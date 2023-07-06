@@ -30,6 +30,7 @@
 #include <cub/agent/agent_three_way_partition.cuh>
 #include <cub/config.cuh>
 #include <cub/device/dispatch/dispatch_scan.cuh>
+#include <cub/device/dispatch/tuning/tuning_three_way_partition.cuh>
 #include <cub/thread/thread_operators.cuh>
 #include <cub/util_deprecated.cuh>
 #include <cub/util_device.cuh>
@@ -140,29 +141,6 @@ __global__ void DeviceThreeWayPartitionInitKernel(ScanTileStateT tile_state_1,
     }
   }
 }
-
-namespace detail
-{
-
-template <class InputT>
-struct device_three_way_partition_policy_hub
-{
-  /// SM35
-  struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
-  {
-    constexpr static int ITEMS_PER_THREAD = Nominal4BItemsToItems<InputT>(9);
-
-    using ThreeWayPartitionPolicy = cub::AgentThreeWayPartitionPolicy<256,
-                                                                      ITEMS_PER_THREAD,
-                                                                      cub::BLOCK_LOAD_DIRECT,
-                                                                      cub::LOAD_DEFAULT,
-                                                                      cub::BLOCK_SCAN_WARP_SCANS>;
-  };
-
-  using MaxPolicy = Policy350;
-};
-
-} // namespace detail
 
 /******************************************************************************
  * Dispatch
