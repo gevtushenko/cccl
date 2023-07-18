@@ -84,6 +84,25 @@ template <class AccumT,
           primitive_op PrimitiveOp,
           primitive_accum PrimitiveAccumulator = is_primitive_accum<AccumT>(),
           accum_size AccumSize                 = classify_accum_size<AccumT>()>
+struct sm80_tuning
+{
+  static constexpr int threads = 128;
+  static constexpr int items   = 15;
+
+  using delay_constructor = detail::default_delay_constructor_t<AccumT>;
+};
+
+// clang-format off
+template <class T> struct sm80_tuning<T, primitive_op::yes, primitive_accum::yes, accum_size::_1> : tuning<192, 22, 168, 1140> {};
+template <class T> struct sm80_tuning<T, primitive_op::yes, primitive_accum::yes, accum_size::_2> : tuning<512, 12, 376, 1125> {};
+template <class T> struct sm80_tuning<T, primitive_op::yes, primitive_accum::yes, accum_size::_4> : tuning<128, 24, 648, 1245> {};
+template <class T> struct sm80_tuning<T, primitive_op::yes, primitive_accum::yes, accum_size::_8> : tuning<224, 24, 632, 1290> {};
+// clang-format on
+
+template <class AccumT,
+          primitive_op PrimitiveOp,
+          primitive_accum PrimitiveAccumulator = is_primitive_accum<AccumT>(),
+          accum_size AccumSize                 = classify_accum_size<AccumT>()>
 struct sm90_tuning
 {
   static constexpr int threads = 128;
@@ -183,8 +202,23 @@ struct DeviceScanPolicy
                                  detail::default_delay_constructor_t<AccumT>>;
   };
 
+  /// SM800
+  struct Policy800 : ChainedPolicy<800, Policy800, Policy600>
+  {
+    using tuning = detail::scan::sm90_tuning<AccumT, detail::scan::is_primitive_op<ScanOpT>()>;
+
+    using ScanPolicyT = policy_t<tuning::threads,
+                                 tuning::items,
+                                 AccumT,
+                                 ScanTransposedLoad,
+                                 LOAD_DEFAULT,
+                                 ScanTransposedStore,
+                                 BLOCK_SCAN_WARP_SCANS,
+                                 typename tuning::delay_constructor>;
+  };
+
   /// SM900
-  struct Policy900 : ChainedPolicy<900, Policy900, Policy600>
+  struct Policy900 : ChainedPolicy<900, Policy900, Policy800>
   {
     using tuning = detail::scan::sm90_tuning<AccumT, detail::scan::is_primitive_op<ScanOpT>()>;
 
