@@ -205,7 +205,7 @@ struct DeviceScanPolicy
   /// SM800
   struct Policy800 : ChainedPolicy<800, Policy800, Policy600>
   {
-    using tuning = detail::scan::sm90_tuning<AccumT, detail::scan::is_primitive_op<ScanOpT>()>;
+    using tuning = detail::scan::sm80_tuning<AccumT, detail::scan::is_primitive_op<ScanOpT>()>;
 
     using ScanPolicyT = policy_t<tuning::threads,
                                  tuning::items,
