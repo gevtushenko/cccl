@@ -69,8 +69,7 @@ template <
     CacheLoadModifier               _LOAD_MODIFIER,                 ///< Cache load modifier for reading input elements
     bool                            _RLE_COMPRESS,                  ///< Whether to perform localized RLE to compress samples before histogramming
     BlockHistogramMemoryPreference  _MEM_PREFERENCE,                ///< Whether to prefer privatized shared-memory bins (versus privatized global-memory bins)
-    bool                            _WORK_STEALING,                 ///< Whether to dequeue tiles from a global work queue
-    int                             _VEC_SIZE = 4>                  ///< Vector size for samples loading (1, 2, 4)
+    bool                            _WORK_STEALING>                 ///< Whether to dequeue tiles from a global work queue
 struct AgentHistogramPolicy
 {
     enum
@@ -81,8 +80,6 @@ struct AgentHistogramPolicy
         MEM_PREFERENCE          = _MEM_PREFERENCE,                  ///< Whether to prefer privatized shared-memory bins (versus privatized global-memory bins)
         IS_WORK_STEALING        = _WORK_STEALING,                   ///< Whether to dequeue tiles from a global work queue
     };
-
-    static constexpr int VEC_SIZE = _VEC_SIZE;                      ///< Vector size for samples loading (1, 2, 4)
 
     static const BlockLoadAlgorithm     LOAD_ALGORITHM          = _LOAD_ALGORITHM;          ///< The BlockLoad algorithm to use
     static const CacheLoadModifier      LOAD_MODIFIER           = _LOAD_MODIFIER;           ///< Cache load modifier for reading input elements
@@ -119,9 +116,8 @@ struct AgentHistogram
     /// The pixel type of SampleT
     using PixelT = typename CubVector<SampleT, NUM_CHANNELS>::Type;
 
-    /// The vec type of SampleT
-    static constexpr int VecSize = AgentHistogramPolicyT::VEC_SIZE;
-    using VecT = typename CubVector<SampleT, VecSize>::Type;
+    /// The quad type of SampleT
+    using QuadT = typename CubVector<SampleT, 4>::Type;
 
     /// Constants
     enum
@@ -130,7 +126,7 @@ struct AgentHistogram
 
         PIXELS_PER_THREAD       = AgentHistogramPolicyT::PIXELS_PER_THREAD,
         SAMPLES_PER_THREAD      = PIXELS_PER_THREAD * NUM_CHANNELS,
-        VECS_PER_THREAD         = SAMPLES_PER_THREAD / VecSize,
+        QUADS_PER_THREAD        = SAMPLES_PER_THREAD / 4,
 
         TILE_PIXELS             = PIXELS_PER_THREAD * BLOCK_THREADS,
         TILE_SAMPLES            = SAMPLES_PER_THREAD * BLOCK_THREADS,
@@ -161,8 +157,8 @@ struct AgentHistogram
         WrappedPixelIteratorT;
 
     /// Qaud input iterator type (for applying cache modifier)
-    typedef CacheModifiedInputIterator<LOAD_MODIFIER, VecT, OffsetT>
-        WrappedVecsIteratorT;
+    typedef CacheModifiedInputIterator<LOAD_MODIFIER, QuadT, OffsetT>
+        WrappedQuadIteratorT;
 
     /// Parameterized BlockLoad type for samples
     typedef BlockLoad<
@@ -180,13 +176,13 @@ struct AgentHistogram
             AgentHistogramPolicyT::LOAD_ALGORITHM>
         BlockLoadPixelT;
 
-    /// Parameterized BlockLoad type for vecs
+    /// Parameterized BlockLoad type for quads
     typedef BlockLoad<
-            VecT,
+            QuadT,
             BLOCK_THREADS,
-            VECS_PER_THREAD,
+            QUADS_PER_THREAD,
             AgentHistogramPolicyT::LOAD_ALGORITHM>
-        BlockLoadVecT;
+        BlockLoadQuadT;
 
     /// Shared memory type required by this thread block
     struct _TempStorage
@@ -200,7 +196,7 @@ struct AgentHistogram
         {
             typename BlockLoadSampleT::TempStorage sample_load;     // Smem needed for loading a tile of samples
             typename BlockLoadPixelT::TempStorage pixel_load;       // Smem needed for loading a tile of pixels
-            typename BlockLoadVecT::TempStorage vec_load;           // Smem needed for loading a tile of vecs
+            typename BlockLoadQuadT::TempStorage quad_load;         // Smem needed for loading a tile of quads
 
         } aliasable;
     };
@@ -457,21 +453,21 @@ struct AgentHistogram
             reinterpret_cast<AliasedPixels&>(samples));
     }
 
-    // Load full, aligned tile using vec iterator (single-channel)
+    // Load full, aligned tile using quad iterator (single-channel)
     __device__ __forceinline__ void LoadFullAlignedTile(
         OffsetT                         block_offset,
         int                             valid_samples,
         SampleT                         (&samples)[PIXELS_PER_THREAD][NUM_CHANNELS],
         Int2Type<1>                     num_active_channels)
     {
-        typedef VecT AliasedVecs[VECS_PER_THREAD];
+        typedef QuadT AliasedQuads[QUADS_PER_THREAD];
 
-        WrappedVecsIteratorT d_wrapped_vecs((VecT*) (d_native_samples + block_offset));
+        WrappedQuadIteratorT d_wrapped_quads((QuadT*) (d_native_samples + block_offset));
 
-        // Load using a wrapped vec iterator
-        BlockLoadVecT(temp_storage.aliasable.vec_load).Load(
-            d_wrapped_vecs,
-            reinterpret_cast<AliasedVecs&>(samples));
+        // Load using a wrapped quad iterator
+        BlockLoadQuadT(temp_storage.aliasable.quad_load).Load(
+            d_wrapped_quads,
+            reinterpret_cast<AliasedQuads&>(samples));
     }
 
     // Load full, aligned tile
@@ -538,31 +534,6 @@ struct AgentHistogram
             valid_samples);
     }
 
-    template <bool IS_FULL_TILE>
-    __device__ __forceinline__ void MarkValid(bool (&is_valid)[PIXELS_PER_THREAD],
-                                              int valid_samples,
-                                              Int2Type<false> /* is_striped = false */)
-    {
-        #pragma unroll
-        for (int PIXEL = 0; PIXEL < PIXELS_PER_THREAD; ++PIXEL)
-        {
-            is_valid[PIXEL] = IS_FULL_TILE || (((threadIdx.x * PIXELS_PER_THREAD + PIXEL) *
-                                                NUM_CHANNELS) < valid_samples);
-        }
-    }
-
-    template <bool IS_FULL_TILE>
-    __device__ __forceinline__ void MarkValid(bool (&is_valid)[PIXELS_PER_THREAD],
-                                              int valid_samples,
-                                              Int2Type<true> /* is_striped = true */)
-    {
-        #pragma unroll
-        for (int PIXEL = 0; PIXEL < PIXELS_PER_THREAD; ++PIXEL)
-        {
-            is_valid[PIXEL] = IS_FULL_TILE || (((threadIdx.x + BLOCK_THREADS * PIXEL) *
-                                                NUM_CHANNELS) < valid_samples);
-        }
-    }
 
     //---------------------------------------------------------------------
     // Tile processing
@@ -570,7 +541,7 @@ struct AgentHistogram
 
     // Consume a tile of data samples
     template <
-        bool IS_ALIGNED,        // Whether the tile offset is aligned (vec-aligned for single-channel, pixel-aligned for multi-channel)
+        bool IS_ALIGNED,        // Whether the tile offset is aligned (quad-aligned for single-channel, pixel-aligned for multi-channel)
         bool IS_FULL_TILE>      // Whether the tile is full
     __device__ __forceinline__ void ConsumeTile(OffsetT block_offset, int valid_samples)
     {
@@ -586,20 +557,15 @@ struct AgentHistogram
             Int2Type<IS_ALIGNED>());
 
         // Set valid flags
-        MarkValid<IS_FULL_TILE>(
-          is_valid,
-          valid_samples,
-          Int2Type<AgentHistogramPolicyT::LOAD_ALGORITHM == BLOCK_LOAD_STRIPED>{});
+        #pragma unroll
+        for (int PIXEL = 0; PIXEL < PIXELS_PER_THREAD; ++PIXEL)
+            is_valid[PIXEL] = IS_FULL_TILE || (((threadIdx.x * PIXELS_PER_THREAD + PIXEL) * NUM_CHANNELS) < valid_samples);
 
         // Accumulate samples
         if (prefer_smem)
-        {
             AccumulateSmemPixels(samples, is_valid);
-        }
         else
-        {
             AccumulateGmemPixels(samples, is_valid);
-        }
     }
 
 
@@ -759,21 +725,21 @@ struct AgentHistogram
         int                 tiles_per_row,              ///< Number of image tiles per row
         GridQueue<int>      tile_queue)                 ///< Queue descriptor for assigning tiles of work to thread blocks
     {
-        // Check whether all row starting offsets are vec-aligned (in single-channel) or pixel-aligned (in multi-channel)
-        int     vec_mask           = AlignBytes<VecT>::ALIGN_BYTES - 1;
+        // Check whether all row starting offsets are quad-aligned (in single-channel) or pixel-aligned (in multi-channel)
+        int     quad_mask           = AlignBytes<QuadT>::ALIGN_BYTES - 1;
         int     pixel_mask          = AlignBytes<PixelT>::ALIGN_BYTES - 1;
         size_t  row_bytes           = sizeof(SampleT) * row_stride_samples;
 
-        bool vec_aligned_rows      = (NUM_CHANNELS == 1) && (SAMPLES_PER_THREAD % VecSize == 0) &&     // Single channel
-                                        ((size_t(d_native_samples) & vec_mask) == 0) &&        // ptr is quad-aligned
-                                        ((num_rows == 1) || ((row_bytes & vec_mask) == 0));    // number of row-samples is a multiple of the alignment of the quad
+        bool quad_aligned_rows      = (NUM_CHANNELS == 1) && (SAMPLES_PER_THREAD % 4 == 0) &&     // Single channel
+                                        ((size_t(d_native_samples) & quad_mask) == 0) &&        // ptr is quad-aligned
+                                        ((num_rows == 1) || ((row_bytes & quad_mask) == 0));    // number of row-samples is a multiple of the alignment of the quad
 
         bool pixel_aligned_rows     = (NUM_CHANNELS > 1) &&                                     // Multi channel
                                         ((size_t(d_native_samples) & pixel_mask) == 0) &&       // ptr is pixel-aligned
                                         ((row_bytes & pixel_mask) == 0);                        // number of row-samples is a multiple of the alignment of the pixel
 
         // Whether rows are aligned and can be vectorized
-        if ((d_native_samples != NULL) && (vec_aligned_rows || pixel_aligned_rows))
+        if ((d_native_samples != NULL) && (quad_aligned_rows || pixel_aligned_rows))
             ConsumeTiles<true>(num_row_pixels, num_rows, row_stride_samples, tiles_per_row, tile_queue, Int2Type<IS_WORK_STEALING>());
         else
             ConsumeTiles<false>(num_row_pixels, num_rows, row_stride_samples, tiles_per_row, tile_queue, Int2Type<IS_WORK_STEALING>());

@@ -34,15 +34,13 @@
 
 #pragma once
 
+#include <iterator>
+#include <stdio.h>
+
 #include <cub/config.cuh>
 #include <cub/device/dispatch/dispatch_reduce_by_key.cuh>
 #include <cub/device/dispatch/dispatch_rle.cuh>
-#include <cub/device/dispatch/tuning/tuning_run_length_encode.cuh>
 #include <cub/util_deprecated.cuh>
-
-#include <iterator>
-
-#include <stdio.h>
 
 CUB_NAMESPACE_BEGIN
 
@@ -206,44 +204,38 @@ struct DeviceRunLengthEncode
          int num_items,
          cudaStream_t stream = 0)
   {
-    using offset_t      = int;        // Signed integer type for global offsets
-    using equality_op   = Equality;   // Default == operator
-    using reduction_op  = cub::Sum;   // Value reduction operator
+    using OffsetT      = int;        // Signed integer type for global offsets
+    using FlagIterator = NullType *; // FlagT iterator type (not used)
+    using SelectOp     = NullType;   // Selection op (not used)
+    using EqualityOp   = Equality;   // Default == operator
+    using ReductionOp  = cub::Sum;   // Value reduction operator
 
     // The lengths output value type
-    using length_t =
-      cub::detail::non_void_value_t<LengthsOutputIteratorT, offset_t>;
+    using LengthT =
+      cub::detail::non_void_value_t<LengthsOutputIteratorT, OffsetT>;
 
     // Generator type for providing 1s values for run-length reduction
-    using lengths_input_iterator_t = ConstantInputIterator<length_t, offset_t>;
-
-    using accum_t = detail::accumulator_t<reduction_op, length_t, length_t>;
-
-    using key_t =
-      cub::detail::non_void_value_t<UniqueOutputIteratorT, cub::detail::value_t<InputIteratorT>>;
-
-    using policy_t = detail::device_run_length_encode_policy_hub<accum_t, key_t>;
+    using LengthsInputIteratorT = ConstantInputIterator<LengthT, OffsetT>;
 
     return DispatchReduceByKey<InputIteratorT,
                                UniqueOutputIteratorT,
-                               lengths_input_iterator_t,
+                               LengthsInputIteratorT,
                                LengthsOutputIteratorT,
                                NumRunsOutputIteratorT,
-                               equality_op,
-                               reduction_op,
-                               offset_t,
-                               accum_t,
-                               policy_t>::Dispatch(d_temp_storage,
-                                                   temp_storage_bytes,
-                                                   d_in,
-                                                   d_unique_out,
-                                                   lengths_input_iterator_t((length_t)1),
-                                                   d_counts_out,
-                                                   d_num_runs_out,
-                                                   equality_op(),
-                                                   reduction_op(),
-                                                   num_items,
-                                                   stream);
+                               EqualityOp,
+                               ReductionOp,
+                               OffsetT>::Dispatch(d_temp_storage,
+                                                  temp_storage_bytes,
+                                                  d_in,
+                                                  d_unique_out,
+                                                  LengthsInputIteratorT(
+                                                    (LengthT)1),
+                                                  d_counts_out,
+                                                  d_num_runs_out,
+                                                  EqualityOp(),
+                                                  ReductionOp(),
+                                                  num_items,
+                                                  stream);
   }
 
   template <typename InputIteratorT,

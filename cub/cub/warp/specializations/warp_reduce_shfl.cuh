@@ -390,7 +390,7 @@ struct WarpReduceShfl
 
 
     //---------------------------------------------------------------------
-    // Templated reduction iteration
+    // Templated inclusive scan iteration
     //---------------------------------------------------------------------
 
     template <typename ReductionOp, int STEP>

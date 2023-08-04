@@ -47,46 +47,41 @@
 CUB_NAMESPACE_BEGIN
 
 
-//! @ingroup SingleModule
-//!
-//! @rst
-//! DeviceReduce provides device-wide, parallel operations for computing 
-//! a reduction across a sequence of data items residing within 
-//! device-accessible memory. 
-//!
-//! .. image:: ../img/reduce_logo.png
-//!     :align: center
-//!
-//! Overview
-//! ====================================
-//! A `reduction <http://en.wikipedia.org/wiki/Reduce_(higher-order_function)>`_
-//! (or *fold*) uses a binary combining operator to compute a single aggregate 
-//! from a sequence of input elements.
-//!
-//! Usage Considerations
-//! ====================================
-//! @cdp_class{DeviceReduce}
-//!
-//! Performance
-//! ====================================
-//! @linear_performance{reduction, reduce-by-key, and run-length encode}
-//!
-//! The following chart illustrates DeviceReduce::Sum
-//! performance across different CUDA architectures for \p int32 keys.
-//!
-//! .. image:: ../img/reduce_int32.png
-//!     :align: center
-//!
-//! @par
-//! The following chart illustrates DeviceReduce::ReduceByKey (summation)
-//! performance across different CUDA architectures for `fp32` values. Segments 
-//! are identified by `int32` keys, and have lengths uniformly sampled 
-//! from `[1, 1000]`.
-//!
-//! .. image:: ../img/reduce_by_key_fp32_len_500.png
-//!     :align: center
-//!
-//! @endrst
+/**
+ * @brief DeviceReduce provides device-wide, parallel operations for computing 
+ *        a reduction across a sequence of data items residing within 
+ *        device-accessible memory. ![](reduce_logo.png)
+ * @ingroup SingleModule
+ *
+ * @par Overview
+ * A <a href="http://en.wikipedia.org/wiki/Reduce_(higher-order_function)">*reduction*</a> 
+ * (or *fold*) uses a binary combining operator to compute a single aggregate 
+ * from a sequence of input elements.
+ *
+ * @par Usage Considerations
+ * @cdp_class{DeviceReduce}
+ *
+ * @par Performance
+ * @linear_performance{reduction, reduce-by-key, and run-length encode}
+ *
+ * @par
+ * The following chart illustrates DeviceReduce::Sum
+ * performance across different CUDA architectures for \p int32 keys.
+ *
+ * @image html reduce_int32.png
+ *
+ * @par
+ * The following chart illustrates DeviceReduce::ReduceByKey (summation)
+ * performance across different CUDA architectures for `fp32` values. Segments 
+ * are identified by `int32` keys, and have lengths uniformly sampled 
+ * from `[1, 1000]`.
+ *
+ * @image html reduce_by_key_fp32_len_500.png
+ *
+ * @par
+ * @plots_below
+ *
+ */
 struct DeviceReduce
 {
   /**
@@ -617,11 +612,10 @@ struct DeviceReduce
 
     // The output tuple type
     using OutputTupleT =
-      cub::detail::non_void_value_t<OutputIteratorT, KeyValuePair<OffsetT, InputValueT>>;
+      cub::detail::non_void_value_t<OutputIteratorT,
+                                    KeyValuePair<OffsetT, InputValueT>>;
 
-    using AccumT = OutputTupleT;
-    
-    using InitT = detail::reduce::empty_problem_init_t<AccumT>;
+    using InitT = OutputTupleT;
 
     // The output value type
     using OutputValueT = typename OutputTupleT::Value;
@@ -633,22 +627,23 @@ struct DeviceReduce
     ArgIndexInputIteratorT d_indexed_in(d_in);
 
     // Initial value
-    // TODO Address https://github.com/NVIDIA/cub/issues/651
-    InitT initial_value{AccumT(1, Traits<InputValueT>::Max())}; 
+
+    // replace with std::numeric_limits<T>::max() when C++11 support is
+    // more prevalent
+    InitT initial_value(1, Traits<InputValueT>::Max()); 
 
     return DispatchReduce<ArgIndexInputIteratorT,
                           OutputIteratorT,
                           OffsetT,
                           cub::ArgMin,
-                          InitT,
-                          AccumT>::Dispatch(d_temp_storage,
-                                            temp_storage_bytes,
-                                            d_indexed_in,
-                                            d_out,
-                                            num_items,
-                                            cub::ArgMin(),
-                                            initial_value,
-                                            stream);
+                          InitT>::Dispatch(d_temp_storage,
+                                           temp_storage_bytes,
+                                           d_indexed_in,
+                                           d_out,
+                                           num_items,
+                                           cub::ArgMin(),
+                                           initial_value,
+                                           stream);
   }
 
   template <typename InputIteratorT, typename OutputIteratorT>
@@ -905,12 +900,10 @@ struct DeviceReduce
       cub::detail::non_void_value_t<OutputIteratorT,
                                     KeyValuePair<OffsetT, InputValueT>>;
 
-    using AccumT = OutputTupleT;
-
     // The output value type
     using OutputValueT = typename OutputTupleT::Value;
 
-    using InitT = detail::reduce::empty_problem_init_t<AccumT>;
+    using InitT = OutputTupleT;
 
     // Wrapped input iterator to produce index-value <OffsetT, InputT> tuples
     using ArgIndexInputIteratorT =
@@ -919,22 +912,23 @@ struct DeviceReduce
     ArgIndexInputIteratorT d_indexed_in(d_in);
 
     // Initial value
-    // TODO Address https://github.com/NVIDIA/cub/issues/651
-    InitT initial_value{AccumT(1, Traits<InputValueT>::Lowest())}; 
+
+    // replace with std::numeric_limits<T>::lowest() when C++11 support is
+    // more prevalent
+    InitT initial_value(1, Traits<InputValueT>::Lowest()); 
 
     return DispatchReduce<ArgIndexInputIteratorT,
                           OutputIteratorT,
                           OffsetT,
                           cub::ArgMax,
-                          InitT,
-                          AccumT>::Dispatch(d_temp_storage,
-                                            temp_storage_bytes,
-                                            d_indexed_in,
-                                            d_out,
-                                            num_items,
-                                            cub::ArgMax(),
-                                            initial_value,
-                                            stream);
+                          InitT>::Dispatch(d_temp_storage,
+                                           temp_storage_bytes,
+                                           d_indexed_in,
+                                           d_out,
+                                           num_items,
+                                           cub::ArgMax(),
+                                           initial_value,
+                                           stream);
   }
 
   template <typename InputIteratorT, typename OutputIteratorT>

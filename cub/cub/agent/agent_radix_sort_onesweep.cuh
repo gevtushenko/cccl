@@ -93,8 +93,7 @@ template <
     typename KeyT,
     typename ValueT,
     typename OffsetT,
-    typename PortionOffsetT,
-    typename DecomposerT = detail::identity_decomposer_t>
+    typename PortionOffsetT>
 struct AgentRadixSortOnesweep
 {
     // constants
@@ -118,14 +117,7 @@ struct AgentRadixSortOnesweep
         LOOKBACK_VALUE_MASK = ~LOOKBACK_KIND_MASK,
     };
 
-    using traits = detail::radix::traits_t<KeyT>;
-    using bit_ordered_type = typename traits::bit_ordered_type;
-    using bit_ordered_conversion = typename traits::bit_ordered_conversion_policy;
-
-    using fundamental_digit_extractor_t = ShiftDigitExtractor<KeyT>;
-    using digit_extractor_t =
-      typename traits::template digit_extractor_t<fundamental_digit_extractor_t, DecomposerT>;
-
+    typedef typename Traits<KeyT>::UnsignedBits UnsignedBits;
     typedef PortionOffsetT AtomicOffsetT;
   
     static const RadixRankAlgorithm RANK_ALGORITHM =
@@ -133,7 +125,7 @@ struct AgentRadixSortOnesweep
     static const BlockScanAlgorithm SCAN_ALGORITHM =
                                     AgentRadixSortOnesweepPolicy::SCAN_ALGORITHM;
     static const RadixSortStoreAlgorithm STORE_ALGORITHM =
-                                    sizeof(bit_ordered_type) == sizeof(uint32_t) ?
+                                    sizeof(UnsignedBits) == sizeof(uint32_t) ?
                                     AgentRadixSortOnesweepPolicy::STORE_ALGORITHM :
                                     RADIX_SORT_STORE_DIRECT;
 
@@ -167,7 +159,7 @@ struct AgentRadixSortOnesweep
     {
         union
         {
-            bit_ordered_type keys_out[TILE_ITEMS];
+            UnsignedBits keys_out[TILE_ITEMS];
             ValueT values_out[TILE_ITEMS];
             typename BlockRadixRankT::TempStorage rank_temp_storage;
         };
@@ -188,32 +180,23 @@ struct AgentRadixSortOnesweep
     AtomicOffsetT* d_ctrs;
     OffsetT* d_bins_out;
     const OffsetT*  d_bins_in;
-    bit_ordered_type* d_keys_out;
-    const bit_ordered_type* d_keys_in;
+    UnsignedBits* d_keys_out;
+    const UnsignedBits* d_keys_in;
     ValueT* d_values_out;
     const ValueT* d_values_in;
     PortionOffsetT num_items;
-    int current_bit;
-    int num_bits;
+    ShiftDigitExtractor<KeyT> digit_extractor;
 
     // other thread variables
     int warp;
     int lane;
-    DecomposerT decomposer;
     PortionOffsetT block_idx;
     bool full_block;
 
-    __device__ __forceinline__ digit_extractor_t digit_extractor()
-    {
-        return traits::template digit_extractor<fundamental_digit_extractor_t>(current_bit,
-                                                                               num_bits,
-                                                                               decomposer);
-    }
-
     // helper methods
-    __device__ __forceinline__ std::uint32_t Digit(bit_ordered_type key)
+    __device__ __forceinline__ int Digit(UnsignedBits key)
     {
-        return digit_extractor().Digit(key);
+        return digit_extractor.Digit(key);
     }
 
     __device__ __forceinline__ int ThreadBin(int u)
@@ -240,13 +223,13 @@ struct AgentRadixSortOnesweep
     struct CountsCallback
     {
         typedef AgentRadixSortOnesweep<AgentRadixSortOnesweepPolicy, IS_DESCENDING, KeyT,
-                                       ValueT, OffsetT, PortionOffsetT, DecomposerT> AgentT;
+                                       ValueT, OffsetT, PortionOffsetT> AgentT;
         AgentT& agent;
         int (&bins)[BINS_PER_THREAD];
-        bit_ordered_type (&keys)[ITEMS_PER_THREAD];
+        UnsignedBits (&keys)[ITEMS_PER_THREAD];
         static const bool EMPTY = false;
         __device__ __forceinline__ CountsCallback(
-            AgentT& agent, int (&bins)[BINS_PER_THREAD], bit_ordered_type (&keys)[ITEMS_PER_THREAD])
+            AgentT& agent, int (&bins)[BINS_PER_THREAD], UnsignedBits (&keys)[ITEMS_PER_THREAD])
             : agent(agent), bins(bins), keys(keys) {}
         __device__ __forceinline__ void operator()(int (&other_bins)[BINS_PER_THREAD])
         {
@@ -295,7 +278,7 @@ struct AgentRadixSortOnesweep
     }
 
     __device__ __forceinline__
-    void LoadKeys(OffsetT tile_offset, bit_ordered_type (&keys)[ITEMS_PER_THREAD])
+    void LoadKeys(OffsetT tile_offset, UnsignedBits (&keys)[ITEMS_PER_THREAD])
     {
         if (full_block)
         {
@@ -304,13 +287,13 @@ struct AgentRadixSortOnesweep
         else
         {
             LoadDirectWarpStriped(threadIdx.x, d_keys_in + tile_offset, keys,
-                                  num_items - tile_offset, Twiddle::DefaultKey(decomposer));
+                                  num_items - tile_offset, Twiddle::DefaultKey());
         }
 
         #pragma unroll
         for (int u = 0; u < ITEMS_PER_THREAD; ++u)
         {
-            keys[u] = Twiddle::In(keys[u], decomposer);
+            keys[u] = Twiddle::In(keys[u]);
         }
     }
 
@@ -341,7 +324,7 @@ struct AgentRadixSortOnesweep
      * values) assigned to the current thread block are similarly copied from
      * d_values_in to d_values_out. */
     __device__ __forceinline__
-    void TryShortCircuit(bit_ordered_type (&keys)[ITEMS_PER_THREAD], int (&bins)[BINS_PER_THREAD])
+    void TryShortCircuit(UnsignedBits (&keys)[ITEMS_PER_THREAD], int (&bins)[BINS_PER_THREAD])
     {
         // check if any bin can be short-circuited
         bool short_circuit = false;
@@ -360,12 +343,12 @@ struct AgentRadixSortOnesweep
     }
 
     __device__ __forceinline__
-    void ShortCircuitCopy(bit_ordered_type (&keys)[ITEMS_PER_THREAD], int (&bins)[BINS_PER_THREAD])
+    void ShortCircuitCopy(UnsignedBits (&keys)[ITEMS_PER_THREAD], int (&bins)[BINS_PER_THREAD])
     {
         // short-circuit handling; note that global look-back is still required
 
         // compute offsets
-        std::uint32_t common_bin = Digit(keys[0]);
+        int common_bin = Digit(keys[0]);
         int offsets[BINS_PER_THREAD];
         #pragma unroll
         for (int u = 0; u < BINS_PER_THREAD; ++u)
@@ -385,7 +368,7 @@ struct AgentRadixSortOnesweep
         #pragma unroll
         for (int u = 0; u < ITEMS_PER_THREAD; ++u)
         {
-            keys[u] = Twiddle::Out(keys[u], decomposer);
+            keys[u] = Twiddle::Out(keys[u]);
         }
         if (full_block)
         {
@@ -420,7 +403,7 @@ struct AgentRadixSortOnesweep
     }
 
     __device__ __forceinline__
-    void ScatterKeysShared(bit_ordered_type (&keys)[ITEMS_PER_THREAD], int (&ranks)[ITEMS_PER_THREAD])
+    void ScatterKeysShared(UnsignedBits (&keys)[ITEMS_PER_THREAD], int (&ranks)[ITEMS_PER_THREAD])
     {
         // write to shared memory
         #pragma unroll
@@ -481,11 +464,11 @@ struct AgentRadixSortOnesweep
         for (int u = 0; u < ITEMS_PER_THREAD; ++u)
         {
             int idx = threadIdx.x + u * BLOCK_THREADS;
-            bit_ordered_type key = s.keys_out[idx];
+            UnsignedBits key = s.keys_out[idx];
             OffsetT global_idx = idx + s.global_offsets[Digit(key)];
             if (FULL_TILE || idx < tile_items)
             {
-                d_keys_out[global_idx] = Twiddle::Out(key, decomposer);
+                d_keys_out[global_idx] = Twiddle::Out(key);
             }
             WARP_SYNC(WARP_MASK);
         }
@@ -519,8 +502,8 @@ struct AgentRadixSortOnesweep
         while (warp_offset < warp_end - WARP_THREADS)
         {
             int idx = warp_offset + lane;
-            bit_ordered_type key = s.keys_out[idx];
-            bit_ordered_type key_out = Twiddle::Out(key, decomposer);
+            UnsignedBits key = s.keys_out[idx];
+            UnsignedBits key_out = Twiddle::Out(key);
             OffsetT global_idx = idx + s.global_offsets[Digit(key)];
             int last_lane = WARP_THREADS - 1;
             int num_writes = WARP_THREADS;
@@ -540,9 +523,9 @@ struct AgentRadixSortOnesweep
             if (lane < num_writes)
             {
                 int idx = warp_offset + lane;
-                bit_ordered_type key = s.keys_out[idx];
+                UnsignedBits key = s.keys_out[idx];
                 OffsetT global_idx = idx + s.global_offsets[Digit(key)];
-                ThreadStore<CACHE_MODIFIER>(&d_keys_out[global_idx], Twiddle::Out(key, decomposer));
+                ThreadStore<CACHE_MODIFIER>(&d_keys_out[global_idx], Twiddle::Out(key));
             }
         }
     }
@@ -618,7 +601,7 @@ struct AgentRadixSortOnesweep
         // load keys
         // if warp1 < warp2, all elements of warp1 occur before those of warp2
         // in the source array
-        bit_ordered_type keys[ITEMS_PER_THREAD];
+        UnsignedBits keys[ITEMS_PER_THREAD];
         LoadKeys(block_idx * TILE_ITEMS, keys);
 
         // rank keys
@@ -626,7 +609,7 @@ struct AgentRadixSortOnesweep
         int exclusive_digit_prefix[BINS_PER_THREAD];
         int bins[BINS_PER_THREAD];
         BlockRadixRankT(s.rank_temp_storage).RankKeys(
-            keys, ranks, digit_extractor(), exclusive_digit_prefix,
+            keys, ranks, digit_extractor, exclusive_digit_prefix,
             CountsCallback(*this, bins, keys));
         
         // scatter keys in shared memory
@@ -658,23 +641,20 @@ struct AgentRadixSortOnesweep
                            const ValueT *d_values_in,
                            PortionOffsetT num_items,
                            int current_bit,
-                           int num_bits,
-                           DecomposerT decomposer = {})
+                           int num_bits)
         : s(temp_storage.Alias())
         , d_lookback(d_lookback)
         , d_ctrs(d_ctrs)
         , d_bins_out(d_bins_out)
         , d_bins_in(d_bins_in)
-        , d_keys_out(reinterpret_cast<bit_ordered_type *>(d_keys_out))
-        , d_keys_in(reinterpret_cast<const bit_ordered_type *>(d_keys_in))
+        , d_keys_out(reinterpret_cast<UnsignedBits *>(d_keys_out))
+        , d_keys_in(reinterpret_cast<const UnsignedBits *>(d_keys_in))
         , d_values_out(d_values_out)
         , d_values_in(d_values_in)
         , num_items(num_items)
-        , current_bit(current_bit)
-        , num_bits(num_bits)
+        , digit_extractor(current_bit, num_bits)
         , warp(threadIdx.x / WARP_THREADS)
         , lane(LaneId())
-        , decomposer(decomposer)
     {
         // initialization
         if (threadIdx.x == 0)

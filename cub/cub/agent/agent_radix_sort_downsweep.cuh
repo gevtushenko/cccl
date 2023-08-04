@@ -99,17 +99,18 @@ template <
     bool     IS_DESCENDING,                     ///< Whether or not the sorted-order is high-to-low
     typename KeyT,                              ///< KeyT type
     typename ValueT,                            ///< ValueT type
-    typename OffsetT,                           ///< Signed integer type for global offsets
-    typename DecomposerT = detail::identity_decomposer_t>
+    typename OffsetT>                           ///< Signed integer type for global offsets
 struct AgentRadixSortDownsweep
 {
     //---------------------------------------------------------------------
     // Type definitions and constants
     //---------------------------------------------------------------------
 
-    using traits = detail::radix::traits_t<KeyT>;
-    using bit_ordered_type = typename traits::bit_ordered_type;
-    using bit_ordered_conversion = typename traits::bit_ordered_conversion_policy;
+    // Appropriate unsigned-bits representation of KeyT
+    typedef typename Traits<KeyT>::UnsignedBits UnsignedBits;
+
+    static const UnsignedBits           LOWEST_KEY  = Traits<KeyT>::LOWEST_KEY;
+    static const UnsignedBits           MAX_KEY     = Traits<KeyT>::MAX_KEY;
 
     static const BlockLoadAlgorithm     LOAD_ALGORITHM  = AgentRadixSortDownsweepPolicy::LOAD_ALGORITHM;
     static const CacheLoadModifier      LOAD_MODIFIER   = AgentRadixSortDownsweepPolicy::LOAD_MODIFIER;
@@ -131,7 +132,7 @@ struct AgentRadixSortDownsweep
     };
 
     // Input iterator wrapper type (for applying cache modifier)s
-    using KeysItr = CacheModifiedInputIterator<LOAD_MODIFIER, bit_ordered_type, OffsetT>;
+    using KeysItr = CacheModifiedInputIterator<LOAD_MODIFIER, UnsignedBits, OffsetT>;
     using ValuesItr = CacheModifiedInputIterator<LOAD_MODIFIER, ValueT, OffsetT>;
 
     // Radix ranking type to use
@@ -140,9 +141,7 @@ struct AgentRadixSortDownsweep
         RANK_ALGORITHM, BLOCK_THREADS, RADIX_BITS, IS_DESCENDING, SCAN_ALGORITHM>;
 
     // Digit extractor type
-    using fundamental_digit_extractor_t = BFEDigitExtractor<KeyT>;
-    using digit_extractor_t =
-      typename traits::template digit_extractor_t<fundamental_digit_extractor_t, DecomposerT>;
+    using DigitExtractorT = BFEDigitExtractor<KeyT>;
 
     enum
     {
@@ -152,7 +151,7 @@ struct AgentRadixSortDownsweep
 
     // BlockLoad type (keys)
     using BlockLoadKeysT =
-      BlockLoad<bit_ordered_type, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM>;
+      BlockLoad<UnsignedBits, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM>;
 
     // BlockLoad type (values)
     using BlockLoadValuesT =
@@ -172,8 +171,8 @@ struct AgentRadixSortDownsweep
 
         struct KeysAndOffsets
         {
-            bit_ordered_type exchange_keys[TILE_ITEMS];
-            OffsetT          relative_bin_offsets[RADIX_DIGITS];
+            UnsignedBits                        exchange_keys[TILE_ITEMS];
+            OffsetT                             relative_bin_offsets[RADIX_DIGITS];
         } keys_and_offsets;
 
         Uninitialized<ValueExchangeT>           exchange_values;
@@ -194,42 +193,34 @@ struct AgentRadixSortDownsweep
     _TempStorage    &temp_storage;
 
     // Input and output device pointers
-    KeysItr            d_keys_in;
-    ValuesItr          d_values_in;
-    bit_ordered_type  *d_keys_out;
-    ValueT            *d_values_out;
+    KeysItr         d_keys_in;
+    ValuesItr       d_values_in;
+    UnsignedBits    *d_keys_out;
+    ValueT          *d_values_out;
 
     // The global scatter base offset for each digit (valid in the first RADIX_DIGITS threads)
-    OffsetT bin_offset[BINS_TRACKED_PER_THREAD];
+    OffsetT         bin_offset[BINS_TRACKED_PER_THREAD];
 
-    std::uint32_t current_bit; 
-    std::uint32_t num_bits;
+    // Digit extractor
+    DigitExtractorT digit_extractor;
 
     // Whether to short-cirucit
-    int short_circuit;
-
-    DecomposerT decomposer;
+    int             short_circuit;
 
     //---------------------------------------------------------------------
     // Utility methods
     //---------------------------------------------------------------------
 
-    __device__ __forceinline__ digit_extractor_t digit_extractor()
-    {
-        return traits::template digit_extractor<fundamental_digit_extractor_t>(current_bit,
-                                                                               num_bits,
-                                                                               decomposer);
-    }
 
     /**
      * Scatter ranked keys through shared memory, then to device-accessible memory
      */
     template <bool FULL_TILE>
     __device__ __forceinline__ void ScatterKeys(
-        bit_ordered_type (&twiddled_keys)[ITEMS_PER_THREAD],
-        OffsetT          (&relative_bin_offsets)[ITEMS_PER_THREAD],
-        int              (&ranks)[ITEMS_PER_THREAD],
-        OffsetT          valid_items)
+        UnsignedBits    (&twiddled_keys)[ITEMS_PER_THREAD],
+        OffsetT         (&relative_bin_offsets)[ITEMS_PER_THREAD],
+        int             (&ranks)[ITEMS_PER_THREAD],
+        OffsetT         valid_items)
     {
         #pragma unroll
         for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
@@ -242,16 +233,17 @@ struct AgentRadixSortDownsweep
         #pragma unroll
         for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
         {
-            bit_ordered_type key = temp_storage.keys_and_offsets.exchange_keys[threadIdx.x + (ITEM * BLOCK_THREADS)];
-            std::uint32_t digit = digit_extractor().Digit(key);
-            relative_bin_offsets[ITEM] = temp_storage.keys_and_offsets.relative_bin_offsets[digit];
+            UnsignedBits key            = temp_storage.keys_and_offsets.exchange_keys[threadIdx.x + (ITEM * BLOCK_THREADS)];
+            UnsignedBits digit          = digit_extractor.Digit(key);
+            relative_bin_offsets[ITEM]  = temp_storage.keys_and_offsets.relative_bin_offsets[digit];
 
-            key = bit_ordered_conversion::from_bit_ordered(decomposer, key);
+            // Un-twiddle
+            key = Traits<KeyT>::TwiddleOut(key);
 
-            if (FULL_TILE ||
+            if (FULL_TILE || 
                 (static_cast<OffsetT>(threadIdx.x + (ITEM * BLOCK_THREADS)) < valid_items))
             {
-              d_keys_out[relative_bin_offsets[ITEM] + threadIdx.x + (ITEM * BLOCK_THREADS)] = key;
+                d_keys_out[relative_bin_offsets[ITEM] + threadIdx.x + (ITEM * BLOCK_THREADS)] = key;
             }
         }
     }
@@ -296,10 +288,10 @@ struct AgentRadixSortDownsweep
      * Load a tile of keys (specialized for full tile, block load)
      */
     __device__ __forceinline__ void LoadKeys(
-        bit_ordered_type            (&keys)[ITEMS_PER_THREAD],
+        UnsignedBits                (&keys)[ITEMS_PER_THREAD],
         OffsetT                     block_offset,
         OffsetT                     valid_items,
-        bit_ordered_type            oob_item,
+        UnsignedBits                oob_item,
         Int2Type<true>              is_full_tile,
         Int2Type<false>             warp_striped)
     {
@@ -314,10 +306,10 @@ struct AgentRadixSortDownsweep
      * Load a tile of keys (specialized for partial tile, block load)
      */
     __device__ __forceinline__ void LoadKeys(
-        bit_ordered_type            (&keys)[ITEMS_PER_THREAD],
+        UnsignedBits                (&keys)[ITEMS_PER_THREAD],
         OffsetT                     block_offset,
         OffsetT                     valid_items,
-        bit_ordered_type            oob_item,
+        UnsignedBits                oob_item,
         Int2Type<false>             is_full_tile,
         Int2Type<false>             warp_striped)
     {
@@ -336,10 +328,10 @@ struct AgentRadixSortDownsweep
      * Load a tile of keys (specialized for full tile, warp-striped load)
      */
     __device__ __forceinline__ void LoadKeys(
-        bit_ordered_type            (&keys)[ITEMS_PER_THREAD],
+        UnsignedBits                (&keys)[ITEMS_PER_THREAD],
         OffsetT                     block_offset,
         OffsetT                     valid_items,
-        bit_ordered_type            oob_item,
+        UnsignedBits                oob_item,
         Int2Type<true>              is_full_tile,
         Int2Type<true>              warp_striped)
     {
@@ -350,10 +342,10 @@ struct AgentRadixSortDownsweep
      * Load a tile of keys (specialized for partial tile, warp-striped load)
      */
     __device__ __forceinline__ void LoadKeys(
-        bit_ordered_type            (&keys)[ITEMS_PER_THREAD],
+        UnsignedBits                (&keys)[ITEMS_PER_THREAD],
         OffsetT                     block_offset,
         OffsetT                     valid_items,
-        bit_ordered_type            oob_item,
+        UnsignedBits                oob_item,
         Int2Type<false>             is_full_tile,
         Int2Type<true>              warp_striped)
     {
@@ -483,14 +475,12 @@ struct AgentRadixSortDownsweep
         OffsetT block_offset,
         const OffsetT &valid_items = TILE_ITEMS)
     {
-        bit_ordered_type  keys[ITEMS_PER_THREAD];
-        int               ranks[ITEMS_PER_THREAD];
-        OffsetT           relative_bin_offsets[ITEMS_PER_THREAD];
+        UnsignedBits    keys[ITEMS_PER_THREAD];
+        int             ranks[ITEMS_PER_THREAD];
+        OffsetT         relative_bin_offsets[ITEMS_PER_THREAD];
 
         // Assign default (min/max) value to all keys
-        bit_ordered_type default_key = IS_DESCENDING 
-                                     ? traits::min_raw_binary_key(decomposer) 
-                                     : traits::max_raw_binary_key(decomposer);
+        UnsignedBits default_key = (IS_DESCENDING) ? LOWEST_KEY : MAX_KEY;
 
         // Load tile of keys
         LoadKeys(
@@ -501,10 +491,11 @@ struct AgentRadixSortDownsweep
             Int2Type<FULL_TILE>(),
             Int2Type<LOAD_WARP_STRIPED>());
 
+        // Twiddle key bits if necessary
         #pragma unroll
         for (int KEY = 0; KEY < ITEMS_PER_THREAD; KEY++)
         {
-            keys[KEY] = bit_ordered_conversion::to_bit_ordered(decomposer, keys[KEY]);
+            keys[KEY] = Traits<KeyT>::TwiddleIn(keys[KEY]);
         }
 
         // Rank the twiddled keys
@@ -512,7 +503,7 @@ struct AgentRadixSortDownsweep
         BlockRadixRankT(temp_storage.radix_rank).RankKeys(
             keys,
             ranks,
-            digit_extractor(),
+            digit_extractor,
             exclusive_digit_prefix);
 
         CTA_SYNC();
@@ -652,18 +643,15 @@ struct AgentRadixSortDownsweep
         const ValueT    *d_values_in,
         ValueT          *d_values_out,
         int             current_bit,
-        int             num_bits,
-        DecomposerT     decomposer = {})
+        int             num_bits)
     :
         temp_storage(temp_storage.Alias()),
-        d_keys_in(reinterpret_cast<const bit_ordered_type*>(d_keys_in)),
+        d_keys_in(reinterpret_cast<const UnsignedBits*>(d_keys_in)),
         d_values_in(d_values_in),
-        d_keys_out(reinterpret_cast<bit_ordered_type*>(d_keys_out)),
+        d_keys_out(reinterpret_cast<UnsignedBits*>(d_keys_out)),
         d_values_out(d_values_out),
-        current_bit(current_bit),
-        num_bits(num_bits),
-        short_circuit(1),
-        decomposer(decomposer)
+        digit_extractor(current_bit, num_bits),
+        short_circuit(1)
     {
         #pragma unroll
         for (int track = 0; track < BINS_TRACKED_PER_THREAD; ++track)
@@ -694,18 +682,15 @@ struct AgentRadixSortDownsweep
         const ValueT    *d_values_in,
         ValueT          *d_values_out,
         int             current_bit,
-        int             num_bits,
-        DecomposerT     decomposer = {})
+        int             num_bits)
     :
         temp_storage(temp_storage.Alias()),
-        d_keys_in(reinterpret_cast<const bit_ordered_type*>(d_keys_in)),
+        d_keys_in(reinterpret_cast<const UnsignedBits*>(d_keys_in)),
         d_values_in(d_values_in),
-        d_keys_out(reinterpret_cast<bit_ordered_type*>(d_keys_out)),
+        d_keys_out(reinterpret_cast<UnsignedBits*>(d_keys_out)),
         d_values_out(d_values_out),
-        current_bit(current_bit),
-        num_bits(num_bits),
-        short_circuit(1),
-        decomposer(decomposer)
+        digit_extractor(current_bit, num_bits),
+        short_circuit(1)
     {
         #pragma unroll
         for (int track = 0; track < BINS_TRACKED_PER_THREAD; ++track)

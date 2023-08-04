@@ -52,7 +52,6 @@
 
 // Device
 #include "device/device_adjacent_difference.cuh"
-#include "device/device_copy.cuh"
 #include "device/device_histogram.cuh"
 #include "device/device_memcpy.cuh"
 #include "device/device_merge_sort.cuh"

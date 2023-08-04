@@ -33,7 +33,6 @@
 
 #include <cub/agent/agent_unique_by_key.cuh>
 #include <cub/device/dispatch/dispatch_scan.cuh>
-#include <cub/device/dispatch/tuning/tuning_unique_by_key.cuh>
 #include <cub/util_deprecated.cuh>
 #include <cub/util_macro.cuh>
 #include <cub/util_math.cuh>
@@ -50,7 +49,7 @@ CUB_NAMESPACE_BEGIN
  * Unique by key kernel entry point (multi-block)
  */
 template <
-    typename ChainedPolicyT,
+    typename AgentUniqueByKeyPolicyT,               ///< Parameterized AgentUniqueByKeyPolicy tuning policy type
     typename KeyInputIteratorT,                     ///< Random-access input iterator type for keys
     typename ValueInputIteratorT,                   ///< Random-access input iterator type for values
     typename KeyOutputIteratorT,                    ///< Random-access output iterator type for keys
@@ -59,7 +58,7 @@ template <
     typename ScanTileStateT,                        ///< Tile status interface type
     typename EqualityOpT,                           ///< Equality operator type
     typename OffsetT>                               ///< Signed integer type for global offsets
-__launch_bounds__ (int(ChainedPolicyT::ActivePolicy::UniqueByKeyPolicyT::BLOCK_THREADS))
+__launch_bounds__ (int(AgentUniqueByKeyPolicyT::UniqueByKeyPolicyT::BLOCK_THREADS))
 __global__ void DeviceUniqueByKeySweepKernel(
     KeyInputIteratorT       d_keys_in,              ///< [in] Pointer to the input sequence of keys
     ValueInputIteratorT     d_values_in,            ///< [in] Pointer to the input sequence of values
@@ -71,16 +70,15 @@ __global__ void DeviceUniqueByKeySweepKernel(
     OffsetT                 num_items,              ///< [in] Total number of input items (i.e., length of \p d_keys_in or \p d_values_in)
     int                     num_tiles)              ///< [in] Total number of tiles for the entire problem
 {
-    using AgentUniqueByKeyPolicyT = typename ChainedPolicyT::ActivePolicy::UniqueByKeyPolicyT;
-
     // Thread block type for selecting data from input tiles
-    using AgentUniqueByKeyT = AgentUniqueByKey<AgentUniqueByKeyPolicyT,
-                                               KeyInputIteratorT,
-                                               ValueInputIteratorT,
-                                               KeyOutputIteratorT,
-                                               ValueOutputIteratorT,
-                                               EqualityOpT,
-                                               OffsetT>;
+    using AgentUniqueByKeyT = AgentUniqueByKey<
+        typename AgentUniqueByKeyPolicyT::UniqueByKeyPolicyT,
+        KeyInputIteratorT,
+        ValueInputIteratorT,
+        KeyOutputIteratorT,
+        ValueOutputIteratorT,
+        EqualityOpT,
+        OffsetT>;
 
     // Shared memory for AgentUniqueByKey
     __shared__ typename AgentUniqueByKeyT::TempStorage temp_storage;
@@ -91,6 +89,53 @@ __global__ void DeviceUniqueByKeySweepKernel(
         tile_state,
         d_num_selected_out);
 }
+
+
+/******************************************************************************
+ * Policy
+ ******************************************************************************/
+
+template <typename KeyInputIteratorT>
+struct DeviceUniqueByKeyPolicy
+{
+    using KeyT = typename std::iterator_traits<KeyInputIteratorT>::value_type;
+
+    // SM350
+    struct Policy350 : ChainedPolicy<350, Policy350, Policy350> {
+        const static int INPUT_SIZE = sizeof(KeyT);
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 9,
+            ITEMS_PER_THREAD = Nominal4BItemsToItems<KeyT>(NOMINAL_4B_ITEMS_PER_THREAD),
+        };
+
+        using UniqueByKeyPolicyT = AgentUniqueByKeyPolicy<128,
+                          ITEMS_PER_THREAD,
+                          cub::BLOCK_LOAD_WARP_TRANSPOSE,
+                          cub::LOAD_LDG,
+                          cub::BLOCK_SCAN_WARP_SCANS>;
+    };
+
+    // SM520
+    struct Policy520 : ChainedPolicy<520, Policy520, Policy350>
+    {
+        const static int INPUT_SIZE = sizeof(KeyT);
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 11,
+            ITEMS_PER_THREAD = Nominal4BItemsToItems<KeyT>(NOMINAL_4B_ITEMS_PER_THREAD),
+        };
+
+        using UniqueByKeyPolicyT =  AgentUniqueByKeyPolicy<64,
+                            ITEMS_PER_THREAD,
+                            cub::BLOCK_LOAD_WARP_TRANSPOSE,
+                            cub::LOAD_LDG,
+                            cub::BLOCK_SCAN_WARP_SCANS>;
+    };
+
+    /// MaxPolicy
+    using MaxPolicy = Policy520;
+};
 
 
 /******************************************************************************
@@ -108,8 +153,8 @@ template <
     typename NumSelectedIteratorT,              ///< Output iterator type for recording the number of items selected
     typename EqualityOpT,                       ///< Equality operator type
     typename OffsetT,                           ///< Signed integer type for global offsets
-    typename SelectedPolicy = DeviceUniqueByKeyPolicy<KeyInputIteratorT, ValueInputIteratorT>>
-struct DispatchUniqueByKey : SelectedPolicy
+    typename SelectedPolicy = DeviceUniqueByKeyPolicy<KeyInputIteratorT>>
+struct DispatchUniqueByKey: SelectedPolicy
 {
     /******************************************************************************
      * Types and constants
@@ -346,13 +391,11 @@ struct DispatchUniqueByKey : SelectedPolicy
     CUB_RUNTIME_FUNCTION __host__  __forceinline__
     cudaError_t Invoke()
     {
-        using MaxPolicyT = typename DispatchUniqueByKey::MaxPolicy;
-
         // Ensure kernels are instantiated.
         return Invoke<ActivePolicyT>(
             DeviceCompactInitKernel<ScanTileStateT, NumSelectedIteratorT>,
             DeviceUniqueByKeySweepKernel<
-                MaxPolicyT,
+                ActivePolicyT,
                 KeyInputIteratorT,
                 ValueInputIteratorT,
                 KeyOutputIteratorT,

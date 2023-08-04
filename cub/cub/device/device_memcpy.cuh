@@ -145,13 +145,6 @@ struct DeviceMemcpy
                                                   uint32_t num_buffers,
                                                   cudaStream_t stream = 0)
   {
-    static_assert(std::is_pointer<cub::detail::value_t<InputBufferIt>>::value,
-                  "DeviceMemcpy::Batched only supports copying of memory buffers."
-                  "Please consider using DeviceCopy::Batched instead.");
-    static_assert(std::is_pointer<cub::detail::value_t<OutputBufferIt>>::value,
-                  "DeviceMemcpy::Batched only supports copying of memory buffers."
-                  "Please consider using DeviceCopy::Batched instead.");
-
     // Integer type large enough to hold any offset in [0, num_buffers)
     using BufferOffsetT = uint32_t;
 
@@ -164,15 +157,13 @@ struct DeviceMemcpy
                                        OutputBufferIt,
                                        BufferSizeIteratorT,
                                        BufferOffsetT,
-                                       BlockOffsetT,
-                                       detail::DeviceBatchMemcpyPolicy<BufferOffsetT, BlockOffsetT>,
-                                       true>::Dispatch(d_temp_storage,
-                                                       temp_storage_bytes,
-                                                       input_buffer_it,
-                                                       output_buffer_it,
-                                                       buffer_sizes,
-                                                       num_buffers,
-                                                       stream);
+                                       BlockOffsetT>::Dispatch(d_temp_storage,
+                                                               temp_storage_bytes,
+                                                               input_buffer_it,
+                                                               output_buffer_it,
+                                                               buffer_sizes,
+                                                               num_buffers,
+                                                               stream);
   }
 };
 

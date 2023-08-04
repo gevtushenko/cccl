@@ -43,7 +43,6 @@
 #include "../util_ptx.cuh"
 #include "../util_type.cuh"
 
-#include <cuda/std/type_traits>
 
 CUB_NAMESPACE_BEGIN
 
@@ -93,16 +92,15 @@ struct BlockRadixRankEmptyCallback
 };
 
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
 namespace detail
 {
 
 template <int Bits, int PartialWarpThreads, int PartialWarpId>
 struct warp_in_block_matcher_t
 {
-  static __device__ std::uint32_t match_any(std::uint32_t label, std::uint32_t warp_id)
+  static __device__ unsigned int match_any(unsigned int label, unsigned int warp_id)
   {
-    if (warp_id == static_cast<std::uint32_t>(PartialWarpId)) 
+    if (warp_id == static_cast<unsigned int>(PartialWarpId)) 
     {
       return MatchAny<Bits, PartialWarpThreads>(label);
     }
@@ -114,14 +112,13 @@ struct warp_in_block_matcher_t
 template <int Bits, int PartialWarpId>
 struct warp_in_block_matcher_t<Bits, 0, PartialWarpId>
 {
-  static __device__ std::uint32_t match_any(std::uint32_t label, std::uint32_t warp_id)
+  static __device__ unsigned int match_any(unsigned int label, unsigned int warp_id)
   {
     return MatchAny<Bits>(label);
   }
 };
 
 } // namespace detail
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 /**
@@ -202,15 +199,13 @@ private:
      ******************************************************************************/
 
     // Integer type for digit counters (to be packed into words of type PackedCounters)
-    using DigitCounter = unsigned short;
+    typedef unsigned short DigitCounter;
 
     // Integer type for packing DigitCounters into columns of shared memory banks
     using PackedCounter =
       cub::detail::conditional_t<SMEM_CONFIG == cudaSharedMemBankSizeEightByte,
                                  unsigned long long,
                                  unsigned int>;
-
-    static constexpr DigitCounter max_tile_size = ::cuda::std::numeric_limits<DigitCounter>::max();
 
     enum
     {
@@ -455,9 +450,6 @@ public:
         int             (&ranks)[KEYS_PER_THREAD],          ///< [out] For each key, the local rank within the tile
         DigitExtractorT digit_extractor)                    ///< [in] The digit extractor
     {
-        static_assert(BLOCK_THREADS * KEYS_PER_THREAD <= max_tile_size,
-                      "DigitCounter type is too small to hold this number of keys");
-
         DigitCounter    thread_prefixes[KEYS_PER_THREAD];   // For each key, the count of previous keys in this tile having the same digit
         DigitCounter*   digit_counters[KEYS_PER_THREAD];    // For each key, the byte-offset of its corresponding digit counter in smem
 
@@ -468,13 +460,13 @@ public:
         for (int ITEM = 0; ITEM < KEYS_PER_THREAD; ++ITEM)
         {
             // Get digit
-            std::uint32_t digit = digit_extractor.Digit(keys[ITEM]);
+            unsigned int digit = digit_extractor.Digit(keys[ITEM]);
 
             // Get sub-counter
-            std::uint32_t sub_counter = digit >> LOG_COUNTER_LANES;
+            unsigned int sub_counter = digit >> LOG_COUNTER_LANES;
 
             // Get counter lane
-            std::uint32_t counter_lane = digit & (COUNTER_LANES - 1);
+            unsigned int counter_lane = digit & (COUNTER_LANES - 1);
 
             if (IS_DESCENDING)
             {
@@ -522,9 +514,6 @@ public:
         DigitExtractorT digit_extractor,                    ///< [in] The digit extractor
         int             (&exclusive_digit_prefix)[BINS_TRACKED_PER_THREAD])            ///< [out] The exclusive prefix sum for the digits [(threadIdx.x * BINS_TRACKED_PER_THREAD) ... (threadIdx.x * BINS_TRACKED_PER_THREAD) + BINS_TRACKED_PER_THREAD - 1]
     {
-        static_assert(BLOCK_THREADS * KEYS_PER_THREAD <= max_tile_size,
-                      "DigitCounter type is too small to hold this number of keys");
-
         // Rank keys
         RankKeys(keys, ranks, digit_extractor);
 
@@ -730,7 +719,7 @@ public:
         UnsignedBits    (&keys)[KEYS_PER_THREAD],           ///< [in] Keys for this tile
         int             (&ranks)[KEYS_PER_THREAD],          ///< [out] For each key, the local rank within the tile
         DigitExtractorT digit_extractor,                    ///< [in] The digit extractor
-        CountsCallback  callback)
+        CountsCallback    callback)
     {
         // Initialize shared digit counters
 
@@ -750,7 +739,7 @@ public:
         for (int ITEM = 0; ITEM < KEYS_PER_THREAD; ++ITEM)
         {
             // My digit
-            std::uint32_t digit = digit_extractor.Digit(keys[ITEM]);
+            uint32_t digit = digit_extractor.Digit(keys[ITEM]);
 
             if (IS_DESCENDING)
                 digit = RADIX_DIGITS - digit - 1;
@@ -947,9 +936,9 @@ struct BlockRadixRankMatchEarlyCounts
         int warp;
         int lane;
 
-        __device__ __forceinline__ std::uint32_t Digit(UnsignedBits key)
+        __device__ __forceinline__ int Digit(UnsignedBits key)
         {
-            std::uint32_t digit =  digit_extractor.Digit(key);
+            int digit =  digit_extractor.Digit(key);
             return IS_DESCENDING ? RADIX_DIGITS - 1 - digit : digit;
         }
 
@@ -1073,7 +1062,7 @@ struct BlockRadixRankMatchEarlyCounts
             #pragma unroll
             for (int u = 0; u < KEYS_PER_THREAD; ++u)
             {
-                std::uint32_t bin = Digit(keys[u]);
+                int bin = Digit(keys[u]);
                 int* p_match_mask = &match_masks[bin];
                 atomicOr(p_match_mask, lane_mask);
                 WARP_SYNC(WARP_MASK);
@@ -1103,7 +1092,7 @@ struct BlockRadixRankMatchEarlyCounts
             #pragma unroll
             for (int u = 0; u < KEYS_PER_THREAD; ++u)
             {
-                std::uint32_t bin = Digit(keys[u]);
+                int bin = Digit(keys[u]);
                 int bin_mask = detail::warp_in_block_matcher_t<RADIX_BITS,
                                                                PARTIAL_WARP_THREADS,
                                                                BLOCK_WARPS - 1>::match_any(bin,
@@ -1192,7 +1181,6 @@ struct BlockRadixRankMatchEarlyCounts
 };
 
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
 namespace detail 
 {
 
@@ -1232,7 +1220,6 @@ using block_radix_rank_t = cub::detail::conditional_t<
                                        WARP_MATCH_ATOMIC_OR>>>>>;
 
 } // namespace detail
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 CUB_NAMESPACE_END
