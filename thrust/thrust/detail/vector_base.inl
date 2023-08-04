@@ -367,7 +367,6 @@ template<typename T, typename Alloc>
 } // end vector_base::resize()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::size_type
     vector_base<T,Alloc>
       ::size(void) const
@@ -376,7 +375,6 @@ template<typename T, typename Alloc>
 } // end vector_base::size()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::size_type
     vector_base<T,Alloc>
       ::max_size(void) const
@@ -426,7 +424,6 @@ template<typename T, typename Alloc>
 } // end vector_base::reserve()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::size_type
     vector_base<T,Alloc>
       ::capacity(void) const
@@ -443,7 +440,6 @@ template<typename T, typename Alloc>
 } // end vector_base::shrink_to_fit()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::reference
     vector_base<T,Alloc>
       ::operator[](const size_type n)
@@ -452,7 +448,6 @@ template<typename T, typename Alloc>
 } // end vector_base::operator[]
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_reference
     vector_base<T,Alloc>
       ::operator[](const size_type n) const
@@ -461,7 +456,6 @@ template<typename T, typename Alloc>
 } // end vector_base::operator[]
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::iterator
     vector_base<T,Alloc>
       ::begin(void)
@@ -470,7 +464,6 @@ template<typename T, typename Alloc>
 } // end vector_base::begin()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_iterator
     vector_base<T,Alloc>
       ::begin(void) const
@@ -479,7 +472,6 @@ template<typename T, typename Alloc>
 } // end vector_base::begin()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_iterator
     vector_base<T,Alloc>
       ::cbegin(void) const
@@ -488,7 +480,6 @@ template<typename T, typename Alloc>
 } // end vector_base::cbegin()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::reverse_iterator
     vector_base<T,Alloc>
       ::rbegin(void)
@@ -497,7 +488,6 @@ template<typename T, typename Alloc>
 } // end vector_base::rbegin()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_reverse_iterator
     vector_base<T,Alloc>
       ::rbegin(void) const
@@ -506,7 +496,6 @@ template<typename T, typename Alloc>
 } // end vector_base::rbegin()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_reverse_iterator
     vector_base<T,Alloc>
       ::crbegin(void) const
@@ -515,7 +504,6 @@ template<typename T, typename Alloc>
 } // end vector_base::crbegin()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::iterator
     vector_base<T,Alloc>
       ::end(void)
@@ -526,7 +514,6 @@ template<typename T, typename Alloc>
 } // end vector_base::end()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_iterator
     vector_base<T,Alloc>
       ::end(void) const
@@ -537,7 +524,6 @@ template<typename T, typename Alloc>
 } // end vector_base::end()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_iterator
     vector_base<T,Alloc>
       ::cend(void) const
@@ -546,7 +532,6 @@ template<typename T, typename Alloc>
 } // end vector_base::cend()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::reverse_iterator
     vector_base<T,Alloc>
       ::rend(void)
@@ -555,7 +540,6 @@ template<typename T, typename Alloc>
 } // end vector_base::rend()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_reverse_iterator
     vector_base<T,Alloc>
       ::rend(void) const
@@ -564,7 +548,6 @@ template<typename T, typename Alloc>
 } // end vector_base::rend()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_reverse_iterator
     vector_base<T,Alloc>
       ::crend(void) const
@@ -573,7 +556,6 @@ template<typename T, typename Alloc>
 } // end vector_base::crend()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_reference
     vector_base<T,Alloc>
       ::front(void) const
@@ -582,7 +564,6 @@ template<typename T, typename Alloc>
 } // end vector_base::front()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::reference
     vector_base<T,Alloc>
       ::front(void)
@@ -591,7 +572,6 @@ template<typename T, typename Alloc>
 } // end vector_base::front()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_reference
     vector_base<T,Alloc>
       ::back(void) const
@@ -602,7 +582,6 @@ template<typename T, typename Alloc>
 } // end vector_base::vector_base
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::reference
     vector_base<T,Alloc>
       ::back(void)
@@ -613,7 +592,6 @@ template<typename T, typename Alloc>
 } // end vector_base::vector_base
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::pointer
     vector_base<T,Alloc>
       ::data(void)
@@ -622,7 +600,6 @@ template<typename T, typename Alloc>
 } // end vector_base::data()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   typename vector_base<T,Alloc>::const_pointer
     vector_base<T,Alloc>
       ::data(void) const
@@ -647,7 +624,6 @@ template<typename T, typename Alloc>
 } // end vector_base::~vector_dev()
 
 template<typename T, typename Alloc>
-  __host__ __device__
   bool vector_base<T,Alloc>
     ::empty(void) const
 {
