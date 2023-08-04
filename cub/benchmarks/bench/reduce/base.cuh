@@ -26,6 +26,7 @@
  ******************************************************************************/
 
 #include <cub/device/device_reduce.cuh>
+#include <cub/detail/choose_offset.cuh>
 
 #ifndef TUNE_BASE
 #define TUNE_ITEMS_PER_VEC_LOAD (1 << TUNE_ITEMS_PER_VEC_LOAD_POW2)

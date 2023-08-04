@@ -77,6 +77,31 @@ CUB_NAMESPACE_BEGIN
  * Inlined PTX intrinsics
  ******************************************************************************/
 
+namespace detail
+{
+/**
+ * @brief Shifts @p val left by the amount specified by unsigned 32-bit value in @p num_bits. If @p
+ * num_bits is larger than 32 bits, @p num_bits is clamped to 32.
+ */
+__device__ __forceinline__ uint32_t LogicShiftLeft(uint32_t val, uint32_t num_bits)
+{
+  uint32_t ret{};
+  asm("shl.b32 %0, %1, %2;" : "=r"(ret) : "r"(val), "r"(num_bits));
+  return ret;
+}
+
+/**
+ * @brief Shifts @p val right by the amount specified by unsigned 32-bit value in @p num_bits. If @p
+ * num_bits is larger than 32 bits, @p num_bits is clamped to 32.
+ */
+__device__ __forceinline__ uint32_t LogicShiftRight(uint32_t val, uint32_t num_bits)
+{
+  uint32_t ret{};
+  asm("shr.b32 %0, %1, %2;" : "=r"(ret) : "r"(val), "r"(num_bits));
+  return ret;
+}
+} // namespace detail
+
 /**
  * \brief Shift-right then add.  Returns (\p x >> \p shift) + \p addend.
  */
@@ -137,6 +162,22 @@ __device__ __forceinline__ unsigned int BFE(
     const unsigned long long MASK = (1ull << num_bits) - 1;
     return (source >> bit_start) & MASK;
 }
+
+#if CUB_IS_INT128_ENABLED 
+/**
+ * Bitfield-extract for 128-bit types.
+ */
+template <typename UnsignedBits>
+__device__ __forceinline__ unsigned int BFE(
+    UnsignedBits            source,
+    unsigned int            bit_start,
+    unsigned int            num_bits,
+    Int2Type<16>            /*byte_len*/)
+{
+    const __uint128_t MASK = (__uint128_t{1} << num_bits) - 1;
+    return (source >> bit_start) & MASK;
+}
+#endif
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -253,9 +294,7 @@ __device__  __forceinline__ int CTA_SYNC_OR(int p)
  */
 __device__  __forceinline__ void WARP_SYNC(unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
     __syncwarp(member_mask);
-#endif
 }
 
 
@@ -264,11 +303,7 @@ __device__  __forceinline__ void WARP_SYNC(unsigned int member_mask)
  */
 __device__  __forceinline__ int WARP_ANY(int predicate, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
     return __any_sync(member_mask, predicate);
-#else
-    return ::__any(predicate);
-#endif
 }
 
 
@@ -277,11 +312,7 @@ __device__  __forceinline__ int WARP_ANY(int predicate, unsigned int member_mask
  */
 __device__  __forceinline__ int WARP_ALL(int predicate, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
     return __all_sync(member_mask, predicate);
-#else
-    return ::__all(predicate);
-#endif
 }
 
 
@@ -290,11 +321,7 @@ __device__  __forceinline__ int WARP_ALL(int predicate, unsigned int member_mask
  */
 __device__  __forceinline__ int WARP_BALLOT(int predicate, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
     return __ballot_sync(member_mask, predicate);
-#else
-    return __ballot(predicate);
-#endif
 }
 
 
@@ -304,13 +331,8 @@ __device__  __forceinline__ int WARP_BALLOT(int predicate, unsigned int member_m
 __device__ __forceinline__ 
 unsigned int SHFL_UP_SYNC(unsigned int word, int src_offset, int flags, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
     asm volatile("shfl.sync.up.b32 %0, %1, %2, %3, %4;"
         : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags), "r"(member_mask));
-#else
-    asm volatile("shfl.up.b32 %0, %1, %2, %3;"
-        : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags));
-#endif
     return word;
 }
 
@@ -320,13 +342,8 @@ unsigned int SHFL_UP_SYNC(unsigned int word, int src_offset, int flags, unsigned
 __device__ __forceinline__ 
 unsigned int SHFL_DOWN_SYNC(unsigned int word, int src_offset, int flags, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
     asm volatile("shfl.sync.down.b32 %0, %1, %2, %3, %4;"
         : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags), "r"(member_mask));
-#else
-    asm volatile("shfl.down.b32 %0, %1, %2, %3;"
-        : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags));
-#endif
     return word;
 }
 
@@ -336,13 +353,8 @@ unsigned int SHFL_DOWN_SYNC(unsigned int word, int src_offset, int flags, unsign
 __device__ __forceinline__ 
 unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, int flags, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
     asm volatile("shfl.sync.idx.b32 %0, %1, %2, %3, %4;"
         : "=r"(word) : "r"(word), "r"(src_lane), "r"(flags), "r"(member_mask));
-#else
-    asm volatile("shfl.idx.b32 %0, %1, %2, %3;"
-        : "=r"(word) : "r"(word), "r"(src_lane), "r"(flags));
-#endif
     return word;
 }
 
@@ -352,11 +364,7 @@ unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, int flags, unsigned 
 __device__ __forceinline__ 
 unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
-  return __shfl_sync(member_mask, word, src_lane);
-#else
-  return __shfl(word, src_lane);
-#endif
+    return __shfl_sync(member_mask, word, src_lane);
 }
 
 /**
@@ -719,47 +727,80 @@ __device__ __forceinline__ T ShuffleIndex(
 }
 
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
+namespace detail 
+{
+
+/** 
+ * Implementation detail for `MatchAny`. It provides specializations for full and partial warps. 
+ * For partial warps, inactive threads must be masked out. This is done in the partial warp 
+ * specialization below. 
+ * Usage:
+ * ```
+ * // returns a mask of threads with the same 4 least-significant bits of `label` 
+ * // in a warp with 16 active threads
+ * warp_matcher_t<4, 16>::match_any(label); 
+ *
+ * // returns a mask of threads with the same 4 least-significant bits of `label` 
+ * // in a warp with 32 active threads (no extra work is done)
+ * warp_matcher_t<4, 32>::match_any(label); 
+ * ```
+ */
+template <int LABEL_BITS, int WARP_ACTIVE_THREADS>
+struct warp_matcher_t 
+{
+
+  static __device__ unsigned int match_any(unsigned int label)
+  {
+    return warp_matcher_t<LABEL_BITS, 32>::match_any(label) & ~(~0 << WARP_ACTIVE_THREADS);
+  }
+
+};
+
+template <int LABEL_BITS>
+struct warp_matcher_t<LABEL_BITS, CUB_PTX_WARP_THREADS> 
+{
+
+  // match.any.sync.b32 is slower when matching a few bits
+  // using a ballot loop instead
+  static __device__ unsigned int match_any(unsigned int label)
+  {
+      unsigned int retval;
+
+      // Extract masks of common threads for each bit
+      #pragma unroll
+      for (int BIT = 0; BIT < LABEL_BITS; ++BIT)
+      {
+          unsigned int mask;
+          unsigned int current_bit = 1 << BIT;
+          asm ("{\n"
+              "    .reg .pred p;\n"
+              "    and.b32 %0, %1, %2;"
+              "    setp.eq.u32 p, %0, %2;\n"
+              "    vote.ballot.sync.b32 %0, p, 0xffffffff;\n"
+              "    @!p not.b32 %0, %0;\n"
+              "}\n" : "=r"(mask) : "r"(label), "r"(current_bit));
+
+          // Remove peers who differ
+          retval = (BIT == 0) ? mask : retval & mask;
+      }
+
+      return retval;
+  }
+
+};
+
+} // namespace detail
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * Compute a 32b mask of threads having the same least-significant
  * LABEL_BITS of \p label as the calling thread.
  */
-template <int LABEL_BITS>
+template <int LABEL_BITS, int WARP_ACTIVE_THREADS = CUB_PTX_WARP_THREADS>
 inline __device__ unsigned int MatchAny(unsigned int label)
 {
-    unsigned int retval;
-
-    // Extract masks of common threads for each bit
-    #pragma unroll
-    for (int BIT = 0; BIT < LABEL_BITS; ++BIT)
-    {
-        unsigned int mask;
-        unsigned int current_bit = 1 << BIT;
-        asm ("{\n"
-            "    .reg .pred p;\n"
-            "    and.b32 %0, %1, %2;"
-            "    setp.eq.u32 p, %0, %2;\n"
-#ifdef CUB_USE_COOPERATIVE_GROUPS
-            "    vote.ballot.sync.b32 %0, p, 0xffffffff;\n"
-#else
-            "    vote.ballot.b32 %0, p;\n"
-#endif
-            "    @!p not.b32 %0, %0;\n"
-            "}\n" : "=r"(mask) : "r"(label), "r"(current_bit));
-
-        // Remove peers who differ
-        retval = (BIT == 0) ? mask : retval & mask;
-    }
-
-    return retval;
-
-//  // VOLTA match
-//    unsigned int retval;
-//    asm ("{\n"
-//         "    match.any.sync.b32 %0, %1, 0xffffffff;\n"
-//         "}\n" : "=r"(retval) : "r"(label));
-//    return retval;
-
+  return detail::warp_matcher_t<LABEL_BITS, WARP_ACTIVE_THREADS>::match_any(label);
 }
 
 CUB_NAMESPACE_END

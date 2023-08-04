@@ -72,7 +72,7 @@ class cuda_error_category
     {
       using namespace cuda::errc;
 
-      if(ev < ::cudaErrorUnknown)
+      if(ev < ::cudaErrorApiFailureBase)
       {
         return make_error_condition(static_cast<errc_t>(ev));
       }

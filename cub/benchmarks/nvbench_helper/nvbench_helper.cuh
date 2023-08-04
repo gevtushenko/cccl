@@ -52,6 +52,13 @@ using fundamental_types = nvbench::type_list<int8_t,
                                              int128_t,
                                              float,
                                              double>;
+
+using fundamental_types_m128 = nvbench::type_list<int8_t,
+                                             int16_t,
+                                             int32_t,
+                                             int64_t,
+                                             float,
+                                             double>;
                                              
 using all_types = nvbench::type_list<int8_t,
                                      int16_t,

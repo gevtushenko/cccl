@@ -229,7 +229,7 @@ void radix_sort_values(nvbench::state &state, nvbench::type_list<KeyT, ValueT, O
 #ifdef TUNE_KeyT
 using key_types = nvbench::type_list<TUNE_KeyT>;
 #else // !defined(TUNE_KeyT) 
-using key_types = fundamental_types;
+using key_types = fundamental_types_m128;
 #endif // TUNE_KeyT
 
 #ifdef TUNE_ValueT

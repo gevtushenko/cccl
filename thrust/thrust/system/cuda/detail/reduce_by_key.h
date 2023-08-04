@@ -1079,13 +1079,12 @@ namespace __reduce_by_key {
 
     size_type num_items = thrust::distance(keys_first, keys_last);
 
-    pair<KeysOutputIt, ValuesOutputIt> result = thrust::make_pair(keys_output, values_output);
-
     if (num_items == 0)
     {
-      return result;
+      return thrust::make_pair(keys_output, values_output);
     }
 
+    pair<KeysOutputIt, ValuesOutputIt> result{};
     THRUST_INDEX_TYPE_DISPATCH(result,
                                reduce_by_key_dispatch,
                                num_items,
