@@ -38,8 +38,8 @@
 
 #include <set>
 #include <map>
-#include <mutex>
 
+#include "host/mutex.cuh"
 #include <math.h>
 
 CUB_NAMESPACE_BEGIN
@@ -243,7 +243,7 @@ struct CachingDeviceAllocator
     // Fields
     //---------------------------------------------------------------------
 
-    std::mutex      mutex;              /// Mutex for thread-safety
+    cub::Mutex      mutex;              /// Mutex for thread-safety
 
     unsigned int    bin_growth;         /// Geometric growth factor for bin-sizes
     unsigned int    min_bin;            /// Minimum bin enumeration
@@ -329,14 +329,14 @@ struct CachingDeviceAllocator
     cudaError_t SetMaxCachedBytes(size_t max_cached_bytes_)
     {
         // Lock
-        mutex.lock();
+        mutex.Lock();
 
         if (debug) _CubLog("Changing max_cached_bytes (%lld -> %lld)\n", (long long) this->max_cached_bytes, (long long) max_cached_bytes_);
 
         this->max_cached_bytes = max_cached_bytes_;
 
         // Unlock
-        mutex.unlock();
+        mutex.Unlock();
 
         return cudaSuccess;
     }
@@ -382,7 +382,7 @@ struct CachingDeviceAllocator
         else
         {
             // Search for a suitable cached allocation: lock
-            mutex.lock();
+            mutex.Lock();
 
             if (search_key.bin < min_bin)
             {
@@ -438,7 +438,7 @@ struct CachingDeviceAllocator
             }
 
             // Done searching: unlock
-            mutex.unlock();
+            mutex.Unlock();
         }
 
         // Allocate the block if necessary
@@ -462,7 +462,7 @@ struct CachingDeviceAllocator
                 cudaGetLastError();     // Reset CUDART's error
 
                 // Lock
-                mutex.lock();
+                mutex.Lock();
 
                 // Iterate the range of free blocks on the same device
                 BlockDescriptor free_key(device);
@@ -484,11 +484,13 @@ struct CachingDeviceAllocator
                     if (debug) _CubLog("\tDevice %d freed %lld bytes.\n\t\t  %lld available blocks cached (%lld bytes), %lld live blocks (%lld bytes) outstanding.\n",
                         device, (long long) block_itr->bytes, (long long) cached_blocks.size(), (long long) cached_bytes[device].free, (long long) live_blocks.size(), (long long) cached_bytes[device].live);
 
-                    block_itr = cached_blocks.erase(block_itr);
+                    cached_blocks.erase(block_itr);
+
+                    block_itr++;
                 }
 
                 // Unlock
-                mutex.unlock();
+                mutex.Unlock();
 
                 // Return under error
                 if (error) return error;
@@ -502,10 +504,10 @@ struct CachingDeviceAllocator
                 return error;
 
             // Insert into live blocks
-            mutex.lock();
+            mutex.Lock();
             live_blocks.insert(search_key);
             cached_bytes[device].live += search_key.bytes;
-            mutex.unlock();
+            mutex.Unlock();
 
             if (debug) _CubLog("\tDevice %d allocated new device block at %p (%lld bytes associated with stream %lld).\n",
                       device, search_key.d_ptr, (long long) search_key.bytes, (long long) search_key.associated_stream);
@@ -565,7 +567,7 @@ struct CachingDeviceAllocator
         }
 
         // Lock
-        mutex.lock();
+        mutex.Lock();
 
         // Find corresponding block descriptor
         bool recached = false;
@@ -593,7 +595,7 @@ struct CachingDeviceAllocator
         }
 
         // Unlock
-        mutex.unlock();
+        mutex.Unlock();
 
         // First set to specified device (entrypoint may not be set)
         if (device != entrypoint_device)
@@ -651,7 +653,7 @@ struct CachingDeviceAllocator
         int entrypoint_device     = INVALID_DEVICE_ORDINAL;
         int current_device        = INVALID_DEVICE_ORDINAL;
 
-        mutex.lock();
+        mutex.Lock();
 
         while (!cached_blocks.empty())
         {
@@ -685,7 +687,7 @@ struct CachingDeviceAllocator
 
         }
 
-        mutex.unlock();
+        mutex.Unlock();
 
         // Attempt to revert back to entry-point device if necessary
         if (entrypoint_device != INVALID_DEVICE_ORDINAL)

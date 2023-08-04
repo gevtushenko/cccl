@@ -51,9 +51,9 @@ CUB_NAMESPACE_BEGIN
  * honor the relative ordering of items and partial reductions when applying the
  * reduction operator.
  *
- * Compared to the implementation of BlockReduceRakingCommutativeOnly (which
- * does not support non-commutative operators), this implementation requires a
- * few extra rounds of inter-thread communication.
+ * Compared to the implementation of BlockReduceRaking (which does not support
+ * non-commutative operators), this implementation requires a few extra
+ * rounds of inter-thread communication.
  */
 template <
     typename    T,              ///< Data type being reduced
@@ -125,7 +125,7 @@ struct BlockReduceRaking
 
     template <bool IS_FULL_TILE, typename ReductionOp, int ITERATION>
     __device__ __forceinline__ T RakingReduction(
-        ReductionOp                 reduction_op,       ///< [in] Binary reduction operator
+        ReductionOp                 reduction_op,       ///< [in] Binary scan operator
         T                           *raking_segment,
         T                           partial,            ///< [in] <b>[<em>lane</em><sub>0</sub> only]</b> Warp-wide aggregate reduction of input items
         int                         num_valid,          ///< [in] Number of valid elements (may be less than BLOCK_THREADS)
@@ -142,7 +142,7 @@ struct BlockReduceRaking
 
     template <bool IS_FULL_TILE, typename ReductionOp>
     __device__ __forceinline__ T RakingReduction(
-        ReductionOp                 /*reduction_op*/,   ///< [in] Binary reduction operator
+        ReductionOp                 /*reduction_op*/,   ///< [in] Binary scan operator
         T                           * /*raking_segment*/,
         T                           partial,            ///< [in] <b>[<em>lane</em><sub>0</sub> only]</b> Warp-wide aggregate reduction of input items
         int                         /*num_valid*/,      ///< [in] Number of valid elements (may be less than BLOCK_THREADS)

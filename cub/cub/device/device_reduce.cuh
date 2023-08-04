@@ -38,7 +38,6 @@
 #include <limits>
 
 #include <cub/config.cuh>
-#include <cub/detail/choose_offset.cuh>
 #include <cub/device/dispatch/dispatch_reduce.cuh>
 #include <cub/device/dispatch/dispatch_reduce_by_key.cuh>
 #include <cub/iterator/arg_index_input_iterator.cuh>
@@ -47,46 +46,41 @@
 CUB_NAMESPACE_BEGIN
 
 
-//! @ingroup SingleModule
-//!
-//! @rst
-//! DeviceReduce provides device-wide, parallel operations for computing 
-//! a reduction across a sequence of data items residing within 
-//! device-accessible memory. 
-//!
-//! .. image:: ../img/reduce_logo.png
-//!     :align: center
-//!
-//! Overview
-//! ====================================
-//! A `reduction <http://en.wikipedia.org/wiki/Reduce_(higher-order_function)>`_
-//! (or *fold*) uses a binary combining operator to compute a single aggregate 
-//! from a sequence of input elements.
-//!
-//! Usage Considerations
-//! ====================================
-//! @cdp_class{DeviceReduce}
-//!
-//! Performance
-//! ====================================
-//! @linear_performance{reduction, reduce-by-key, and run-length encode}
-//!
-//! The following chart illustrates DeviceReduce::Sum
-//! performance across different CUDA architectures for \p int32 keys.
-//!
-//! .. image:: ../img/reduce_int32.png
-//!     :align: center
-//!
-//! @par
-//! The following chart illustrates DeviceReduce::ReduceByKey (summation)
-//! performance across different CUDA architectures for `fp32` values. Segments 
-//! are identified by `int32` keys, and have lengths uniformly sampled 
-//! from `[1, 1000]`.
-//!
-//! .. image:: ../img/reduce_by_key_fp32_len_500.png
-//!     :align: center
-//!
-//! @endrst
+/**
+ * @brief DeviceReduce provides device-wide, parallel operations for computing 
+ *        a reduction across a sequence of data items residing within 
+ *        device-accessible memory. ![](reduce_logo.png)
+ * @ingroup SingleModule
+ *
+ * @par Overview
+ * A <a href="http://en.wikipedia.org/wiki/Reduce_(higher-order_function)">*reduction*</a> 
+ * (or *fold*) uses a binary combining operator to compute a single aggregate 
+ * from a sequence of input elements.
+ *
+ * @par Usage Considerations
+ * @cdp_class{DeviceReduce}
+ *
+ * @par Performance
+ * @linear_performance{reduction, reduce-by-key, and run-length encode}
+ *
+ * @par
+ * The following chart illustrates DeviceReduce::Sum
+ * performance across different CUDA architectures for \p int32 keys.
+ *
+ * @image html reduce_int32.png
+ *
+ * @par
+ * The following chart illustrates DeviceReduce::ReduceByKey (summation)
+ * performance across different CUDA architectures for `fp32` values. Segments 
+ * are identified by `int32` keys, and have lengths uniformly sampled 
+ * from `[1, 1000]`.
+ *
+ * @image html reduce_by_key_fp32_len_500.png
+ *
+ * @par
+ * @plots_below
+ *
+ */
 struct DeviceReduce
 {
   /**
@@ -164,8 +158,6 @@ struct DeviceReduce
    *   **[inferred]** Data element type that is convertible to the `value` type 
    *   of `InputIteratorT`
    *
-   * @tparam NumItemsT **[inferred]** Type of num_items
-   *
    * @param[in] d_temp_storage 
    *   Device-accessible allocation of temporary storage. When `nullptr`, the 
    *   required allocation size is written to `temp_storage_bytes` and no work 
@@ -196,19 +188,18 @@ struct DeviceReduce
   template <typename InputIteratorT,
             typename OutputIteratorT,
             typename ReductionOpT,
-            typename T,
-            typename NumItemsT>
+            typename T>
   CUB_RUNTIME_FUNCTION static cudaError_t Reduce(void *d_temp_storage,
                                                  size_t &temp_storage_bytes,
                                                  InputIteratorT d_in,
                                                  OutputIteratorT d_out,
-                                                 NumItemsT num_items,
+                                                 int num_items,
                                                  ReductionOpT reduction_op,
                                                  T init,
                                                  cudaStream_t stream = 0)
   {
     // Signed integer type for global offsets
-    using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
+    using OffsetT = int;
 
     return DispatchReduce<InputIteratorT,
                           OutputIteratorT,
@@ -218,7 +209,7 @@ struct DeviceReduce
                                        temp_storage_bytes,
                                        d_in,
                                        d_out,
-                                       static_cast<OffsetT>(num_items),
+                                       num_items,
                                        reduction_op,
                                        init,
                                        stream);
@@ -312,8 +303,6 @@ struct DeviceReduce
    *   **[inferred]** Output iterator type for recording the reduced 
    *   aggregate \iterator
    *
-   * @tparam NumItemsT **[inferred]** Type of num_items
-   *
    * @param[in] d_temp_storage  
    *   Device-accessible allocation of temporary storage. When `nullptr`, the 
    *   required allocation size is written to `temp_storage_bytes` and no work 
@@ -335,18 +324,16 @@ struct DeviceReduce
    *   **[optional]** CUDA stream to launch kernels within.  
    *   Default is stream<sub>0</sub>.
    */
-  template <typename InputIteratorT, 
-            typename OutputIteratorT, 
-            typename NumItemsT>
+  template <typename InputIteratorT, typename OutputIteratorT>
   CUB_RUNTIME_FUNCTION static cudaError_t Sum(void *d_temp_storage,
                                               size_t &temp_storage_bytes,
                                               InputIteratorT d_in,
                                               OutputIteratorT d_out,
-                                              NumItemsT num_items,
-                                              cudaStream_t stream = 0)
+                                              int num_items,
+                                              cudaStream_t stream    = 0)
   {
     // Signed integer type for global offsets
-    using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
+    using OffsetT = int;
 
     // The output value type
     using OutputT =
@@ -363,7 +350,7 @@ struct DeviceReduce
                                            temp_storage_bytes,
                                            d_in,
                                            d_out,
-                                           static_cast<OffsetT>(num_items),
+                                           num_items,
                                            cub::Sum(),
                                            InitT{}, // zero-initialize
                                            stream);
@@ -442,8 +429,6 @@ struct DeviceReduce
    *   **[inferred]** Output iterator type for recording the reduced 
    *   aggregate \iterator
    *
-   * @tparam NumItemsT **[inferred]** Type of num_items
-   *
    * @param[in] d_temp_storage  
    *   Device-accessible allocation of temporary storage. When `nullptr`, the 
    *   required allocation size is written to `temp_storage_bytes` and no work 
@@ -465,18 +450,16 @@ struct DeviceReduce
    *   **[optional]** CUDA stream to launch kernels within.  
    *   Default is stream<sub>0</sub>.
    */
-  template <typename InputIteratorT,
-            typename OutputIteratorT,
-            typename NumItemsT>
+  template <typename InputIteratorT, typename OutputIteratorT>
   CUB_RUNTIME_FUNCTION static cudaError_t Min(void *d_temp_storage,
                                               size_t &temp_storage_bytes,
                                               InputIteratorT d_in,
                                               OutputIteratorT d_out,
-                                              NumItemsT num_items,
+                                              int num_items,
                                               cudaStream_t stream = 0)
   {
     // Signed integer type for global offsets
-    using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
+    using OffsetT = int;
 
     // The input value type
     using InputT = cub::detail::value_t<InputIteratorT>;
@@ -491,7 +474,7 @@ struct DeviceReduce
                                            temp_storage_bytes,
                                            d_in,
                                            d_out,
-                                           static_cast<OffsetT>(num_items),
+                                           num_items,
                                            cub::Min(),
                                            // replace with 
                                            // std::numeric_limits<T>::max() when
@@ -600,8 +583,7 @@ struct DeviceReduce
    *   **[optional]** CUDA stream to launch kernels within.  
    *   Default is stream<sub>0</sub>.
    */
-  template <typename InputIteratorT, 
-            typename OutputIteratorT>
+  template <typename InputIteratorT, typename OutputIteratorT>
   CUB_RUNTIME_FUNCTION static cudaError_t ArgMin(void *d_temp_storage,
                                                  size_t &temp_storage_bytes,
                                                  InputIteratorT d_in,
@@ -617,11 +599,10 @@ struct DeviceReduce
 
     // The output tuple type
     using OutputTupleT =
-      cub::detail::non_void_value_t<OutputIteratorT, KeyValuePair<OffsetT, InputValueT>>;
+      cub::detail::non_void_value_t<OutputIteratorT,
+                                    KeyValuePair<OffsetT, InputValueT>>;
 
-    using AccumT = OutputTupleT;
-    
-    using InitT = detail::reduce::empty_problem_init_t<AccumT>;
+    using InitT = OutputTupleT;
 
     // The output value type
     using OutputValueT = typename OutputTupleT::Value;
@@ -633,22 +614,23 @@ struct DeviceReduce
     ArgIndexInputIteratorT d_indexed_in(d_in);
 
     // Initial value
-    // TODO Address https://github.com/NVIDIA/cub/issues/651
-    InitT initial_value{AccumT(1, Traits<InputValueT>::Max())}; 
+
+    // replace with std::numeric_limits<T>::max() when C++11 support is
+    // more prevalent
+    InitT initial_value(1, Traits<InputValueT>::Max()); 
 
     return DispatchReduce<ArgIndexInputIteratorT,
                           OutputIteratorT,
                           OffsetT,
                           cub::ArgMin,
-                          InitT,
-                          AccumT>::Dispatch(d_temp_storage,
-                                            temp_storage_bytes,
-                                            d_indexed_in,
-                                            d_out,
-                                            num_items,
-                                            cub::ArgMin(),
-                                            initial_value,
-                                            stream);
+                          InitT>::Dispatch(d_temp_storage,
+                                           temp_storage_bytes,
+                                           d_indexed_in,
+                                           d_out,
+                                           num_items,
+                                           cub::ArgMin(),
+                                           initial_value,
+                                           stream);
   }
 
   template <typename InputIteratorT, typename OutputIteratorT>
@@ -725,8 +707,6 @@ struct DeviceReduce
    *   **[inferred]** Output iterator type for recording the reduced 
    *   aggregate \iterator
    *
-   * @tparam NumItemsT **[inferred]** Type of num_items
-   *
    * @param[in] d_temp_storage  
    *   Device-accessible allocation of temporary storage. When `nullptr`, the 
    *   required allocation size is written to `temp_storage_bytes` and no work 
@@ -748,18 +728,16 @@ struct DeviceReduce
    *   **[optional]** CUDA stream to launch kernels within. 
    *   Default is stream<sub>0</sub>.
    */
-  template <typename InputIteratorT, 
-            typename OutputIteratorT,
-            typename NumItemsT>
+  template <typename InputIteratorT, typename OutputIteratorT>
   CUB_RUNTIME_FUNCTION static cudaError_t Max(void *d_temp_storage,
                                               size_t &temp_storage_bytes,
                                               InputIteratorT d_in,
                                               OutputIteratorT d_out,
-                                              NumItemsT num_items,
+                                              int num_items,
                                               cudaStream_t stream = 0)
   {
     // Signed integer type for global offsets
-    using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
+    using OffsetT = int;
 
     // The input value type
     using InputT = cub::detail::value_t<InputIteratorT>;
@@ -774,7 +752,7 @@ struct DeviceReduce
                                            temp_storage_bytes,
                                            d_in,
                                            d_out,
-                                           static_cast<OffsetT>(num_items),
+                                           num_items,
                                            cub::Max(),
                                            // replace with 
                                            // std::numeric_limits<T>::lowest()
@@ -885,8 +863,7 @@ struct DeviceReduce
    *   **[optional]** CUDA stream to launch kernels within.  
    *   Default is stream<sub>0</sub>.
    */
-  template <typename InputIteratorT, 
-            typename OutputIteratorT>
+  template <typename InputIteratorT, typename OutputIteratorT>
   CUB_RUNTIME_FUNCTION static cudaError_t ArgMax(void *d_temp_storage,
                                                  size_t &temp_storage_bytes,
                                                  InputIteratorT d_in,
@@ -905,12 +882,10 @@ struct DeviceReduce
       cub::detail::non_void_value_t<OutputIteratorT,
                                     KeyValuePair<OffsetT, InputValueT>>;
 
-    using AccumT = OutputTupleT;
-
     // The output value type
     using OutputValueT = typename OutputTupleT::Value;
 
-    using InitT = detail::reduce::empty_problem_init_t<AccumT>;
+    using InitT = OutputTupleT;
 
     // Wrapped input iterator to produce index-value <OffsetT, InputT> tuples
     using ArgIndexInputIteratorT =
@@ -919,22 +894,23 @@ struct DeviceReduce
     ArgIndexInputIteratorT d_indexed_in(d_in);
 
     // Initial value
-    // TODO Address https://github.com/NVIDIA/cub/issues/651
-    InitT initial_value{AccumT(1, Traits<InputValueT>::Lowest())}; 
+
+    // replace with std::numeric_limits<T>::lowest() when C++11 support is
+    // more prevalent
+    InitT initial_value(1, Traits<InputValueT>::Lowest()); 
 
     return DispatchReduce<ArgIndexInputIteratorT,
                           OutputIteratorT,
                           OffsetT,
                           cub::ArgMax,
-                          InitT,
-                          AccumT>::Dispatch(d_temp_storage,
-                                            temp_storage_bytes,
-                                            d_indexed_in,
-                                            d_out,
-                                            num_items,
-                                            cub::ArgMax(),
-                                            initial_value,
-                                            stream);
+                          InitT>::Dispatch(d_temp_storage,
+                                           temp_storage_bytes,
+                                           d_indexed_in,
+                                           d_out,
+                                           num_items,
+                                           cub::ArgMax(),
+                                           initial_value,
+                                           stream);
   }
 
   template <typename InputIteratorT, typename OutputIteratorT>
@@ -1078,8 +1054,6 @@ struct DeviceReduce
    *   **[inferred]*8 Binary reduction functor type having member 
    *   `T operator()(const T &a, const T &b)`
    *
-   * @tparam NumItemsT **[inferred]** Type of num_items
-   *
    * @param[in] d_temp_storage  
    *   Device-accessible allocation of temporary storage. When `nullptr`, the 
    *   required allocation size is written to `temp_storage_bytes` and no work 
@@ -1121,8 +1095,7 @@ struct DeviceReduce
             typename ValuesInputIteratorT,
             typename AggregatesOutputIteratorT,
             typename NumRunsOutputIteratorT,
-            typename ReductionOpT,
-            typename NumItemsT>
+            typename ReductionOpT>
   CUB_RUNTIME_FUNCTION __forceinline__ static cudaError_t
   ReduceByKey(void *d_temp_storage,
               size_t &temp_storage_bytes,
@@ -1132,11 +1105,11 @@ struct DeviceReduce
               AggregatesOutputIteratorT d_aggregates_out,
               NumRunsOutputIteratorT d_num_runs_out,
               ReductionOpT reduction_op,
-              NumItemsT num_items,
+              int num_items,
               cudaStream_t stream = 0)
   {
     // Signed integer type for global offsets
-    using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
+    using OffsetT = int;
 
     // FlagT iterator type (not used)
 
@@ -1161,7 +1134,7 @@ struct DeviceReduce
                                                   d_num_runs_out,
                                                   EqualityOp(),
                                                   reduction_op,
-                                                  static_cast<OffsetT>(num_items),
+                                                  num_items,
                                                   stream);
   }
 

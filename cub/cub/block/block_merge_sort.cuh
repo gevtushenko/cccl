@@ -407,6 +407,7 @@ public:
     // each thread has sorted keys
     // merge sort keys in shared memory
     //
+    #pragma unroll
     for (int target_merged_threads_number = 2;
          target_merged_threads_number <= NUM_THREADS;
          target_merged_threads_number *= 2)

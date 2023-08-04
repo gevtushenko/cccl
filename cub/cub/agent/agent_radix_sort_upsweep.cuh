@@ -80,17 +80,15 @@ struct AgentRadixSortUpsweepPolicy :
 template <
     typename AgentRadixSortUpsweepPolicy,   ///< Parameterized AgentRadixSortUpsweepPolicy tuning policy type
     typename KeyT,                          ///< KeyT type
-    typename OffsetT,
-    typename DecomposerT = detail::identity_decomposer_t>                       ///< Signed integer type for global offsets
+    typename OffsetT>                       ///< Signed integer type for global offsets
 struct AgentRadixSortUpsweep
 {
 
     //---------------------------------------------------------------------
     // Type definitions and constants
     //---------------------------------------------------------------------
-    using traits = detail::radix::traits_t<KeyT>;
-    using bit_ordered_type = typename traits::bit_ordered_type;
-    using bit_ordered_conversion = typename traits::bit_ordered_conversion_policy;
+
+    typedef typename Traits<KeyT>::UnsignedBits UnsignedBits;
 
     // Integer type for digit counters (to be packed into words of PackedCounters)
     typedef unsigned char DigitCounter;
@@ -136,12 +134,10 @@ struct AgentRadixSortUpsweep
 
 
     // Input iterator wrapper type (for applying cache modifier)s
-    typedef CacheModifiedInputIterator<LOAD_MODIFIER, bit_ordered_type, OffsetT> KeysItr;
+    typedef CacheModifiedInputIterator<LOAD_MODIFIER, UnsignedBits, OffsetT> KeysItr;
 
     // Digit extractor type
-    using fundamental_digit_extractor_t = BFEDigitExtractor<KeyT>;
-    using digit_extractor_t =
-      typename traits::template digit_extractor_t<fundamental_digit_extractor_t, DecomposerT>;
+    typedef BFEDigitExtractor<KeyT> DigitExtractorT;
 
     /**
      * Shared memory storage layout
@@ -171,10 +167,9 @@ struct AgentRadixSortUpsweep
     // Input and output device pointers
     KeysItr         d_keys_in;
 
-    // Target bits
-    int current_bit;
-    int num_bits;
-    DecomposerT decomposer;
+    // Digit extractor
+    DigitExtractorT digit_extractor;
+
 
     //---------------------------------------------------------------------
     // Helper structure for templated iteration
@@ -187,7 +182,7 @@ struct AgentRadixSortUpsweep
         // BucketKeys
         static __device__ __forceinline__ void BucketKeys(
             AgentRadixSortUpsweep       &cta,
-            bit_ordered_type             keys[KEYS_PER_THREAD])
+            UnsignedBits                keys[KEYS_PER_THREAD])
         {
             cta.Bucket(keys[COUNT]);
 
@@ -201,34 +196,30 @@ struct AgentRadixSortUpsweep
     struct Iterate<MAX, MAX>
     {
         // BucketKeys
-        static __device__ __forceinline__ void BucketKeys(AgentRadixSortUpsweep &/*cta*/, bit_ordered_type /*keys*/[KEYS_PER_THREAD]) {}
+        static __device__ __forceinline__ void BucketKeys(AgentRadixSortUpsweep &/*cta*/, UnsignedBits /*keys*/[KEYS_PER_THREAD]) {}
     };
 
 
     //---------------------------------------------------------------------
     // Utility methods
     //---------------------------------------------------------------------
-    __device__ __forceinline__ digit_extractor_t digit_extractor()
-    {
-        return traits::template digit_extractor<fundamental_digit_extractor_t>(current_bit, num_bits, decomposer);
-    }
 
     /**
      * Decode a key and increment corresponding smem digit counter
      */
-    __device__ __forceinline__ void Bucket(bit_ordered_type key)
+    __device__ __forceinline__ void Bucket(UnsignedBits key)
     {
         // Perform transform op
-        bit_ordered_type converted_key = bit_ordered_conversion::to_bit_ordered(decomposer, key);
+        UnsignedBits converted_key = Traits<KeyT>::TwiddleIn(key);
 
         // Extract current digit bits
-        std::uint32_t digit = digit_extractor().Digit(converted_key);
+        UnsignedBits digit = digit_extractor.Digit(converted_key);
 
         // Get sub-counter offset
-        std::uint32_t sub_counter = digit & (PACKING_RATIO - 1);
+        UnsignedBits sub_counter = digit & (PACKING_RATIO - 1);
 
         // Get row offset
-        std::uint32_t row_offset = digit >> LOG_PACKING_RATIO;
+        UnsignedBits row_offset = digit >> LOG_PACKING_RATIO;
 
         // Increment counter
         temp_storage.thread_counters[row_offset][threadIdx.x][sub_counter]++;
@@ -301,7 +292,7 @@ struct AgentRadixSortUpsweep
     __device__ __forceinline__ void ProcessFullTile(OffsetT block_offset)
     {
         // Tile of keys
-        bit_ordered_type keys[KEYS_PER_THREAD];
+        UnsignedBits keys[KEYS_PER_THREAD];
 
         LoadDirectStriped<BLOCK_THREADS>(threadIdx.x, d_keys_in + block_offset, keys);
 
@@ -324,7 +315,7 @@ struct AgentRadixSortUpsweep
         for (OffsetT offset = threadIdx.x; offset < block_end - block_offset; offset += BLOCK_THREADS) 
         {
             // Load and bucket key
-            bit_ordered_type key = d_keys_in[block_offset + offset];
+            UnsignedBits key = d_keys_in[block_offset + offset];
             Bucket(key);
         }
     }
@@ -341,14 +332,11 @@ struct AgentRadixSortUpsweep
         TempStorage &temp_storage,
         const KeyT  *d_keys_in,
         int         current_bit,
-        int         num_bits,
-        DecomposerT decomposer = {})
+        int         num_bits)
     :
         temp_storage(temp_storage.Alias()),
-        d_keys_in(reinterpret_cast<const bit_ordered_type*>(d_keys_in)),
-        current_bit(current_bit), 
-        num_bits(num_bits),
-        decomposer(decomposer)
+        d_keys_in(reinterpret_cast<const UnsignedBits*>(d_keys_in)),
+        digit_extractor(current_bit, num_bits)
     {}
 
 

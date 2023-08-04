@@ -196,13 +196,13 @@ public:
     }
 
     /// Equal to
-    __host__ __device__ __forceinline__ bool operator==(const self_type& rhs) const
+    __host__ __device__ __forceinline__ bool operator==(const self_type& rhs)
     {
         return (val == rhs.val);
     }
 
     /// Not equal to
-    __host__ __device__ __forceinline__ bool operator!=(const self_type& rhs) const
+    __host__ __device__ __forceinline__ bool operator!=(const self_type& rhs)
     {
         return (val != rhs.val);
     }

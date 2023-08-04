@@ -27,7 +27,6 @@
 
 #pragma once
 
-#include <cub/block/radix_rank_sort_operations.cuh>
 #include <cub/config.cuh>
 #include <cub/util_type.cuh>
 #include <cub/warp/warp_load.cuh>
@@ -107,9 +106,6 @@ template <bool IS_DESCENDING,
           typename OffsetT>
 class AgentSubWarpSort
 {
-  using traits = detail::radix::traits_t<KeyT>;
-  using bit_ordered_type = typename traits::bit_ordered_type;
-
   struct BinaryOpT
   {
     template <typename T>
@@ -157,26 +153,6 @@ class AgentSubWarpSort
   __device__ static bool equal(T lhs, T rhs)
   {
     return lhs == rhs;
-  }
-
-  __device__ static bool get_oob_default(Int2Type<true> /* is bool */) 
-  {
-    // Traits<KeyT>::MAX_KEY for `bool` is 0xFF which is different from `true` and makes
-    // comparison with oob unreliable.
-    return !IS_DESCENDING;
-  }
-
-  __device__ static KeyT get_oob_default(Int2Type<false> /* is bool */) 
-  {
-    // For FP64 the difference is:
-    // Lowest() -> -1.79769e+308 = 00...00b -> TwiddleIn -> -0 = 10...00b
-    // LOWEST   -> -nan          = 11...11b -> TwiddleIn ->  0 = 00...00b
-
-    // Segmented sort doesn't support custom types at the moment.
-    bit_ordered_type default_key_bits = IS_DESCENDING 
-                                      ? traits::min_raw_binary_key(detail::identity_decomposer_t{})
-                                      : traits::max_raw_binary_key(detail::identity_decomposer_t{});
-    return reinterpret_cast<KeyT &>(default_key_bits);
   }
 
 public:
@@ -253,8 +229,14 @@ public:
       KeyT keys[PolicyT::ITEMS_PER_THREAD];
       ValueT values[PolicyT::ITEMS_PER_THREAD];
 
-      KeyT oob_default = 
-        AgentSubWarpSort::get_oob_default(Int2Type<std::is_same<bool, KeyT>::value>{});
+      // For FP64 the difference is:
+      // Lowest() -> -1.79769e+308 = 00...00b -> TwiddleIn -> -0 = 10...00b
+      // LOWEST   -> -nan          = 11...11b -> TwiddleIn ->  0 = 00...00b
+
+      using UnsignedBitsT = typename Traits<KeyT>::UnsignedBits;
+      UnsignedBitsT default_key_bits = IS_DESCENDING ? Traits<KeyT>::LOWEST_KEY
+                                                     : Traits<KeyT>::MAX_KEY;
+      KeyT oob_default = reinterpret_cast<KeyT &>(default_key_bits);
 
       WarpLoadKeysT(storage.load_keys)
         .Load(keys_input, keys, segment_size, oob_default);

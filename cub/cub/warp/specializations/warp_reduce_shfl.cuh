@@ -39,41 +39,11 @@
 #include "../../util_type.cuh"
 
 #include <stdint.h>
+#include <type_traits>
 
-#include <cuda/std/type_traits>
 #include <nv/target>
 
 CUB_NAMESPACE_BEGIN
-
-
-namespace detail 
-{
-
-template <class A = int, class = A>
-struct reduce_add_exists : ::cuda::std::false_type 
-{};
-
-template <class T>
-struct reduce_add_exists<T, decltype(__reduce_add_sync(0xFFFFFFFF, T{}))> : ::cuda::std::true_type 
-{};
-
-template <class T = int, class = T>
-struct reduce_min_exists : ::cuda::std::false_type 
-{};
-
-template <class T>
-struct reduce_min_exists<T, decltype(__reduce_min_sync(0xFFFFFFFF, T{}))> : ::cuda::std::true_type 
-{};
-
-template <class T = int, class = T>
-struct reduce_max_exists : ::cuda::std::false_type 
-{};
-
-template <class T>
-struct reduce_max_exists<T, decltype(__reduce_max_sync(0xFFFFFFFF, T{}))> : ::cuda::std::true_type 
-{};
-
-}
 
 
 /**
@@ -171,6 +141,7 @@ struct WarpReduceShfl
         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
         // Use predicate set from SHFL to guard against invalid peers
+#ifdef CUB_USE_COOPERATIVE_GROUPS
         asm volatile(
             "{"
             "  .reg .u32 r0;"
@@ -180,6 +151,17 @@ struct WarpReduceShfl
             "  mov.u32 %0, r0;"
             "}"
             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input), "r"(member_mask));
+#else
+        asm volatile(
+            "{"
+            "  .reg .u32 r0;"
+            "  .reg .pred p;"
+            "  shfl.down.b32 r0|p, %1, %2, %3;"
+            "  @p add.u32 r0, r0, %4;"
+            "  mov.u32 %0, r0;"
+            "}"
+            : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input));
+#endif
 
         return output;
     }
@@ -196,6 +178,7 @@ struct WarpReduceShfl
         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
         // Use predicate set from SHFL to guard against invalid peers
+#ifdef CUB_USE_COOPERATIVE_GROUPS
         asm volatile(
             "{"
             "  .reg .f32 r0;"
@@ -205,6 +188,17 @@ struct WarpReduceShfl
             "  mov.f32 %0, r0;"
             "}"
             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input), "r"(member_mask));
+#else
+        asm volatile(
+            "{"
+            "  .reg .f32 r0;"
+            "  .reg .pred p;"
+            "  shfl.down.b32 r0|p, %1, %2, %3;"
+            "  @p add.f32 r0, r0, %4;"
+            "  mov.f32 %0, r0;"
+            "}"
+            : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input));
+#endif
 
         return output;
     }
@@ -220,6 +214,7 @@ struct WarpReduceShfl
         unsigned long long output;
         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
+#ifdef CUB_USE_COOPERATIVE_GROUPS
         asm volatile(
             "{"
             "  .reg .u32 lo;"
@@ -232,6 +227,20 @@ struct WarpReduceShfl
             "  @p add.u64 %0, %0, %1;"
             "}"
             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+#else
+        asm volatile(
+            "{"
+            "  .reg .u32 lo;"
+            "  .reg .u32 hi;"
+            "  .reg .pred p;"
+            "  mov.b64 {lo, hi}, %1;"
+            "  shfl.down.b32 lo|p, lo, %2, %3;"
+            "  shfl.down.b32 hi|p, hi, %2, %3;"
+            "  mov.b64 %0, {lo, hi};"
+            "  @p add.u64 %0, %0, %1;"
+            "}"
+            : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
+#endif
 
         return output;
     }
@@ -248,6 +257,7 @@ struct WarpReduceShfl
         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
         // Use predicate set from SHFL to guard against invalid peers
+#ifdef CUB_USE_COOPERATIVE_GROUPS
         asm volatile(
             "{"
             "  .reg .u32 lo;"
@@ -260,6 +270,20 @@ struct WarpReduceShfl
             "  @p add.s64 %0, %0, %1;"
             "}"
             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+#else
+        asm volatile(
+            "{"
+            "  .reg .u32 lo;"
+            "  .reg .u32 hi;"
+            "  .reg .pred p;"
+            "  mov.b64 {lo, hi}, %1;"
+            "  shfl.down.b32 lo|p, lo, %2, %3;"
+            "  shfl.down.b32 hi|p, hi, %2, %3;"
+            "  mov.b64 %0, {lo, hi};"
+            "  @p add.s64 %0, %0, %1;"
+            "}"
+            : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
+#endif
 
         return output;
     }
@@ -276,6 +300,7 @@ struct WarpReduceShfl
         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
         // Use predicate set from SHFL to guard against invalid peers
+#ifdef CUB_USE_COOPERATIVE_GROUPS
         asm volatile(
             "{"
             "  .reg .u32 lo;"
@@ -290,6 +315,22 @@ struct WarpReduceShfl
             "  @p add.f64 %0, %0, r0;"
             "}"
             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+#else
+        asm volatile(
+            "{"
+            "  .reg .u32 lo;"
+            "  .reg .u32 hi;"
+            "  .reg .pred p;"
+            "  .reg .f64 r0;"
+            "  mov.b64 %0, %1;"
+            "  mov.b64 {lo, hi}, %1;"
+            "  shfl.down.b32 lo|p, lo, %2, %3;"
+            "  shfl.down.b32 hi|p, hi, %2, %3;"
+            "  mov.b64 r0, {lo, hi};"
+            "  @p add.f64 %0, %0, r0;"
+            "}"
+            : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c));
+#endif
 
         return output;
     }
@@ -390,7 +431,7 @@ struct WarpReduceShfl
 
 
     //---------------------------------------------------------------------
-    // Templated reduction iteration
+    // Templated inclusive scan iteration
     //---------------------------------------------------------------------
 
     template <typename ReductionOp, int STEP>
@@ -451,11 +492,13 @@ struct WarpReduceShfl
         return output;
     }
 
+    // Warp reduce functions are not supported by nvc++ (NVBug 3694682)
+#ifndef _NVHPC_CUDA 
     template <class U = T>
     __device__ __forceinline__ 
     typename std::enable_if<
-               (std::is_same<int, U>::value || std::is_same<unsigned int, U>::value)
-            && detail::reduce_add_exists<>::value, T>::type
+               std::is_same<int, U>::value 
+            || std::is_same<unsigned int, U>::value, T>::type
     ReduceImpl(Int2Type<1> /* all_lanes_valid */,
                T input,
                int /* valid_items */,
@@ -476,8 +519,8 @@ struct WarpReduceShfl
     template <class U = T>
     __device__ __forceinline__ 
     typename std::enable_if<
-               (std::is_same<int, U>::value || std::is_same<unsigned int, U>::value)
-            && detail::reduce_min_exists<>::value, T>::type
+               std::is_same<int, U>::value 
+            || std::is_same<unsigned int, U>::value, T>::type
     ReduceImpl(Int2Type<1> /* all_lanes_valid */,
                T input,
                int /* valid_items */,
@@ -498,8 +541,8 @@ struct WarpReduceShfl
     template <class U = T>
     __device__ __forceinline__ 
     typename std::enable_if<
-               (std::is_same<int, U>::value || std::is_same<unsigned int, U>::value)
-            && detail::reduce_max_exists<>::value, T>::type
+               std::is_same<int, U>::value 
+            || std::is_same<unsigned int, U>::value, T>::type
     ReduceImpl(Int2Type<1> /* all_lanes_valid */,
                T input,
                int /* valid_items */,
@@ -516,6 +559,7 @@ struct WarpReduceShfl
 
       return output;
     }
+#endif // _NVHPC_CUDA 
 
     /// Reduction
     template <

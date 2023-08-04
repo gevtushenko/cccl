@@ -44,16 +44,9 @@ namespace detail
 #ifdef DOXYGEN_SHOULD_SKIP_THIS // Only parse this during doxygen passes:
 
 /**
- * \def CUB_DISABLE_CDP
- *
- * If defined, support for device-side usage of CUB is disabled.
- */
-#define CUB_DISABLE_CDP
-
-/**
  * \def CUB_RDC_ENABLED
  *
- * Defined if RDC is enabled and CUB_DISABLE_CDP is not defined.
+ * Defined if RDC is enabled.
  */
 #define CUB_RDC_ENABLED
 
@@ -83,7 +76,7 @@ namespace detail
 
 #ifndef CUB_RUNTIME_FUNCTION
 
-#if defined(__CUDACC_RDC__) && !defined(CUB_DISABLE_CDP)
+#if defined(__CUDACC_RDC__)
 
 #define CUB_RDC_ENABLED
 #define CUB_RUNTIME_FUNCTION __host__ __device__

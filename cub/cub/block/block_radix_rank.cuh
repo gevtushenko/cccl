@@ -43,7 +43,6 @@
 #include "../util_ptx.cuh"
 #include "../util_type.cuh"
 
-#include <cuda/std/type_traits>
 
 CUB_NAMESPACE_BEGIN
 
@@ -93,37 +92,6 @@ struct BlockRadixRankEmptyCallback
 };
 
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
-namespace detail
-{
-
-template <int Bits, int PartialWarpThreads, int PartialWarpId>
-struct warp_in_block_matcher_t
-{
-  static __device__ std::uint32_t match_any(std::uint32_t label, std::uint32_t warp_id)
-  {
-    if (warp_id == static_cast<std::uint32_t>(PartialWarpId)) 
-    {
-      return MatchAny<Bits, PartialWarpThreads>(label);
-    }
-
-    return MatchAny<Bits>(label);
-  }
-};
-
-template <int Bits, int PartialWarpId>
-struct warp_in_block_matcher_t<Bits, 0, PartialWarpId>
-{
-  static __device__ std::uint32_t match_any(std::uint32_t label, std::uint32_t warp_id)
-  {
-    return MatchAny<Bits>(label);
-  }
-};
-
-} // namespace detail
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
-
 /**
  * \brief BlockRadixRank provides operations for ranking unsigned integer types within a CUDA thread block.
  * \ingroup BlockModule
@@ -146,34 +114,17 @@ struct warp_in_block_matcher_t<Bits, 0, PartialWarpId>
  * \par Performance Considerations
  * - \granularity
  *
+ * \par Examples
  * \par
- * \code
- * #include <cub/cub.cuh>
+ * - <b>Example 1:</b> Simple radix rank of 32-bit integer keys
+ *      \code
+ *      #include <cub/cub.cuh>
  *
- * __global__ void ExampleKernel(...)
- * {
- *   constexpr int block_threads = 2;
- *   constexpr int radix_bits = 5;
+ *      template <int BLOCK_THREADS>
+ *      __global__ void ExampleKernel(...)
+ *      {
  *
- *   // Specialize BlockRadixRank for a 1D block of 2 threads 
- *   using block_radix_rank = cub::BlockRadixRank<block_threads, radix_bits>;
- *   using storage_t = typename block_radix_rank::TempStorage;
- *
- *   // Allocate shared memory for BlockRadixSort
- *   __shared__ storage_t temp_storage;
- *
- *   // Obtain a segment of consecutive items that are blocked across threads
- *   int keys[2];
- *   int ranks[2];
- *   ...
- *
- *   cub::BFEDigitExtractor<int> extractor(0, radix_bits);
- *   block_radix_rank(temp_storage).RankKeys(keys, ranks, extractor);
- *
- *   ...
- * \endcode
- * Suppose the set of input `keys` across the block of threads is `{ [16,10], [9,11] }`.  
- * The corresponding output `ranks` in those threads will be `{ [3,1], [0,2] }`.
+ *      \endcode
  *
  * \par Re-using dynamically allocating shared memory
  * The following example under the examples/block folder illustrates usage of
@@ -202,15 +153,13 @@ private:
      ******************************************************************************/
 
     // Integer type for digit counters (to be packed into words of type PackedCounters)
-    using DigitCounter = unsigned short;
+    typedef unsigned short DigitCounter;
 
     // Integer type for packing DigitCounters into columns of shared memory banks
     using PackedCounter =
       cub::detail::conditional_t<SMEM_CONFIG == cudaSharedMemBankSizeEightByte,
                                  unsigned long long,
                                  unsigned int>;
-
-    static constexpr DigitCounter max_tile_size = ::cuda::std::numeric_limits<DigitCounter>::max();
 
     enum
     {
@@ -455,9 +404,6 @@ public:
         int             (&ranks)[KEYS_PER_THREAD],          ///< [out] For each key, the local rank within the tile
         DigitExtractorT digit_extractor)                    ///< [in] The digit extractor
     {
-        static_assert(BLOCK_THREADS * KEYS_PER_THREAD <= max_tile_size,
-                      "DigitCounter type is too small to hold this number of keys");
-
         DigitCounter    thread_prefixes[KEYS_PER_THREAD];   // For each key, the count of previous keys in this tile having the same digit
         DigitCounter*   digit_counters[KEYS_PER_THREAD];    // For each key, the byte-offset of its corresponding digit counter in smem
 
@@ -468,13 +414,13 @@ public:
         for (int ITEM = 0; ITEM < KEYS_PER_THREAD; ++ITEM)
         {
             // Get digit
-            std::uint32_t digit = digit_extractor.Digit(keys[ITEM]);
+            unsigned int digit = digit_extractor.Digit(keys[ITEM]);
 
             // Get sub-counter
-            std::uint32_t sub_counter = digit >> LOG_COUNTER_LANES;
+            unsigned int sub_counter = digit >> LOG_COUNTER_LANES;
 
             // Get counter lane
-            std::uint32_t counter_lane = digit & (COUNTER_LANES - 1);
+            unsigned int counter_lane = digit & (COUNTER_LANES - 1);
 
             if (IS_DESCENDING)
             {
@@ -522,9 +468,6 @@ public:
         DigitExtractorT digit_extractor,                    ///< [in] The digit extractor
         int             (&exclusive_digit_prefix)[BINS_TRACKED_PER_THREAD])            ///< [out] The exclusive prefix sum for the digits [(threadIdx.x * BINS_TRACKED_PER_THREAD) ... (threadIdx.x * BINS_TRACKED_PER_THREAD) + BINS_TRACKED_PER_THREAD - 1]
     {
-        static_assert(BLOCK_THREADS * KEYS_PER_THREAD <= max_tile_size,
-                      "DigitCounter type is too small to hold this number of keys");
-
         // Rank keys
         RankKeys(keys, ranks, digit_extractor);
 
@@ -585,7 +528,6 @@ private:
 
         LOG_WARP_THREADS            = CUB_LOG_WARP_THREADS(0),
         WARP_THREADS                = 1 << LOG_WARP_THREADS,
-        PARTIAL_WARP_THREADS        = BLOCK_THREADS % WARP_THREADS,
         WARPS                       = (BLOCK_THREADS + WARP_THREADS - 1) / WARP_THREADS,
 
         PADDED_WARPS            = ((WARPS & 0x1) == 0) ?
@@ -730,7 +672,7 @@ public:
         UnsignedBits    (&keys)[KEYS_PER_THREAD],           ///< [in] Keys for this tile
         int             (&ranks)[KEYS_PER_THREAD],          ///< [out] For each key, the local rank within the tile
         DigitExtractorT digit_extractor,                    ///< [in] The digit extractor
-        CountsCallback  callback)
+        CountsCallback    callback)
     {
         // Initialize shared digit counters
 
@@ -750,17 +692,13 @@ public:
         for (int ITEM = 0; ITEM < KEYS_PER_THREAD; ++ITEM)
         {
             // My digit
-            std::uint32_t digit = digit_extractor.Digit(keys[ITEM]);
+            uint32_t digit = digit_extractor.Digit(keys[ITEM]);
 
             if (IS_DESCENDING)
                 digit = RADIX_DIGITS - digit - 1;
 
             // Mask of peers who have same digit as me
-            uint32_t peer_mask =
-              detail::warp_in_block_matcher_t<
-                RADIX_BITS, 
-                PARTIAL_WARP_THREADS, 
-                WARPS - 1>::match_any(digit, warp_id);
+            uint32_t peer_mask = MatchAny<RADIX_BITS>(digit);
 
             // Pointer to smem digit counter for this key
             digit_counters[ITEM] = &temp_storage.aliasable.warp_digit_counters[digit][warp_id];
@@ -906,9 +844,7 @@ struct BlockRadixRankMatchEarlyCounts
         BINS_TRACKED_PER_THREAD = BINS_PER_THREAD,
         FULL_BINS = BINS_PER_THREAD * BLOCK_THREADS == RADIX_DIGITS,
         WARP_THREADS = CUB_PTX_WARP_THREADS,
-        PARTIAL_WARP_THREADS = BLOCK_THREADS % WARP_THREADS,
         BLOCK_WARPS = BLOCK_THREADS / WARP_THREADS,
-        PARTIAL_WARP_ID = BLOCK_WARPS - 1,
         WARP_MASK = ~0,
         NUM_MATCH_MASKS = MATCH_ALGORITHM == WARP_MATCH_ATOMIC_OR ? BLOCK_WARPS : 0,
         // Guard against declaring zero-sized array:
@@ -947,9 +883,9 @@ struct BlockRadixRankMatchEarlyCounts
         int warp;
         int lane;
 
-        __device__ __forceinline__ std::uint32_t Digit(UnsignedBits key)
+        __device__ __forceinline__ int Digit(UnsignedBits key)
         {
-            std::uint32_t digit =  digit_extractor.Digit(key);
+            int digit =  digit_extractor.Digit(key);
             return IS_DESCENDING ? RADIX_DIGITS - 1 - digit : digit;
         }
 
@@ -1073,7 +1009,7 @@ struct BlockRadixRankMatchEarlyCounts
             #pragma unroll
             for (int u = 0; u < KEYS_PER_THREAD; ++u)
             {
-                std::uint32_t bin = Digit(keys[u]);
+                int bin = Digit(keys[u]);
                 int* p_match_mask = &match_masks[bin];
                 atomicOr(p_match_mask, lane_mask);
                 WARP_SYNC(WARP_MASK);
@@ -1086,7 +1022,7 @@ struct BlockRadixRankMatchEarlyCounts
                     // atomic is a bit faster
                     warp_offset = atomicAdd(&warp_offsets[bin], popc);
                 }
-                warp_offset = SHFL_IDX_SYNC(warp_offset, leader, WARP_MASK);
+                warp_offset = SHFL_IDX_SYNC(warp_offset, leader, bin_mask);
                 if (lane == leader) *p_match_mask = 0;
                 WARP_SYNC(WARP_MASK);
                 ranks[u] = warp_offset + popc - 1;
@@ -1103,11 +1039,8 @@ struct BlockRadixRankMatchEarlyCounts
             #pragma unroll
             for (int u = 0; u < KEYS_PER_THREAD; ++u)
             {
-                std::uint32_t bin = Digit(keys[u]);
-                int bin_mask = detail::warp_in_block_matcher_t<RADIX_BITS,
-                                                               PARTIAL_WARP_THREADS,
-                                                               BLOCK_WARPS - 1>::match_any(bin,
-                                                                                           warp);
+                int bin = Digit(keys[u]);
+                int bin_mask = MatchAny<RADIX_BITS>(bin);
                 int leader = (WARP_THREADS - 1) - __clz(bin_mask);
                 int warp_offset = 0;
                 int popc = __popc(bin_mask & LaneMaskLe());
@@ -1116,7 +1049,7 @@ struct BlockRadixRankMatchEarlyCounts
                     // atomic is a bit faster
                     warp_offset = atomicAdd(&warp_offsets[bin], popc);
                 }
-                warp_offset = SHFL_IDX_SYNC(warp_offset, leader, WARP_MASK);
+                warp_offset = SHFL_IDX_SYNC(warp_offset, leader, bin_mask);
                 ranks[u] = warp_offset + popc - 1;
             }
         }
@@ -1190,49 +1123,6 @@ struct BlockRadixRankMatchEarlyCounts
         RankKeys(keys, ranks, digit_extractor, exclusive_digit_prefix);
     }
 };
-
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
-namespace detail 
-{
-
-// `BlockRadixRank` doesn't conform to the typical pattern, not exposing the algorithm 
-// template parameter. Other algorithms don't provide the same template parameters, not allowing 
-// multi-dimensional thread block specializations. 
-// 
-// TODO(senior-zero) for 3.0:
-// - Put existing implementations into the detail namespace
-// - Support multi-dimensional thread blocks in the rest of implementations
-// - Repurpose BlockRadixRank as an entry name with the algorithm template parameter
-template <RadixRankAlgorithm RankAlgorithm,
-          int BlockDimX,
-          int RadixBits,
-          bool IsDescending,
-          BlockScanAlgorithm ScanAlgorithm>
-using block_radix_rank_t = cub::detail::conditional_t<
-  RankAlgorithm == RADIX_RANK_BASIC,
-  BlockRadixRank<BlockDimX, RadixBits, IsDescending, false, ScanAlgorithm>,
-  cub::detail::conditional_t<
-    RankAlgorithm == RADIX_RANK_MEMOIZE,
-    BlockRadixRank<BlockDimX, RadixBits, IsDescending, true, ScanAlgorithm>,
-    cub::detail::conditional_t<
-      RankAlgorithm == RADIX_RANK_MATCH,
-      BlockRadixRankMatch<BlockDimX, RadixBits, IsDescending, ScanAlgorithm>,
-      cub::detail::conditional_t<
-        RankAlgorithm == RADIX_RANK_MATCH_EARLY_COUNTS_ANY,
-        BlockRadixRankMatchEarlyCounts<BlockDimX,
-                                       RadixBits,
-                                       IsDescending,
-                                       ScanAlgorithm,
-                                       WARP_MATCH_ANY>,
-        BlockRadixRankMatchEarlyCounts<BlockDimX,
-                                       RadixBits,
-                                       IsDescending,
-                                       ScanAlgorithm,
-                                       WARP_MATCH_ATOMIC_OR>>>>>;
-
-} // namespace detail
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 CUB_NAMESPACE_END
