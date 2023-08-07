@@ -134,6 +134,10 @@ struct AgentSelectIf
     // The flag value type
     using FlagT = cub::detail::value_t<FlagsInputIteratorT>;
 
+    /// The vec type of InputT
+    static constexpr int VecSize = 4;
+    using VecT = typename CubVector<InputT, VecSize>::Type;
+
     // Tile status descriptor interface type
     using ScanTileStateT = ScanTileState<OffsetT>;
 
@@ -146,6 +150,7 @@ struct AgentSelectIf
 
         BLOCK_THREADS           = AgentSelectIfPolicyT::BLOCK_THREADS,
         ITEMS_PER_THREAD        = AgentSelectIfPolicyT::ITEMS_PER_THREAD,
+        VECS_PER_THREAD         = ITEMS_PER_THREAD / VecSize,
         TILE_ITEMS              = BLOCK_THREADS * ITEMS_PER_THREAD,
         TWO_PHASE_SCATTER       = (ITEMS_PER_THREAD > 1),
 
@@ -155,6 +160,11 @@ struct AgentSelectIf
                                                     : USE_DISCONTINUITY
     };
 
+    static constexpr bool ATTEMPT_VECTORIZATION = (VecSize > 1) &&
+                                                  (ITEMS_PER_THREAD % VecSize == 0) &&
+                                                  (std::is_pointer<InputIteratorT>::value) &&
+                                                  Traits<InputT>::PRIMITIVE;
+
     // Cache-modified Input iterator wrapper type (for applying cache modifier) for items
     // Wrap the native input pointer with CacheModifiedValuesInputIterator
     // or directly use the supplied input iterator type
@@ -162,6 +172,14 @@ struct AgentSelectIf
       std::is_pointer<InputIteratorT>::value,
       CacheModifiedInputIterator<AgentSelectIfPolicyT::LOAD_MODIFIER,
                                  InputT,
+                                 OffsetT>,
+      InputIteratorT>;
+
+    /// Vec input iterator type
+    using WrappedVecsIteratorT = cub::detail::conditional_t<
+      std::is_pointer<InputIteratorT>::value,
+      CacheModifiedInputIterator<AgentSelectIfPolicyT::LOAD_MODIFIER, 
+                                 VecT, 
                                  OffsetT>,
       InputIteratorT>;
 
@@ -180,6 +198,12 @@ struct AgentSelectIf
                                  BLOCK_THREADS,
                                  ITEMS_PER_THREAD,
                                  AgentSelectIfPolicyT::LOAD_ALGORITHM>;
+
+    // Parameterized BlockLoad type for vec input data
+    using BlockLoadVecT = BlockLoad<VecT,
+                                    BLOCK_THREADS,
+                                    VECS_PER_THREAD,
+                                    AgentSelectIfPolicyT::LOAD_ALGORITHM>;
 
     // Parameterized BlockLoad type for flags
     using BlockLoadFlags = BlockLoad<FlagT,
@@ -216,6 +240,9 @@ struct AgentSelectIf
         // Smem needed for loading items
         typename BlockLoadT::TempStorage load_items;
 
+        // Smem needed for loading a tile of vecs
+        typename BlockLoadVecT::TempStorage load_vecs;
+
         // Smem needed for loading values
         typename BlockLoadFlags::TempStorage load_flags;
 
@@ -232,6 +259,7 @@ struct AgentSelectIf
     //---------------------------------------------------------------------
 
     _TempStorage&                   temp_storage;       ///< Reference to temp_storage
+    InputIteratorT                  d_raw_in;           ///< Input data
     WrappedInputIteratorT           d_in;               ///< Input items
     SelectedOutputIteratorT         d_selected_out;     ///< Unique output items
     WrappedFlagsInputIteratorT      d_flags_in;         ///< Input selection flags (if applicable)
@@ -256,6 +284,7 @@ struct AgentSelectIf
         OffsetT                     num_items)          ///< Total number of input items
     :
         temp_storage(temp_storage.Alias()),
+        d_raw_in(d_in), // TODO Do we need both iterators?
         d_in(d_in),
         d_selected_out(d_selected_out),
         d_flags_in(d_flags_in),
@@ -586,26 +615,53 @@ struct AgentSelectIf
         return num_tile_selections;
     }
 
+    template <int IS_LAST_TILE, int CAN_VECTORIZE>
+    __device__ __forceinline__ OffsetT LoadTile(int num_tile_items,
+                                                OffsetT tile_offset,
+                                                InputT (&items)[ITEMS_PER_THREAD],
+                                                Int2Type<IS_LAST_TILE>,
+                                                Int2Type<CAN_VECTORIZE>)
+    {
+        if (IS_LAST_TILE)
+        {
+            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items, num_tile_items);
+        }
+        else
+        {
+            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items);
+        }
+    }
+
+    __device__ __forceinline__ OffsetT LoadTile(int num_tile_items,
+                                                OffsetT tile_offset,
+                                                InputT (&items)[ITEMS_PER_THREAD],
+                                                Int2Type<0> /* is last tile */,
+                                                Int2Type<1> /* can vectorize */)
+    {
+        using aliased_vec_t = VecT[VECS_PER_THREAD];
+
+        WrappedVecsIteratorT d_wrapped_vecs((VecT *)(d_raw_in + tile_offset));
+
+        BlockLoadVecT(temp_storage.load_vecs)
+          .Load(d_wrapped_vecs, reinterpret_cast<aliased_vec_t &>(items));
+    }
 
     /**
      * Process subsequent tile of input (dynamic chained scan).  Returns the running count of selections (including this tile)
      */
-    template <bool IS_LAST_TILE>
+    template <bool IS_LAST_TILE, int CAN_VECTORIZE>
     __device__ __forceinline__ OffsetT ConsumeSubsequentTile(
         int                 num_tile_items,     ///< Number of input items comprising this tile
         int                 tile_idx,           ///< Tile index
         OffsetT             tile_offset,        ///< Tile offset
-        ScanTileStateT&     tile_state)         ///< Global tile state descriptor
+        ScanTileStateT&     tile_state,         ///< Global tile state descriptor
+        Int2Type<CAN_VECTORIZE> can_vectorize)
     {
         InputT      items[ITEMS_PER_THREAD];
         OffsetT     selection_flags[ITEMS_PER_THREAD];
         OffsetT     selection_indices[ITEMS_PER_THREAD];
 
-        // Load items
-        if (IS_LAST_TILE)
-            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items, num_tile_items);
-        else
-            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items);
+        LoadTile(num_tile_items, tile_offset, items, Int2Type<IS_LAST_TILE>{}, can_vectorize);
 
         // Initialize selection_flags
         InitializeSelections<false, IS_LAST_TILE>(
@@ -648,6 +704,19 @@ struct AgentSelectIf
         return num_selections;
     }
 
+    template <typename Iterator>
+    static __device__ __forceinline__ bool IsAligned(Iterator d_raw_in,
+                                                     Int2Type<true> /*can_vectorize*/)
+    {
+        return (size_t(d_raw_in) & (sizeof(VecT) - 1)) == 0;
+    }
+
+    template <typename Iterator>
+    static __device__ __forceinline__ bool IsAligned(Iterator /*d_in*/,
+                                                     Int2Type<false> /*can_vectorize*/)
+    {
+        return false;
+    }
 
     /**
      * Process a tile of input
@@ -660,13 +729,32 @@ struct AgentSelectIf
         ScanTileStateT&     tile_state)         ///< Global tile state descriptor
     {
         OffsetT num_selections;
+
         if (tile_idx == 0)
         {
-            num_selections = ConsumeFirstTile<IS_LAST_TILE>(num_tile_items, tile_offset, tile_state);
+            num_selections =
+              ConsumeFirstTile<IS_LAST_TILE>(num_tile_items, tile_offset, tile_state);
         }
         else
         {
-            num_selections = ConsumeSubsequentTile<IS_LAST_TILE>(num_tile_items, tile_idx, tile_offset, tile_state);
+            if (IsAligned(d_raw_in + tile_offset, Int2Type<ATTEMPT_VECTORIZATION>{}))
+            {
+                num_selections = ConsumeSubsequentTile<IS_LAST_TILE>( //
+                  num_tile_items,
+                  tile_idx,
+                  tile_offset,
+                  tile_state,
+                  Int2Type < true && ATTEMPT_VECTORIZATION > {});
+            }
+            else
+            {
+                num_selections = ConsumeSubsequentTile<IS_LAST_TILE>( //
+                  num_tile_items,
+                  tile_idx,
+                  tile_offset,
+                  tile_state,
+                  Int2Type < false && ATTEMPT_VECTORIZATION > {});
+            }
         }
 
         return num_selections;
