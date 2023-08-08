@@ -321,11 +321,7 @@ struct AgentSelectIf
         {
             if (!IS_LAST_TILE || (OffsetT(threadIdx.x * ITEMS_PER_THREAD) + ITEM < num_tile_items))
             {
-                if (!select_op(items[ITEM]))
-                {
-                    selection_flags &= ~(1UL << ITEM);
-                }
-                // selection_flags ^= (-select_op(items[ITEM]) ^ selection_flags) & (1 << ITEM);
+                selection_flags ^= (-select_op(items[ITEM]) ^ selection_flags) & (1 << ITEM);
             }
         }
 
