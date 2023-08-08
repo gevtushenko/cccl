@@ -136,7 +136,8 @@ struct AgentSelectIf
 
     /// The vec type of InputT
     using TargetVecT = ulonglong2;
-    static constexpr bool vectorizeable_type = sizeof(InputT) < sizeof(TargetVecT);
+    static constexpr bool vectorizeable_type = Traits<InputT>::PRIMITIVE &&
+                                               (sizeof(InputT) < sizeof(TargetVecT));
 
     using VecT = typename ::cuda::std::conditional<vectorizeable_type, TargetVecT, InputT>::type;
 
@@ -165,10 +166,9 @@ struct AgentSelectIf
                                                     : USE_DISCONTINUITY
     };
 
-    static constexpr bool ATTEMPT_VECTORIZATION = (VecSize > 1) &&
+    static constexpr bool ATTEMPT_VECTORIZATION = vectorizeable_type &&
                                                   (ITEMS_PER_THREAD % VecSize == 0) &&
-                                                  (std::is_pointer<InputIteratorT>::value) &&
-                                                  Traits<InputT>::PRIMITIVE;
+                                                  (std::is_pointer<InputIteratorT>::value);
 
     // Cache-modified Input iterator wrapper type (for applying cache modifier) for items
     // Wrap the native input pointer with CacheModifiedValuesInputIterator
