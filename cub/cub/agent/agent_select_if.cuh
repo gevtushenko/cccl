@@ -170,6 +170,9 @@ struct AgentSelectIf
                                                   (ITEMS_PER_THREAD % VecSize == 0) &&
                                                   (std::is_pointer<InputIteratorT>::value);
 
+    using flags_storage_t =
+      typename ::cuda::std::conditional<(ITEMS_PER_THREAD <= 32), std::uint32_t, std::uint64_t>::type;
+
     // Cache-modified Input iterator wrapper type (for applying cache modifier) for items
     // Wrap the native input pointer with CacheModifiedValuesInputIterator
     // or directly use the supplied input iterator type
@@ -307,21 +310,21 @@ struct AgentSelectIf
      * Initialize selections (specialized for selection operator)
      */
     template <bool IS_FIRST_TILE, bool IS_LAST_TILE>
-    __device__ __forceinline__ std::uint32_t InitializeSelections(
+    __device__ __forceinline__ flags_storage_t InitializeSelections(
         OffsetT                     /*tile_offset*/,
         OffsetT                     num_tile_items,
         InputT                      (&items)[ITEMS_PER_THREAD],
         Int2Type<USE_SELECT_OP>     /*select_method*/)
     {
         // Out-of-bounds items are selection_flags
-        std::uint32_t selection_flags = ~0U;
+        flags_storage_t selection_flags = ~flags_storage_t{0};
 
         #pragma unroll
         for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
         {
             if (!IS_LAST_TILE || (OffsetT(threadIdx.x * ITEMS_PER_THREAD) + ITEM < num_tile_items))
             {
-                selection_flags ^= (-select_op(items[ITEM]) ^ selection_flags) & (1 << ITEM);
+                selection_flags ^= (-select_op(items[ITEM]) ^ selection_flags) & (flags_storage_t{1} << ITEM);
             }
         }
 
@@ -333,7 +336,7 @@ struct AgentSelectIf
      * Initialize selections (specialized for valid flags)
      */
     template <bool IS_FIRST_TILE, bool IS_LAST_TILE>
-    __device__ __forceinline__ std::uint32_t InitializeSelections(
+    __device__ __forceinline__ flags_storage_t InitializeSelections(
         OffsetT                     tile_offset,
         OffsetT                     num_tile_items,
         InputT                      (&/*items*/)[ITEMS_PER_THREAD],
@@ -347,7 +350,7 @@ struct AgentSelectIf
      * Initialize selections (specialized for discontinuity detection)
      */
     template <bool IS_FIRST_TILE, bool IS_LAST_TILE>
-    __device__ __forceinline__ std::uint32_t InitializeSelections(
+    __device__ __forceinline__ flags_storage_t InitializeSelections(
         OffsetT                     tile_offset,
         OffsetT                     num_tile_items,
         InputT                      (&items)[ITEMS_PER_THREAD],
@@ -367,7 +370,7 @@ struct AgentSelectIf
     template <bool IS_LAST_TILE, bool IS_FIRST_TILE>
     __device__ __forceinline__ void ScatterDirect(
         InputT  (&items)[ITEMS_PER_THREAD],
-        std::uint32_t selection_flags,
+        flags_storage_t selection_flags,
         OffsetT (&selection_indices)[ITEMS_PER_THREAD],
         OffsetT num_selections)
     {
@@ -375,7 +378,7 @@ struct AgentSelectIf
         #pragma unroll
         for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
         {
-            if (selection_flags & (1 << ITEM))
+            if (selection_flags & (flags_storage_t{1} << ITEM))
             {
                 if ((!IS_LAST_TILE) || selection_indices[ITEM] < num_selections)
                 {
@@ -392,7 +395,7 @@ struct AgentSelectIf
     template <bool IS_LAST_TILE, bool IS_FIRST_TILE>
     __device__ __forceinline__ void ScatterTwoPhase(
         InputT          (&items)[ITEMS_PER_THREAD],
-        std::uint32_t   selection_flags,
+        flags_storage_t selection_flags,
         OffsetT         (&selection_indices)[ITEMS_PER_THREAD],
         int             /*num_tile_items*/,                         ///< Number of valid items in this tile
         int             num_tile_selections,                        ///< Number of selections in this tile
@@ -407,7 +410,7 @@ struct AgentSelectIf
         for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
         {
             int local_scatter_offset = selection_indices[ITEM] - num_selections_prefix;
-            if (selection_flags & (1 << ITEM))
+            if (selection_flags & (flags_storage_t{1} << ITEM))
             {
                 temp_storage.raw_exchange.Alias()[local_scatter_offset] = items[ITEM];
             }
@@ -428,7 +431,7 @@ struct AgentSelectIf
     template <bool IS_LAST_TILE, bool IS_FIRST_TILE>
     __device__ __forceinline__ void ScatterTwoPhase(
         InputT          (&items)[ITEMS_PER_THREAD],
-        std::uint32_t   selection_flags,
+        flags_storage_t selection_flags,
         OffsetT         (&selection_indices)[ITEMS_PER_THREAD],
         int             num_tile_items,                             ///< Number of valid items in this tile
         int             num_tile_selections,                        ///< Number of selections in this tile
@@ -447,7 +450,7 @@ struct AgentSelectIf
             int item_idx                = (threadIdx.x * ITEMS_PER_THREAD) + ITEM;
             int local_selection_idx     = selection_indices[ITEM] - num_selections_prefix;
             int local_rejection_idx     = item_idx - local_selection_idx;
-            int local_scatter_offset    = (selection_flags & (1 << ITEM)) ?
+            int local_scatter_offset    = (selection_flags & (flags_storage_t{1} << ITEM)) ?
                                             tile_num_rejections + local_selection_idx :
                                             local_rejection_idx;
 
@@ -483,7 +486,7 @@ struct AgentSelectIf
     template <bool IS_LAST_TILE, bool IS_FIRST_TILE>
     __device__ __forceinline__ void Scatter(
         InputT          (&items)[ITEMS_PER_THREAD],
-        std::uint32_t   selection_flags,
+        flags_storage_t selection_flags,
         OffsetT         (&selection_indices)[ITEMS_PER_THREAD],
         int             num_tile_items,                             ///< Number of valid items in this tile
         int             num_tile_selections,                        ///< Number of selections in this tile
@@ -536,7 +539,7 @@ struct AgentSelectIf
         else
             BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items);
 
-        std::uint32_t selection_flags =
+        flags_storage_t selection_flags =
           InitializeSelections<true, IS_LAST_TILE>(tile_offset,
                                                    num_tile_items,
                                                    items,
@@ -625,7 +628,7 @@ struct AgentSelectIf
 
         LoadTile(num_tile_items, tile_offset, items, Int2Type<IS_LAST_TILE>{}, can_vectorize);
 
-        std::uint32_t selection_flags =
+        flags_storage_t selection_flags =
           InitializeSelections<false, IS_LAST_TILE>(tile_offset,
                                                     num_tile_items,
                                                     items,
