@@ -561,52 +561,25 @@ struct AgentSelectIf
     // Cooperatively scan a device-wide sequence of tiles with other CTAs
     //---------------------------------------------------------------------
 
-    template <int IS_LAST_TILE, int CAN_VECTORIZE>
-    __device__ __forceinline__ OffsetT LoadTile(int num_tile_items,
-                                                OffsetT tile_offset,
-                                                InputT (&items)[ITEMS_PER_THREAD],
-                                                Int2Type<IS_LAST_TILE>,
-                                                Int2Type<CAN_VECTORIZE>)
-    {
-        if (IS_LAST_TILE)
-        {
-            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items, num_tile_items);
-        }
-        else
-        {
-            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items);
-        }
-    }
-
-    __device__ __forceinline__ OffsetT LoadTile(int num_tile_items,
-                                                OffsetT tile_offset,
-                                                InputT (&items)[ITEMS_PER_THREAD],
-                                                Int2Type<0> /* is last tile */,
-                                                Int2Type<1> /* can vectorize */)
-    {
-        using aliased_vec_t = VecT[VECS_PER_THREAD];
-
-        WrappedVecsIteratorT d_wrapped_vecs((VecT *)(d_raw_in + tile_offset));
-
-        BlockLoadVecT(temp_storage.load_vecs)
-          .Load(d_wrapped_vecs, reinterpret_cast<aliased_vec_t &>(items));
-    }
 
     /**
      * Process first tile of input (dynamic chained scan).  Returns the running count of selections (including this tile)
      */
-    template <bool IS_LAST_TILE, int CAN_VECTORIZE>
+    template <bool IS_LAST_TILE>
     __device__ __forceinline__ OffsetT ConsumeFirstTile(
-        int                     num_tile_items,     ///< Number of input items comprising this tile
-        OffsetT                 tile_offset,        ///< Tile offset
-        ScanTileStateT&         tile_state,         ///< Global tile state descriptor
-        Int2Type<CAN_VECTORIZE> can_vectorize)
+        int                 num_tile_items,     ///< Number of input items comprising this tile
+        OffsetT             tile_offset,        ///< Tile offset
+        ScanTileStateT&     tile_state)         ///< Global tile state descriptor
     {
         InputT      items[ITEMS_PER_THREAD];
         OffsetT     selection_flags[ITEMS_PER_THREAD];
         OffsetT     selection_indices[ITEMS_PER_THREAD];
 
-        LoadTile(num_tile_items, tile_offset, items, Int2Type<IS_LAST_TILE>{}, can_vectorize);
+        // Load items
+        if (IS_LAST_TILE)
+            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items, num_tile_items);
+        else
+            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items);
 
         // Initialize selection_flags
         InitializeSelections<true, IS_LAST_TILE>(
@@ -645,6 +618,37 @@ struct AgentSelectIf
             num_tile_selections);
 
         return num_tile_selections;
+    }
+
+    template <int IS_LAST_TILE, int CAN_VECTORIZE>
+    __device__ __forceinline__ OffsetT LoadTile(int num_tile_items,
+                                                OffsetT tile_offset,
+                                                InputT (&items)[ITEMS_PER_THREAD],
+                                                Int2Type<IS_LAST_TILE>,
+                                                Int2Type<CAN_VECTORIZE>)
+    {
+        if (IS_LAST_TILE)
+        {
+            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items, num_tile_items);
+        }
+        else
+        {
+            BlockLoadT(temp_storage.load_items).Load(d_in + tile_offset, items);
+        }
+    }
+
+    __device__ __forceinline__ OffsetT LoadTile(int num_tile_items,
+                                                OffsetT tile_offset,
+                                                InputT (&items)[ITEMS_PER_THREAD],
+                                                Int2Type<0> /* is last tile */,
+                                                Int2Type<1> /* can vectorize */)
+    {
+        using aliased_vec_t = VecT[VECS_PER_THREAD];
+
+        WrappedVecsIteratorT d_wrapped_vecs((VecT *)(d_raw_in + tile_offset));
+
+        BlockLoadVecT(temp_storage.load_vecs)
+          .Load(d_wrapped_vecs, reinterpret_cast<aliased_vec_t &>(items));
     }
 
     /**
@@ -722,30 +726,40 @@ struct AgentSelectIf
     /**
      * Process a tile of input
      */
-    template <bool IS_LAST_TILE, int CAN_VECTORIZE = 0>
+    template <bool IS_LAST_TILE>
     __device__ __forceinline__ OffsetT ConsumeTile(
-        int                     num_tile_items,     ///< Number of input items comprising this tile
-        int                     tile_idx,           ///< Tile index
-        OffsetT                 tile_offset,        ///< Tile offset
-        ScanTileStateT&         tile_state,         ///< Global tile state descriptor
-        Int2Type<CAN_VECTORIZE> can_vectorize = {})
+        int                 num_tile_items,     ///< Number of input items comprising this tile
+        int                 tile_idx,           ///< Tile index
+        OffsetT             tile_offset,        ///< Tile offset
+        ScanTileStateT&     tile_state)         ///< Global tile state descriptor
     {
         OffsetT num_selections;
 
         if (tile_idx == 0)
         {
-            num_selections = ConsumeFirstTile<IS_LAST_TILE>(num_tile_items,
-                                                            tile_offset,
-                                                            tile_state,
-                                                            can_vectorize);
+            num_selections =
+              ConsumeFirstTile<IS_LAST_TILE>(num_tile_items, tile_offset, tile_state);
         }
         else
         {
-            num_selections = ConsumeSubsequentTile<IS_LAST_TILE>(num_tile_items,
-                                                                 tile_idx,
-                                                                 tile_offset,
-                                                                 tile_state,
-                                                                 can_vectorize);
+            if (IsAligned(d_raw_in + tile_offset, Int2Type<ATTEMPT_VECTORIZATION>{}))
+            {
+                num_selections = ConsumeSubsequentTile<IS_LAST_TILE>( //
+                  num_tile_items,
+                  tile_idx,
+                  tile_offset,
+                  tile_state,
+                  Int2Type < true && ATTEMPT_VECTORIZATION > {});
+            }
+            else
+            {
+                num_selections = ConsumeSubsequentTile<IS_LAST_TILE>( //
+                  num_tile_items,
+                  tile_idx,
+                  tile_offset,
+                  tile_state,
+                  Int2Type < false && ATTEMPT_VECTORIZATION > {});
+            }
         }
 
         return num_selections;
@@ -768,18 +782,7 @@ struct AgentSelectIf
         if (tile_idx < num_tiles - 1)
         {
             // Not the last tile (full)
-            if (IsAligned(d_raw_in + tile_offset, Int2Type<ATTEMPT_VECTORIZATION>{}))
-            {
-                ConsumeTile<false>(TILE_ITEMS,
-                                   tile_idx,
-                                   tile_offset,
-                                   tile_state,
-                                   Int2Type<ATTEMPT_VECTORIZATION>{});
-            }
-            else
-            {
-                ConsumeTile<false>(TILE_ITEMS, tile_idx, tile_offset, tile_state, Int2Type<false>{});
-            }
+            ConsumeTile<false>(TILE_ITEMS, tile_idx, tile_offset, tile_state);
         }
         else
         {
