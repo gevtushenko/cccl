@@ -342,7 +342,7 @@ CUB_TEST("DeviceSelect::Flagged works with flags that alias input", "[device][se
   REQUIRE(reference == out);
 }
 
-CUB_TEST("DeviceSelect::Flagged works in place", "[device][select_if]", types)
+CUB_TEST("DeviceSelect::Flagged works in place", "[device][select_flagged]", types)
 {
   using type = typename c2h::get<0, TestType>;
 
