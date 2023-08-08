@@ -687,7 +687,7 @@ struct device_select_policy_hub
 {
     struct DefaultTuning
     {
-      static constexpr int NOMINAL_4B_ITEMS_PER_THREAD = 12;
+      static constexpr int NOMINAL_4B_ITEMS_PER_THREAD = 32;
 
       static constexpr int ITEMS_PER_THREAD =
         CUB_MIN(NOMINAL_4B_ITEMS_PER_THREAD,
@@ -696,7 +696,7 @@ struct device_select_policy_hub
       using SelectIfPolicyT = AgentSelectIfPolicy<128,
                                                   ITEMS_PER_THREAD,
                                                   BLOCK_LOAD_DIRECT,
-                                                  MayAlias ? LOAD_CA : LOAD_LDG,
+                                                  LOAD_LDG,
                                                   BLOCK_SCAN_WARP_SCANS,
                                                   detail::fixed_delay_constructor_t<350, 450>>;
     };

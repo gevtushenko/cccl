@@ -135,8 +135,13 @@ struct AgentSelectIf
     using FlagT = cub::detail::value_t<FlagsInputIteratorT>;
 
     /// The vec type of InputT
-    static constexpr int VecSize = 4;
-    using VecT = typename CubVector<InputT, VecSize>::Type;
+    using TargetVecT = ulonglong2;
+    static constexpr bool vectorizeable_type = sizeof(InputT) < sizeof(TargetVecT);
+
+    using VecT = typename ::cuda::std::conditional<vectorizeable_type, TargetVecT, InputT>::type;
+
+    static constexpr int VecSize = sizeof(VecT) / sizeof(InputT);
+    // static_assert(VecSize == 16, "should be 16");
 
     // Tile status descriptor interface type
     using ScanTileStateT = ScanTileState<OffsetT>;
