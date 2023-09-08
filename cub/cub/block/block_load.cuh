@@ -791,7 +791,6 @@ private:
         {}
 
         /// Load a linear segment of items from memory, specialized for native pointer types (attempts vectorization)
-        template <typename InputIteratorT>
         __device__ __forceinline__ void Load(
             InputT               *block_ptr,                     ///< [in] The thread block's base input iterator for loading from
             InputT               (&items)[ITEMS_PER_THREAD])     ///< [out] Data to load
@@ -800,7 +799,6 @@ private:
         }
 
         /// Load a linear segment of items from memory, specialized for native pointer types (attempts vectorization)
-        template <typename InputIteratorT>
         __device__ __forceinline__ void Load(
             const InputT         *block_ptr,                     ///< [in] The thread block's base input iterator for loading from
             InputT               (&items)[ITEMS_PER_THREAD])     ///< [out] Data to load
