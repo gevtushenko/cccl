@@ -135,6 +135,7 @@ if (THRUST_ENABLE_EXAMPLES)
 endif()
 
 if (THRUST_ENABLE_BENCHMARKS)
+  add_subdirectory(benchmarks)
   add_subdirectory(internal/benchmark)
 endif()
 

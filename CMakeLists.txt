@@ -15,6 +15,12 @@ endif()
 
 project(CCCL LANGUAGES NONE)
 
+# Include CPM early to make it available in CCCL libraries
+# for testing and benchmarking.
+if (CCCL_TOPLEVEL_PROJECT)
+  include(cmake/CPM.cmake)
+endif()
+
 # Optionally include installation rules for non-top-level builds:
 option(CCCL_ENABLE_INSTALL_RULES "Enable installation of CCCL." ${CCCL_TOPLEVEL_PROJECT})
 if (CCCL_ENABLE_INSTALL_RULES)
@@ -46,10 +52,13 @@ if (CCCL_ENABLE_LIBCUDACXX)
 endif()
 
 if (CCCL_ENABLE_CUB)
+  option(CUB_ENABLE_BENCHMARKS "Build CUB benchmarking suite." OFF)
+  option(CUB_ENABLE_TUNING "Build CUB tuning suite." OFF)
   set(CUB_TOPLEVEL_PROJECT ON)
 endif()
 
 if (CCCL_ENABLE_THRUST)
+  option(THRUST_ENABLE_BENCHMARKS "Build Thrust runtime benchmarks." "OFF")
   set(THRUST_TOPLEVEL_PROJECT ON)
 endif()
 
@@ -63,6 +72,10 @@ endif()
 
 if (CCCL_ENABLE_EXAMPLES)
   add_subdirectory(examples)
+endif()
+
+if (CUB_ENABLE_BENCHMARKS OR CUB_ENABLE_TUNING OR THRUST_ENABLE_BENCHMARKS)
+  add_subdirectory(benchmarks)
 endif()
 
 # Must stay at the end of this file.
