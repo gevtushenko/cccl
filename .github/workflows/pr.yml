@@ -163,7 +163,7 @@ jobs:
   #    devcontainer_version: ${{ needs.compute-matrix.outputs.DEVCONTAINER_VERSION }}
 >>>>>>> 13c95baef (Disable other jobs for now.)
 
-clang-cuda:
+  clang-cuda:
     name: ${{matrix.lib}} CTK${{matrix.cuda}} clang-cuda ${{matrix.compiler.version}}
     needs: compute-matrix
     strategy:
