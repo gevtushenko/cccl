@@ -33,7 +33,7 @@ function(add_bench target_name bench_name bench_src)
       RUNTIME_OUTPUT_DIRECTORY "${THRUST_EXECUTABLE_OUTPUT_DIR}"
       CUDA_STANDARD 17
       CXX_STANDARD 17)
-  target_link_libraries(${bench_target} PRIVATE nvbench::nvbench nvbench::main)
+  target_link_libraries(${bench_target} PRIVATE nvbench_helper nvbench::main)
 endfunction()
 
 function(add_bench_dir bench_dir)

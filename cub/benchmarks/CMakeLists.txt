@@ -1,4 +1,8 @@
+find_package(CUDAToolkit REQUIRED)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+# Defer dependencies collection to nvbench helper 
+add_subdirectory(nvbench_helper)
 
 set(benches_root "${CMAKE_CURRENT_LIST_DIR}")
 
