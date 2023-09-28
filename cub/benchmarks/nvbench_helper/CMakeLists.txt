@@ -15,6 +15,7 @@ set_target_properties(nvbench_helper PROPERTIES CUDA_STANDARD 17 CXX_STANDARD 17
 
 CPMAddPackage("gh:catchorg/Catch2@2.13.9")
 add_executable(nvbench_helper.test test/gen_entropy.cu
+                                   test/gen_distribution.cu
                                    test/main.cpp)
 target_link_libraries(nvbench_helper.test PRIVATE nvbench_helper Catch2::Catch2)
 set_target_properties(nvbench_helper.test

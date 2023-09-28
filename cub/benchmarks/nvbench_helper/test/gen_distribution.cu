@@ -25,5 +25,11 @@
  *
  ******************************************************************************/
 
-#define CATCH_CONFIG_MAIN  
+
 #include <catch2/catch.hpp>
+#include <nvbench_helper.cuh>
+
+TEMPLATE_LIST_TEST_CASE("Generators produce data with given entropy", "[gen]", fundamental_types)
+{
+  REQUIRE(1 == 1);
+}
