@@ -152,8 +152,71 @@ template <typename T>
 void gen(seed_t seed,
          thrust::device_vector<T> &data,
          bit_entropy entropy = bit_entropy::_1_000,
-         T min = std::numeric_limits<T>::min(),
-         T max = std::numeric_limits<T>::max());
+         T min               = std::numeric_limits<T>::min(),
+         T max               = std::numeric_limits<T>::max());
+
+namespace detail
+{
+
+struct generator_base_t
+{
+  seed_t m_seed{};
+  const std::size_t m_elements{0};
+  const bit_entropy m_entropy{bit_entropy::_1_000};
+
+  template <typename T>
+  thrust::device_vector<T> generate(T min, T max)
+  {
+    thrust::device_vector<T> data(m_elements); 
+    gen(m_seed, data, m_entropy, min, max);
+    ++m_seed;
+    return data;
+  }
+};
+
+template <class T>
+struct generator_t : generator_base_t
+{
+  const T m_min{std::numeric_limits<T>::min()};
+  const T m_max{std::numeric_limits<T>::max()};
+
+  operator thrust::device_vector<T>()
+  {
+    return generator_base_t::generate(m_min, m_max);
+  }
+};
+
+template <>
+struct generator_t<void> : generator_base_t
+{
+  template <typename T>
+  operator thrust::device_vector<T>()
+  {
+    return generator_base_t::generate(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+  }
+};
+
+struct gen_t
+{
+  generator_t<void> operator()(std::size_t elements,
+                               bit_entropy entropy = bit_entropy::_1_000) const
+  {
+    return {seed_t{}, elements, entropy};
+  }
+
+  template <class T>
+  generator_t<T> operator()(std::size_t elements,
+                            bit_entropy entropy = bit_entropy::_1_000,
+                            T min               = std::numeric_limits<T>::min,
+                            T max               = std::numeric_limits<T>::max()) const
+  {
+    return {seed_t{}, elements, entropy, min, max};
+  }
+};
+
+} // namespace detail
+
+inline detail::gen_t generate;
 
 template <typename T>
 thrust::device_vector<T> gen_power_law_offsets(seed_t seed,

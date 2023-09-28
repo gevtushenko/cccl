@@ -105,9 +105,7 @@ TEMPLATE_LIST_TEST_CASE("Generators produce data with given entropy", "[gen]", f
                  entropy_levels.cend(),
                  entropy.begin(),
                  [](bit_entropy entropy) {
-                   constexpr std::size_t elements = 1 << 24;
-                   thrust::device_vector<TestType> data(elements);
-                   gen(seed_t{}, data, entropy);
+                   const thrust::device_vector<TestType> data = generate(1 << 24, entropy);
                    return compute_actual_entropy(data);
                  });
 

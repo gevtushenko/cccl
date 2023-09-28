@@ -187,10 +187,8 @@ void seg_sort(nvbench::state &state,
   const auto elements = static_cast<std::size_t>(state.get_int64("Elements{io}"));
   const auto segments = offsets.size() - 1;
 
-  thrust::device_vector<key_t> buffer_1(elements);
+  thrust::device_vector<key_t> buffer_1 = generate(elements, entropy);
   thrust::device_vector<key_t> buffer_2(elements);
-
-  gen(seed_t{}, buffer_1, entropy);
 
   key_t *d_buffer_1 = thrust::raw_pointer_cast(buffer_1.data());
   key_t *d_buffer_2 = thrust::raw_pointer_cast(buffer_2.data());
