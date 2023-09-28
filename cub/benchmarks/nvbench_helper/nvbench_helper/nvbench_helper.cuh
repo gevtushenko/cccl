@@ -108,12 +108,12 @@ inline double entropy_to_probability(bit_entropy entropy)
 {
   switch (entropy)
   {
-    case bit_entropy::_0_000: return 0.0;
+    case bit_entropy::_1_000: return 1.0;
     case bit_entropy::_0_811: return 0.811;
     case bit_entropy::_0_544: return 0.544;
     case bit_entropy::_0_337: return 0.337;
     case bit_entropy::_0_201: return 0.201;
-    case bit_entropy::_1_000: return 1.0;
+    case bit_entropy::_0_000: return 0.0;
     default: return 0.0;
   }
 }
@@ -177,106 +177,6 @@ thrust::device_vector<T> gen_uniform_key_segments(seed_t seed,
                                                   std::size_t min_segment_size,
                                                   std::size_t max_segment_size);
 
-// #define DBG_ENTROPY
-
-// This is very slow to compile, do not enable by default
-#ifdef DBG_ENTROPY
-#include <thrust/host_vector.h>
-#include <thrust/sort.h>
-
-#include <cub/device/device_run_length_encode.cuh>
-
-template <class T>
-double get_expected_entropy(bit_entropy in_entropy)
-{
-  if (in_entropy == bit_entropy::_0_000) {
-    return 0.0;
-  }
-
-  if (in_entropy == bit_entropy::_1_000) {
-    return sizeof(T) * 8;
-  }
-
-  const int samples = static_cast<int>(in_entropy) + 1;
-  const double p1 = std::pow(0.5, samples);
-  const double p2 = 1 - p1;
-  const double entropy = (-p1 * std::log2(p1)) + (-p2 * std::log2(p2));
-  return sizeof(T) * 8 * entropy;
-}
-
-template <class T>
-double compute_actual_entropy(thrust::device_vector<T> in)
-{
-  const int n = static_cast<int>(in.size());
-  thrust::device_vector<T> unique(n);
-  thrust::device_vector<int> counts(n);
-  thrust::device_vector<int> num_runs(1);
-
-  thrust::sort(in.begin(), in.end());
-
-  // RLE
-  void *d_temp_storage           = nullptr;
-  std::size_t temp_storage_bytes = 0;
-
-  T *d_in             = thrust::raw_pointer_cast(in.data());
-  T *d_unique_out     = thrust::raw_pointer_cast(unique.data());
-  int *d_counts_out   = thrust::raw_pointer_cast(counts.data());
-  int *d_num_runs_out = thrust::raw_pointer_cast(num_runs.data());
-
-  cub::DeviceRunLengthEncode::Encode(d_temp_storage,
-                                     temp_storage_bytes,
-                                     d_in,
-                                     d_unique_out,
-                                     d_counts_out,
-                                     d_num_runs_out,
-                                     n);
-
-  thrust::device_vector<std::uint8_t> temp_storage(temp_storage_bytes);
-  d_temp_storage = thrust::raw_pointer_cast(temp_storage.data());
-
-  cub::DeviceRunLengthEncode::Encode(d_temp_storage,
-                                     temp_storage_bytes,
-                                     d_in,
-                                     d_unique_out,
-                                     d_counts_out,
-                                     d_num_runs_out,
-                                     n);
-
-  thrust::host_vector<int> h_counts   = counts;
-  thrust::host_vector<int> h_num_runs = num_runs;
-
-  // normalize counts
-  thrust::host_vector<double> ps(h_num_runs[0]);
-  for (std::size_t i = 0; i < ps.size(); i++)
-  {
-    ps[i] = static_cast<double>(h_counts[i]) / n;
-  }
-
-  double entropy = 0.0;
-
-  if (ps.size())
-  {
-    for (double p : ps)
-    {
-      entropy -= p * std::log2(p);
-    }
-  }
-
-  return entropy;
-}
-
-template <class T>
-void report_entropy(thrust::device_vector<T>& buffer_1, bit_entropy entropy)
-{
-  std::cout << "Actual entropy: " << compute_actual_entropy(buffer_1) << std::endl;
-  std::cout << "Expected entropy: " << get_expected_entropy<T>(entropy) << std::endl;
-}
-#else
-template <class T>
-void report_entropy(thrust::device_vector<T>&, bit_entropy)
-{
-}
-
 struct less_t
 {
   template <typename DataType>
@@ -336,5 +236,3 @@ struct max_t
     return less(lhs, rhs) ? rhs : lhs;
   }
 };
-
-#endif

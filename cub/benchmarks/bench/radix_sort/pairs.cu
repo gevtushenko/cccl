@@ -189,8 +189,6 @@ void radix_sort_values(std::integral_constant<bool, true>,
   thrust::device_vector<nvbench::uint8_t> temp(temp_size);
   auto *temp_storage = thrust::raw_pointer_cast(temp.data());
 
-  report_entropy(keys_buffer_1, entropy);
-
   state.exec([&](nvbench::launch &launch) {
     cub::DoubleBuffer<key_t> keys     = d_keys;
     cub::DoubleBuffer<value_t> values = d_values;
