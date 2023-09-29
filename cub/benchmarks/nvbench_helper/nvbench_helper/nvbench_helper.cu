@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <random>
+#include <type_traits>
 
 #include "thrust/scan.h"
 #include <curand.h>
@@ -60,7 +61,14 @@ struct random_to_item_t
 
   __host__ __device__ T operator()(double random_value)
   {
-    return static_cast<T>(floor((m_max - m_min + 1) * random_value + m_min));
+    if constexpr (std::is_floating_point_v<T>) 
+    {
+      return static_cast<T>((m_max - m_min) * random_value + m_min);
+    }
+    else
+    {
+      return static_cast<T>(floor((m_max - m_min + 1) * random_value + m_min));
+    }
   }
 };
 
