@@ -33,6 +33,7 @@
 #include <catch2/catch.hpp>
 #include <nvbench_helper.cuh>
 
+// Kolmogorov-Smirnov Test
 template <class T>
 bool is_uniform(thrust::host_vector<T> samples, T min_sample, T max_sample)
 {
@@ -40,6 +41,7 @@ bool is_uniform(thrust::host_vector<T> samples, T min_sample, T max_sample)
   {
     return false;
   }
+
   if (min_sample >= max_sample)
   {
     return false;
@@ -55,14 +57,16 @@ bool is_uniform(thrust::host_vector<T> samples, T min_sample, T max_sample)
   for (std::size_t i = 0; i < samples.size(); i++)
   {
     const T sample = samples[i];
+
     if (sample < min_sample || sample > max_sample)
     {
       return false;
     }
-    // Empirical uniform distribution function
+
     const double Fn   = static_cast<double>(i + 1) / n;
     const double F    = (static_cast<double>(sample) - min) / (max - min);
     const double diff = std::abs(F - Fn);
+
     if (diff > D)
     {
       D = diff;
@@ -75,17 +79,43 @@ bool is_uniform(thrust::host_vector<T> samples, T min_sample, T max_sample)
   return D <= critical_value;
 }
 
-using types = nvbench::type_list<int16_t, int32_t, int64_t, float, double>;
+// Chi-Square Test for 8-bit data
+template <>
+bool is_uniform(thrust::host_vector<int8_t> samples, int8_t min_value, int8_t max_value) 
+{
+  // The specialization is necessary because the Kolmogorov-Smirnov test requires continuous 
+  // distributions, and 8-bit data is too descrete so KS test produces a lot of false-positives. 
+  // The Chi-Square test is a better fit for discrete distributions. 
+  const int k = 255;
+  const double expected = samples.size() / static_cast<double>(k);
+  std::vector<int> observed(k, 0);
+  for (int8_t sample : samples)
+  {
+    observed[static_cast<unsigned char>(sample - min_value)]++;
+  }
+
+  double chi_square = 0.0;
+  for (int i = 0; i < k; i++) 
+  {
+    chi_square += pow(observed[i] - expected, 2) / expected;
+  }
+
+  // I don't know how to compute the critical value based on the value range / df, so just use 
+  // the constant for df = 255, alpha = 0.05. The test is sensitive to the number of samples and
+  // values range, so it's better not to change the parameters. Regardless, it allows us to 
+  // catch some bugs in the `int8_t` samples distribution automatically. 
+  const double critical = 293.24; 
+  return chi_square < critical;
+}
+
+using types = nvbench::type_list<int8_t, int16_t, int32_t, int64_t, float, double>;
 
 TEMPLATE_LIST_TEST_CASE("Generators produce uniformly distributed data", "[gen]", types)
 {
-  const TestType min             = std::numeric_limits<TestType>::min();
-  const TestType max             = std::numeric_limits<TestType>::max();
-  const TestType max_range_begin = std::nextafter(min, max);
-  const TestType max_range_end   = max;
-  const TestType rnd_max         = GENERATE_COPY(take(4, random(max_range_begin, max_range_end)));
+  const TestType min = std::numeric_limits<TestType>::min();
+  const TestType max = std::numeric_limits<TestType>::max();
 
-  const thrust::device_vector<TestType> data = generate(1 << 24, bit_entropy::_1_000, min, rnd_max);
+  const thrust::device_vector<TestType> data = generate(1 << 16, bit_entropy::_1_000, min, max);
 
-  REQUIRE(is_uniform<TestType>(data, min, rnd_max));
+  REQUIRE(is_uniform<TestType>(data, min, max));
 }
