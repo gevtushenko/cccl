@@ -60,7 +60,7 @@ struct random_to_item_t
 
   __host__ __device__ T operator()(double random_value)
   {
-    return static_cast<T>((m_max - m_min) * random_value + m_min);
+    return static_cast<T>(floor((m_max - m_min + 1) * random_value + m_min));
   }
 };
 
