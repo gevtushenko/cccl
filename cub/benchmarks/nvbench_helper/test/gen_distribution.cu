@@ -25,11 +25,54 @@
  *
  ******************************************************************************/
 
+#include <thrust/host_vector.h>
+#include <thrust/sort.h>
+
+#include <limits>
 
 #include <catch2/catch.hpp>
 #include <nvbench_helper.cuh>
 
-TEMPLATE_LIST_TEST_CASE("Generators produce data with given entropy", "[gen]", fundamental_types)
+bool is_uniform(thrust::host_vector<double> samples,
+                double min = std::numeric_limits<double>::min(),
+                double max = std::numeric_limits<double>::max())
 {
-  REQUIRE(1 == 1);
+  if (samples.empty())
+  {
+    return false;
+  }
+  if (min >= max)
+  {
+    return false;
+  }
+  thrust::host_vector<double> sorted_samples = samples;
+  thrust::sort(sorted_samples.begin(), sorted_samples.end());
+  double n = sorted_samples.size();
+  double D = 0.0;
+  for (std::size_t i = 0; i < sorted_samples.size(); i++)
+  {
+    const double sample = sorted_samples[i];
+    if (sample < min || sample > max)
+    {
+      return false;
+    }
+    // Empirical uniform distribution function
+    const double Fn   = (i + 1) / n;
+    const double F    = (sample - min) / (max - min);
+    const double diff = std::abs(F - Fn);
+    if (diff > D)
+    {
+      D = diff;
+    }
+  }
+  const double c_alpha        = 1.36; // constant for n > 50, alpha = 0.05
+  const double critical_value = c_alpha / std::sqrt(n);
+  return D <= critical_value;
+}
+
+TEST_CASE("Generators produce uniformly distributed data", "[gen]")
+{
+  const thrust::device_vector<double> data = generate(1 << 24);
+
+  REQUIRE(is_uniform(data));
 }
