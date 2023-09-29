@@ -33,46 +33,59 @@
 #include <catch2/catch.hpp>
 #include <nvbench_helper.cuh>
 
-bool is_uniform(thrust::host_vector<double> samples,
-                double min = std::numeric_limits<double>::min(),
-                double max = std::numeric_limits<double>::max())
+template <class T>
+bool is_uniform(thrust::host_vector<T> samples, T min_sample, T max_sample)
 {
   if (samples.empty())
   {
     return false;
   }
-  if (min >= max)
+  if (min_sample >= max_sample)
   {
     return false;
   }
-  thrust::host_vector<double> sorted_samples = samples;
-  thrust::sort(sorted_samples.begin(), sorted_samples.end());
-  double n = sorted_samples.size();
-  double D = 0.0;
-  for (std::size_t i = 0; i < sorted_samples.size(); i++)
+
+  thrust::sort(samples.begin(), samples.end());
+
+  const auto n = static_cast<double>(samples.size());
+  const auto min = static_cast<double>(min_sample);
+  const auto max = static_cast<double>(max_sample);
+
+  auto D = 0.0;
+  for (std::size_t i = 0; i < samples.size(); i++)
   {
-    const double sample = sorted_samples[i];
-    if (sample < min || sample > max)
+    const T sample = samples[i];
+    if (sample < min_sample || sample > max_sample)
     {
       return false;
     }
     // Empirical uniform distribution function
-    const double Fn   = (i + 1) / n;
-    const double F    = (sample - min) / (max - min);
+    const double Fn   = static_cast<double>(i + 1) / n;
+    const double F    = (static_cast<double>(sample) - min) / (max - min);
     const double diff = std::abs(F - Fn);
     if (diff > D)
     {
       D = diff;
     }
   }
+
   const double c_alpha        = 1.36; // constant for n > 50, alpha = 0.05
   const double critical_value = c_alpha / std::sqrt(n);
+
   return D <= critical_value;
 }
 
-TEST_CASE("Generators produce uniformly distributed data", "[gen]")
-{
-  const thrust::device_vector<double> data = generate(1 << 24);
+using types = nvbench::type_list<int16_t, int32_t, int64_t, float, double>;
 
-  REQUIRE(is_uniform(data));
+TEMPLATE_LIST_TEST_CASE("Generators produce uniformly distributed data", "[gen]", types)
+{
+  const TestType min             = std::numeric_limits<TestType>::min();
+  const TestType max             = std::numeric_limits<TestType>::max();
+  const TestType max_range_begin = std::nextafter(min, max);
+  const TestType max_range_end   = max;
+  const TestType rnd_max         = GENERATE_COPY(take(4, random(max_range_begin, max_range_end)));
+
+  const thrust::device_vector<TestType> data = generate(1 << 24, bit_entropy::_1_000, min, rnd_max);
+
+  REQUIRE(is_uniform<TestType>(data, min, rnd_max));
 }
