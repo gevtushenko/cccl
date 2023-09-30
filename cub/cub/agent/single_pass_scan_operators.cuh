@@ -567,6 +567,7 @@ struct ScanTileState<T, true>
         {
             // Not-yet-set
             descriptor->status = StatusWord(SCAN_TILE_INVALID);
+            descriptor->value = T();
             d_tile_descriptors[TILE_STATUS_PADDING + tile_idx] = val;
         }
 
@@ -574,6 +575,7 @@ struct ScanTileState<T, true>
         {
             // Padding
             descriptor->status = StatusWord(SCAN_TILE_OOB);
+            descriptor->value = T();
             d_tile_descriptors[threadIdx.x] = val;
         }
     }
@@ -1127,15 +1129,7 @@ struct TilePrefixCallbackOp
     {
         T value;
         tile_status.WaitForValid(predecessor_idx, predecessor_status, value, delay);
-
-        // Perform a segmented reduction to get the prefix for the current window.
-        // Use the swizzled scan operator because we are now scanning *down* towards thread0.
-
-        int tail_flag = (predecessor_status == StatusWord(SCAN_TILE_INCLUSIVE));
-        window_aggregate = WarpReduceT(temp_storage.warp_reduce).TailSegmentedReduce(
-            value,
-            tail_flag,
-            SwizzleScanOp<ScanOpT>(scan_op));
+        window_aggregate = value;
     }
 
 
@@ -1172,6 +1166,7 @@ struct TilePrefixCallbackOp
             ProcessWindow(predecessor_idx, predecessor_status, window_aggregate, construct_delay());
             exclusive_prefix = scan_op(window_aggregate, exclusive_prefix);
         }
+        exclusive_prefix= WarpReduceT(temp_storage.warp_reduce).Reduce(exclusive_prefix, scan_op);
 
         // Compute the inclusive tile prefix and update the status for this tile
         if (threadIdx.x == 0)
