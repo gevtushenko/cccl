@@ -139,8 +139,6 @@ void select(nvbench::state &state, nvbench::type_list<T, OffsetT>)
   const auto elements = static_cast<std::size_t>(state.get_int64("Elements{io}"));
   const bit_entropy entropy = str_to_entropy(state.get_string("Entropy"));
 
-  T min_val = std::numeric_limits<T>::lowest();
-  T max_val = std::numeric_limits<T>::max();
   T val = value_from_entropy<T>(entropy_to_probability(entropy));
   select_op_t select_op{val};
 
