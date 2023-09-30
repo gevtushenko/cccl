@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <nvbench/nvbench.cuh>
+#include <cuda/std/span>
 
 using complex = cuda::std::complex<float>;
 using int128_t = __int128_t;
@@ -148,15 +149,14 @@ inline double entropy_to_probability(bit_entropy entropy)
   throw std::runtime_error("Can't convert string to bit entropy");
 }
 
-template <typename T>
-void gen(seed_t seed,
-         thrust::device_vector<T> &data,
-         bit_entropy entropy = bit_entropy::_1_000,
-         T min               = std::numeric_limits<T>::min(),
-         T max               = std::numeric_limits<T>::max());
-
 namespace detail
 {
+
+template <typename T>
+void gen_host(seed_t seed, cuda::std::span<T> data, bit_entropy entropy, T min, T max);
+
+template <typename T>
+void gen_device(seed_t seed, cuda::std::span<T> data, bit_entropy entropy, T min, T max);
 
 struct generator_base_t
 {
@@ -167,10 +167,15 @@ struct generator_base_t
   template <typename T>
   thrust::device_vector<T> generate(T min, T max)
   {
-    thrust::device_vector<T> data(m_elements); 
-    gen(m_seed, data, m_entropy, min, max);
+    thrust::device_vector<T> vec(m_elements); 
+    cuda::std::span<T> span(thrust::raw_pointer_cast(vec.data()), m_elements);
+    #if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
+    gen_device(m_seed, span, m_entropy, min, max);
+    #else
+    gen_host(m_seed, span, m_entropy, min, max);
+    #endif
     ++m_seed;
-    return data;
+    return vec;
   }
 };
 

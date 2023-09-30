@@ -15,6 +15,7 @@
 #include <random>
 #include <type_traits>
 
+#include "thrust/detail/raw_pointer_cast.h"
 #include "thrust/scan.h"
 #include <curand.h>
 #include <nvbench_helper.cuh>
@@ -27,7 +28,7 @@ public:
 
   template <typename T>
   void operator()(seed_t seed,
-                  thrust::device_vector<T> &data,
+                  cuda::std::span<T> device_span,
                   bit_entropy entropy,
                   T min = std::numeric_limits<T>::lowest(),
                   T max = std::numeric_limits<T>::max());
@@ -210,32 +211,34 @@ thrust::device_vector<T> generator_t::power_law_segment_offsets(seed_t seed,
   thrust::device_vector<T> segment_sizes(total_segments + 1);
   prepare_lognormal_random_generator(seed, total_segments);
 
-  if (thrust::count(m_distribution.begin(), m_distribution.end(), 0.0) == total_segments)
+  if (thrust::count(thrust::device, m_distribution.begin(), m_distribution.end(), 0.0) == total_segments)
   {
-    thrust::fill_n(m_distribution.begin(), total_segments, 1.0);
+    thrust::fill_n(thrust::device, m_distribution.begin(), total_segments, 1.0);
   }
 
-  double sum = thrust::reduce(m_distribution.begin(), m_distribution.end());
-  thrust::transform(m_distribution.begin(),
+  double sum = thrust::reduce(thrust::device, m_distribution.begin(), m_distribution.end());
+  thrust::transform(thrust::device,
+                    m_distribution.begin(),
                     m_distribution.end(),
                     segment_sizes.begin(),
                     lognormal_transformer_t<T>{total_elements, sum});
 
-  const int diff = total_elements - thrust::reduce(segment_sizes.begin(), segment_sizes.end());
+  const int diff = total_elements -
+                   thrust::reduce(thrust::device, segment_sizes.begin(), segment_sizes.end());
   constexpr int block_size = 256;
   const int grid_size  = (std::abs(diff) + block_size - 1) / block_size;
 
   T *d_segment_sizes = thrust::raw_pointer_cast(segment_sizes.data());
   lognormal_adjust_kernel<T><<<grid_size, block_size>>>(d_segment_sizes, diff);
 
-  thrust::exclusive_scan(segment_sizes.begin(), segment_sizes.end(), segment_sizes.begin());
+  thrust::exclusive_scan(thrust::device, segment_sizes.begin(), segment_sizes.end(), segment_sizes.begin());
 
   return segment_sizes;
 }
 
 template <class T>
 void generator_t::operator()(seed_t seed,
-                             thrust::device_vector<T> &data,
+                             cuda::std::span<T> device_span,
                              bit_entropy entropy,
                              T min,
                              T max)
@@ -243,11 +246,12 @@ void generator_t::operator()(seed_t seed,
   switch (entropy)
   {
     case bit_entropy::_1_000: {
-      prepare_random_generator(seed, data.size());
+      prepare_random_generator(seed, device_span.size());
 
-      thrust::transform(m_distribution.begin(),
+      thrust::transform(thrust::device,
+                        m_distribution.begin(),
                         m_distribution.end(),
-                        data.begin(),
+                        device_span.data(),
                         random_to_item_t<T>(min, max));
       return;
     }
@@ -256,28 +260,33 @@ void generator_t::operator()(seed_t seed,
       rng.seed(static_cast<std::mt19937::result_type>(seed.get()));
       std::uniform_real_distribution<float> dist(0.0f, 1.0f);
       T random_value = random_to_item_t<T>(min, max)(dist(rng));
-      thrust::fill(data.begin(), data.end(), random_value);
+      thrust::fill(thrust::device,
+                   device_span.data(),
+                   device_span.data() + device_span.size(),
+                   random_value);
       return;
     }
     default: {
-      prepare_random_generator(seed, data.size());
+      prepare_random_generator(seed, device_span.size());
 
-      thrust::transform(m_distribution.begin(),
+      thrust::transform(thrust::device,
+                        m_distribution.begin(),
                         m_distribution.end(),
-                        data.begin(),
+                        device_span.data(),
                         random_to_item_t<T>(min, max));
 
       const int number_of_steps = static_cast<int>(entropy);
-      thrust::device_vector<T> tmp(data.size());
+      thrust::device_vector<T> tmp_vec(device_span.size());
+      cuda::std::span<T> tmp(thrust::raw_pointer_cast(tmp_vec.data()), tmp_vec.size());
       constexpr int threads_in_block = 256;
-      const int blocks_in_grid   = (data.size() + threads_in_block - 1) / threads_in_block;
+      const int blocks_in_grid = (device_span.size() + threads_in_block - 1) / threads_in_block;
 
       for (int i = 0; i < number_of_steps; i++, ++seed)
       {
         (*this)(seed, tmp, bit_entropy::_1_000, min, max);
-        and_kernel<<<blocks_in_grid, threads_in_block>>>(thrust::raw_pointer_cast(data.data()),
-                                                         thrust::raw_pointer_cast(tmp.data()),
-                                                         data.size());
+        and_kernel<<<blocks_in_grid, threads_in_block>>>(device_span.data(),
+                                                         tmp.data(),
+                                                         device_span.size());
         cudaStreamSynchronize(0);
       }
       return;
@@ -287,29 +296,29 @@ void generator_t::operator()(seed_t seed,
 
 template <>
 void generator_t::operator()(seed_t seed,
-                             thrust::device_vector<complex> &data,
+                             cuda::std::span<complex> device_span,
                              bit_entropy entropy,
                              complex min,
                              complex max)
 {
   constexpr int threads_in_block = 256;
-  const int blocks_in_grid   = (data.size() + threads_in_block - 1) / threads_in_block;
+  const int blocks_in_grid       = (device_span.size() + threads_in_block - 1) / threads_in_block;
 
   switch (entropy)
   {
     case bit_entropy::_1_000: {
-      prepare_random_generator(seed, data.size()); ++seed;
-      set_real_kernel<<<blocks_in_grid, threads_in_block>>>(thrust::raw_pointer_cast(data.data()),
+      prepare_random_generator(seed, device_span.size()); ++seed;
+      set_real_kernel<<<blocks_in_grid, threads_in_block>>>(device_span.data(),
                                                             min,
                                                             max,
                                                             thrust::raw_pointer_cast(m_distribution.data()),
-                                                            data.size());
-      prepare_random_generator(seed, data.size()); ++seed;
-      set_imag_kernel<<<blocks_in_grid, threads_in_block>>>(thrust::raw_pointer_cast(data.data()),
+                                                            device_span.size());
+      prepare_random_generator(seed, device_span.size()); ++seed;
+      set_imag_kernel<<<blocks_in_grid, threads_in_block>>>(device_span.data(),
                                                             min,
                                                             max,
                                                             thrust::raw_pointer_cast(m_distribution.data()),
-                                                            data.size());
+                                                            device_span.size());
       return;
     }
     case bit_entropy::_0_000: {
@@ -319,34 +328,38 @@ void generator_t::operator()(seed_t seed,
       double random_imag = random_to_item_t<double>(min.imag(), max.imag())(dist(rng));
       double random_real = random_to_item_t<double>(min.imag(), max.imag())(dist(rng));
       complex random_value(random_real, random_imag);
-      thrust::fill(data.begin(), data.end(), random_value);
+      thrust::fill(thrust::device,
+                   device_span.data(),
+                   device_span.data() + device_span.size(),
+                   random_value);
       return;
     }
     default: {
-      prepare_random_generator(seed, data.size());
+      prepare_random_generator(seed, device_span.size());
 
-      prepare_random_generator(seed, data.size()); ++seed;
-      set_real_kernel<<<blocks_in_grid, threads_in_block>>>(thrust::raw_pointer_cast(data.data()),
+      prepare_random_generator(seed, device_span.size()); ++seed;
+      set_real_kernel<<<blocks_in_grid, threads_in_block>>>(device_span.data(),
                                                             min,
                                                             max,
                                                             thrust::raw_pointer_cast(m_distribution.data()),
-                                                            data.size());
-      prepare_random_generator(seed, data.size()); ++seed;
-      set_imag_kernel<<<blocks_in_grid, threads_in_block>>>(thrust::raw_pointer_cast(data.data()),
+                                                            device_span.size());
+      prepare_random_generator(seed, device_span.size()); ++seed;
+      set_imag_kernel<<<blocks_in_grid, threads_in_block>>>(device_span.data(),
                                                             min,
                                                             max,
                                                             thrust::raw_pointer_cast(m_distribution.data()),
-                                                            data.size());
+                                                            device_span.size());
 
       const int number_of_steps = static_cast<int>(entropy);
-      thrust::device_vector<complex> tmp(data.size());
+      thrust::device_vector<complex> tmp_vec(device_span.size());
+      cuda::std::span<complex> tmp(thrust::raw_pointer_cast(tmp_vec.data()), tmp_vec.size());
 
       for (int i = 0; i < number_of_steps; i++, ++seed)
       {
         (*this)(seed, tmp, bit_entropy::_1_000, min, max);
-        and_kernel<<<blocks_in_grid, threads_in_block>>>(thrust::raw_pointer_cast(data.data()),
+        and_kernel<<<blocks_in_grid, threads_in_block>>>(device_span.data(),
                                                          thrust::raw_pointer_cast(tmp.data()),
-                                                         data.size());
+                                                         device_span.size());
         cudaStreamSynchronize(0);
       }
       return;
@@ -366,41 +379,83 @@ struct random_to_probability_t
 
 template <>
 void generator_t::operator()(seed_t seed,
-                             thrust::device_vector<bool> &data,
+                             cuda::std::span<bool> device_span,
                              bit_entropy entropy,
                              bool /* min */,
                              bool /* max */)
 {
   if (entropy == bit_entropy::_0_000)
   {
-    thrust::fill(data.begin(), data.end(), false);
+    thrust::fill(thrust::device, device_span.data(), device_span.data() + device_span.size(), false);
   }
   else if (entropy == bit_entropy::_1_000)
   {
-    thrust::fill(data.begin(), data.end(), true);
+    thrust::fill(thrust::device, device_span.data(), device_span.data() + device_span.size(), true);
   }
   else
   {
-    prepare_random_generator(seed, data.size());
-    thrust::transform(m_distribution.begin(),
+    prepare_random_generator(seed, device_span.size());
+    thrust::transform(thrust::device,
+                      m_distribution.begin(),
                       m_distribution.end(),
-                      data.begin(),
+                      device_span.data(),
                       random_to_probability_t{entropy_to_probability(entropy)});
   }
 }
 
 template <typename T>
-void gen(seed_t seed, thrust::device_vector<T> &data, bit_entropy entropy, T min, T max)
+void gen(seed_t seed, cuda::std::span<T> device_span, bit_entropy entropy, T min, T max)
 {
-  generator_t{}(seed, data, entropy, min, max);
+  generator_t{}(seed, device_span, entropy, min, max);
 }
+
+namespace detail 
+{
+
+template <typename T>
+void gen_host(seed_t seed, cuda::std::span<T> host_span, bit_entropy entropy, T min, T max)
+{
+  // TODO Support benchmarking on systems without GPU
+  thrust::device_vector<T> device_vec(host_span.size());
+  cuda::std::span<T> device_span(thrust::raw_pointer_cast(device_vec.data()), host_span.size());
+
+  cudaMemcpy(device_span.data(),
+             host_span.data(),
+             host_span.size() * sizeof(T),
+             cudaMemcpyHostToDevice);
+
+  gen(seed, device_span, entropy, min, max);
+
+  cudaMemcpy(host_span.data(),
+             device_span.data(),
+             device_span.size() * sizeof(T),
+             cudaMemcpyDeviceToHost);
+}
+
+template <typename T>
+void gen_device(seed_t seed, cuda::std::span<T> device_span, bit_entropy entropy, T min, T max)
+{
+  gen(seed, device_span, entropy, min, max);
+}
+
+} // namespace detail
 
 #define INSTANTIATE_RND(TYPE)                                                                      \
   template void gen<TYPE>(seed_t,                                                                  \
-                          thrust::device_vector<TYPE> & data,                                      \
+                          cuda::std::span<TYPE>,                                                   \
                           bit_entropy,                                                             \
                           TYPE min,                                                                \
-                          TYPE max)
+                          TYPE max);                                                               \
+  template void detail::gen_device<TYPE>(seed_t,                                                   \
+                                         cuda::std::span<TYPE>,                                    \
+                                         bit_entropy,                                              \
+                                         TYPE min,                                                 \
+                                         TYPE max);                                                \
+  template void detail::gen_host<TYPE>(seed_t,                                                     \
+                                       cuda::std::span<TYPE>,                                      \
+                                       bit_entropy,                                                \
+                                       TYPE min,                                                   \
+                                       TYPE max)
 
 #define INSTANTIATE(TYPE) INSTANTIATE_RND(TYPE);
 
@@ -565,7 +620,9 @@ thrust::device_vector<T> gen_uniform_offsets(seed_t seed,
                                              T max_segment_size)
 {
   thrust::device_vector<T> segment_offsets(total_elements + 2);
-  gen(seed, segment_offsets, bit_entropy::_1_000, min_segment_size, max_segment_size);
+  cuda::std::span<T> segment_offsets_span(thrust::raw_pointer_cast(segment_offsets.data()),
+                                          segment_offsets.size());
+  gen(seed, segment_offsets_span, bit_entropy::_1_000, min_segment_size, max_segment_size);
   segment_offsets[total_elements] = total_elements + 1;
   thrust::exclusive_scan(segment_offsets.begin(), segment_offsets.end(), segment_offsets.begin());
   typename thrust::device_vector<T>::iterator iter =
