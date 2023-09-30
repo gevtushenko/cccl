@@ -10,7 +10,7 @@ struct less_then_t
 {
   T m_val;
 
-  __device__ bool operator()(const T &val) const { return val < m_val; }
+  __host__ __device__ bool operator()(const T &val) const { return val < m_val; }
 };
 
 template <typename T>
