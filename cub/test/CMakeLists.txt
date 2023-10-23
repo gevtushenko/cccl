@@ -8,14 +8,11 @@ if(CMAKE_GENERATOR MATCHES "^Visual Studio")
   endif()
 endif()
 
-if ("NVHPC" STREQUAL "${CMAKE_CUDA_COMPILER_ID}")
+if ("MSVC" STREQUAL "${CMAKE_CXX_COMPILER_ID}" OR "NVHPC" STREQUAL "${CMAKE_CUDA_COMPILER_ID}")
   # NVBugs 200770766
-  set(CUB_SEPARATE_CATCH2 ON)
+  option(CUB_SEPARATE_CATCH2 "Build each catch2 test as a separate executable." ON)
 else()
-  option(CUB_SEPARATE_CATCH2
-    "Build each catch2 test as a separate executable."
-    OFF
-  )
+  option(CUB_SEPARATE_CATCH2 "Build each catch2 test as a separate executable." OFF)
 endif()
 
 include("${CUB_SOURCE_DIR}/cmake/CPM.cmake")
