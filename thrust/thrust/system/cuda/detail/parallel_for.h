@@ -69,7 +69,7 @@ namespace __parallel_for {
   template <class F>
   struct Tuning<sm30, F>
   {
-    typedef PtxPolicy<256, 2> type;
+    typedef PtxPolicy<128, 1> type;
   };
 
 
@@ -91,40 +91,45 @@ namespace __parallel_for {
       BLOCK_THREADS    = ptx_plan::BLOCK_THREADS
     };
 
-    template <bool IS_FULL_TILE>
-    static void    THRUST_DEVICE_FUNCTION
-    consume_tile(F    f,
-                 Size tile_base,
-                 int  items_in_tile)
-    {
-#pragma unroll
-      for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
-      {
-        Size idx = BLOCK_THREADS * ITEM + threadIdx.x;
-        if (IS_FULL_TILE || idx < items_in_tile)
-          f(tile_base + idx);
-      }
-    }
+    // template <bool IS_FULL_TILE>
+    // static void    THRUST_DEVICE_FUNCTION
+    // consume_tile(F    f,
+    //              Size tile_base,
+    //              int  items_in_tile)
+    // {
+    //   #pragma unroll
+    //   for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
+    //   {
+    //     Size idx = BLOCK_THREADS * ITEM + threadIdx.x;
+    //     if (IS_FULL_TILE || idx < items_in_tile)
+    //       f(tile_base + idx);
+    //   }
+    // }
 
     THRUST_AGENT_ENTRY(F     f,
                        Size  num_items,
                        char * /*shmem*/ )
     {
-      Size tile_base     = static_cast<Size>(blockIdx.x) * ITEMS_PER_TILE;
-      Size num_remaining = num_items - tile_base;
-      Size items_in_tile = static_cast<Size>(
-          num_remaining < ITEMS_PER_TILE ? num_remaining : ITEMS_PER_TILE);
+      // Size tile_base     = static_cast<Size>(blockIdx.x) * ITEMS_PER_TILE;
+      // Size num_remaining = num_items - tile_base;
+      // Size items_in_tile = static_cast<Size>(
+      //     num_remaining < ITEMS_PER_TILE ? num_remaining : ITEMS_PER_TILE);
 
-      if (items_in_tile == ITEMS_PER_TILE)
-      {
-        // full tile
-        consume_tile<true>(f, tile_base, ITEMS_PER_TILE);
+      int idx = blockIdx.x * BLOCK_THREADS + threadIdx.x;
+      if (idx < num_items) {
+        f(idx);
       }
-      else
-      {
-        // partial tile
-        consume_tile<false>(f, tile_base, items_in_tile);
-      }
+
+      // if (items_in_tile == ITEMS_PER_TILE)
+      // {
+      //   // full tile
+      //   consume_tile<true>(f, tile_base, ITEMS_PER_TILE);
+      // }
+      // else
+      // {
+      //   // partial tile
+      //   consume_tile<false>(f, tile_base, items_in_tile);
+      // }
     }
   };    // struct ParallelForEagent
 

@@ -71,7 +71,6 @@ namespace core {
 #if 0
   template <class Agent, class... Args>
   THRUST_DETAIL_KERNEL_ATTRIBUTES void
-  __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
       _kernel_agent(Args... args)
   {
     extern __shared__ char shmem[];
@@ -79,105 +78,105 @@ namespace core {
   }
 #else
   template <class Agent, class _0>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, shmem);
   }
   template <class Agent, class _0, class _1>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, shmem);
   }
   template <class Agent, class _0, class _1, class _2>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6, class _7>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6, _7 x7)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, x7, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6, class _7, class _8>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6, _7 x7, _8 x8)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, x7, x8, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6, class _7, class _8, class _9>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6, _7 x7, _8 x8, _9 x9)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6, class _7, class _8, class _9, class _xA>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6, _7 x7, _8 x8, _9 x9, _xA xA)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xA, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6, class _7, class _8, class _9, class _xA, class _xB>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6, _7 x7, _8 x8, _9 x9, _xA xA, _xB xB)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xA, xB, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6, class _7, class _8, class _9, class _xA, class _xB, class _xC>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6, _7 x7, _8 x8, _9 x9, _xA xA, _xB xB, _xC xC)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xA, xB, xC, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6, class _7, class _8, class _9, class _xA, class _xB, class _xC, class _xD>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6, _7 x7, _8 x8, _9 x9, _xA xA, _xB xB, _xC xC, _xD xD)
   {
     extern __shared__ char shmem[];
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xA, xB, xC, xD, shmem);
   }
   template <class Agent, class _0, class _1, class _2, class _3, class _4, class _5, class _6, class _7, class _8, class _9, class _xA, class _xB, class _xC, class _xD, class _xE>
-  THRUST_DETAIL_KERNEL_ATTRIBUTES void __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
+  THRUST_DETAIL_KERNEL_ATTRIBUTES void 
   _kernel_agent(_0 x0, _1 x1, _2 x2, _3 x3, _4 x4, _5 x5, _6 x6, _7 x7, _8 x8, _9 x9, _xA xA, _xB xB, _xC xC, _xD xD, _xE xE)
   {
     extern __shared__ char shmem[];
