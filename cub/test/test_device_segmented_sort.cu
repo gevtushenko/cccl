@@ -109,7 +109,6 @@ class Input
   using MaskedValueT = cub::detail::conditional_t<
     std::is_same<ValueT, cub::NullType>::value, KeyT, ValueT>;
 
-  bool reverse {};
   int num_items {};
   thrust::device_vector<KeyT> d_keys;
   thrust::device_vector<MaskedValueT> d_values;
@@ -117,11 +116,10 @@ class Input
   thrust::host_vector<MaskedValueT> h_values;
 
 public:
-  Input(bool reverse, const thrust::host_vector<int> &h_segment_sizes)
+  Input(const thrust::host_vector<int> &h_segment_sizes)
       : d_segment_sizes(h_segment_sizes)
       , d_offsets(d_segment_sizes.size() + 1)
       , h_offsets(d_segment_sizes.size() + 1)
-      , reverse(reverse)
       , num_items(static_cast<int>(
           thrust::reduce(d_segment_sizes.begin(), d_segment_sizes.end())))
       , d_keys(num_items)
@@ -130,16 +128,6 @@ public:
       , h_values(num_items)
   {
     update();
-  }
-
-  Input(thrust::host_vector<int> &h_offsets)
-    : d_offsets(h_offsets)
-    , h_offsets(h_offsets)
-    , reverse(false)
-    , num_items(h_offsets.back())
-    , d_keys(num_items)
-    , d_values(num_items)
-  {
   }
 
   void shuffle()
@@ -213,23 +201,11 @@ private:
     KeyT *keys_output = thrust::raw_pointer_cast(h_keys.data());
     const int *offsets = thrust::raw_pointer_cast(h_offsets.data());
 
-    if (reverse)
-    {
-      Iota<KeyT> generator{keys_output, offsets};
+    ReversedIota<KeyT> generator{keys_output, offsets};
 
-      for (int i = 0; i < get_num_segments(); i++)
-      {
-        generator(i);
-      }
-    }
-    else
+    for (int i = 0; i < get_num_segments(); i++)
     {
-      ReversedIota<KeyT> generator{keys_output, offsets};
-
-      for (int i = 0; i < get_num_segments(); i++)
-      {
-        generator(i);
-      }
+      generator(i);
     }
 
     d_keys = h_keys;
@@ -328,8 +304,7 @@ template <typename KeyT,
           typename ValueT>
 Input<KeyT, ValueT> GenRandomInput(int max_items,
                                    int min_segments,
-                                   int max_segments,
-                                   bool descending)
+                                   int max_segments)
 {
   int items_generated {};
   const int segments_num = RandomValue(max_segments) + min_segments;
@@ -353,7 +328,7 @@ Input<KeyT, ValueT> GenRandomInput(int max_items,
     segment_sizes.push_back(segment_size);
   }
 
-  return Input<KeyT, ValueT>{descending, segment_sizes};
+  return Input<KeyT, ValueT>{segment_sizes};
 }
 
 template <typename KeyT,
@@ -367,8 +342,7 @@ void RandomTest(int min_segments,
   {
     Input<KeyT, ValueT> edge_cases = GenRandomInput<KeyT, ValueT>(max_items,
                                                                   min_segments,
-                                                                  max_segments,
-                                                                  false);
+                                                                  max_segments);
 
     InputTestRandom(edge_cases);
   }
