@@ -263,9 +263,7 @@ void RandomizeInput(thrust::host_vector<KeyT> &h_keys,
 
 template <typename KeyT,
           typename ValueT>
-void HostReferenceSort(bool sort_pairs,
-                       bool sort_descending,
-                       unsigned int num_segments,
+void HostReferenceSort(unsigned int num_segments,
                        const thrust::host_vector<int> &h_offsets,
                        thrust::host_vector<KeyT> &h_keys,
                        thrust::host_vector<ValueT> &h_values)
@@ -277,36 +275,9 @@ void HostReferenceSort(bool sort_pairs,
     const int segment_begin = h_offsets[segment_i];
     const int segment_end   = h_offsets[segment_i + 1];
 
-    if (sort_pairs)
-    {
-      if (sort_descending)
-      {
-        thrust::stable_sort_by_key(h_keys.begin() + segment_begin,
-                                   h_keys.begin() + segment_end,
-                                   h_values.begin() + segment_begin,
-                                   thrust::greater<KeyT>{});
-      }
-      else
-      {
-        thrust::stable_sort_by_key(h_keys.begin() + segment_begin,
-                                   h_keys.begin() + segment_end,
-                                   h_values.begin() + segment_begin);
-      }
-    }
-    else
-    {
-      if (sort_descending)
-      {
-        thrust::stable_sort(h_keys.begin() + segment_begin,
-                            h_keys.begin() + segment_end,
-                            thrust::greater<KeyT>{});
-      }
-      else
-      {
-        thrust::stable_sort(h_keys.begin() + segment_begin,
-                            h_keys.begin() + segment_end);
-      }
-    }
+    thrust::stable_sort(h_keys.begin() + segment_begin,
+                        h_keys.begin() + segment_end,
+                        thrust::greater<KeyT>{});
   }
 }
 
@@ -334,7 +305,7 @@ void InputTestRandom(Input<KeyT, ValueT> &input)
   input.get_d_keys_vec()   = h_keys;
   input.get_d_values_vec() = h_values;
 
-  HostReferenceSort(false, false, input.get_num_segments(), h_offsets, h_keys, h_values);
+  HostReferenceSort(input.get_num_segments(), h_offsets, h_keys, h_values);
 }
 
 template <typename KeyT,

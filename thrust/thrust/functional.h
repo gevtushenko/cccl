@@ -726,9 +726,8 @@ struct greater
 
   /*! Function call operator. The return value is <tt>lhs > rhs</tt>.
    */
-  _CCCL_EXEC_CHECK_DISABLE
-  _CCCL_HOST_DEVICE
-  constexpr bool operator()(const T &lhs, const T &rhs) const
+  __host__ __device__
+  bool operator()(const T &lhs, const T &rhs) const
   {
     return lhs > rhs;
   }
