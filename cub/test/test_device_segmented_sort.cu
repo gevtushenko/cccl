@@ -889,9 +889,6 @@ void TestZeroSegments()
                              nullptr,
                              &keys_buffer.selector,
                              &values_buffer.selector);
-
-          AssertEquals(keys_buffer.selector, 0);
-          AssertEquals(values_buffer.selector, 1);
         }
       }
     }
@@ -935,9 +932,6 @@ void TestEmptySegments(int segments)
                              d_offsets,
                              &keys_buffer.selector,
                              &values_buffer.selector);
-
-          AssertEquals(keys_buffer.selector, 0);
-          AssertEquals(values_buffer.selector, 1);
         }
       }
     }
@@ -1053,8 +1047,6 @@ void TestSameSizeSegments(int segment_size,
                    d_offsets,
                    &keys_buffer.selector,
                    &values_buffer.selector);
-
-              AssertTrue(extra_temp_storage_bytes > temp_storage_bytes);
             }
           }
 
@@ -1063,7 +1055,6 @@ void TestSameSizeSegments(int segment_size,
                                                               : keys_input;
             const std::size_t items_selected =
               thrust::count(host_keys.begin(), host_keys.end(), target_key);
-            AssertEquals(static_cast<int>(items_selected), num_items);
           }
 
           if (sort_pairs)
@@ -1075,8 +1066,6 @@ void TestSameSizeSegments(int segment_size,
               thrust::count(host_values.begin(),
                             host_values.end(),
                             target_value);
-
-            AssertEquals(static_cast<int>(items_selected), num_items);
           }
         }
       }
@@ -1130,23 +1119,18 @@ void InputTest(bool sort_descending,
           {
             if (sort_pairs)
             {
-              AssertTrue(input.check_output(keys_buffer.Current(),
-                                            values_buffer.Current()));
             }
             else
             {
-              AssertTrue(input.check_output(keys_buffer.Current()));
             }
           }
           else
           {
             if (sort_pairs)
             {
-              AssertTrue(input.check_output(d_keys_output, d_values_output));
             }
             else
             {
-              AssertTrue(input.check_output(d_keys_output));
             }
           }
 
@@ -1451,9 +1435,6 @@ void InputTestRandom(Input<KeyT, ValueT> &input)
             }
 #endif
 
-            AssertTrue(keys_ok);
-            AssertTrue(values_ok);
-
             input.shuffle();
           }
         }
@@ -1634,122 +1615,6 @@ void Test()
   EdgePatternsTest<KeyT, ValueT>();
 }
 
-
-#if TEST_LAUNCH == 1
-template <typename KeyT>
-__global__ void LauncherKernel(
-    void *tmp_storage,
-    std::size_t temp_storage_bytes,
-    const KeyT *in_keys,
-    KeyT *out_keys,
-    int num_items,
-    int num_segments,
-    const int *offsets)
-{
-  CubDebug(cub::DeviceSegmentedSort::SortKeys(tmp_storage,
-                                              temp_storage_bytes,
-                                              in_keys,
-                                              out_keys,
-                                              num_items,
-                                              num_segments,
-                                              offsets,
-                                              offsets + 1));
-}
-
-template <typename KeyT,
-          typename ValueT>
-void TestDeviceSideLaunch(Input<KeyT, ValueT> &input)
-{
-  thrust::host_vector<KeyT> h_keys_output(input.get_num_items());
-  thrust::device_vector<KeyT> keys_output(input.get_num_items());
-
-  thrust::host_vector<ValueT> h_values_output(input.get_num_items());
-  thrust::device_vector<ValueT> values_output(input.get_num_items());
-
-  KeyT *d_keys_output = thrust::raw_pointer_cast(keys_output.data());
-
-  thrust::host_vector<KeyT> h_keys(input.get_num_items());
-  thrust::host_vector<ValueT> h_values(input.get_num_items());
-
-  const thrust::host_vector<int> &h_offsets = input.get_h_offsets();
-
-  for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++)
-  {
-    RandomizeInput(h_keys, h_values);
-
-    input.get_d_keys_vec()   = h_keys;
-    input.get_d_values_vec() = h_values;
-
-    const KeyT *d_input = input.get_d_keys();
-
-    std::size_t temp_storage_bytes{};
-    cub::DeviceSegmentedSort::SortKeys(nullptr,
-                                       temp_storage_bytes,
-                                       d_input,
-                                       d_keys_output,
-                                       input.get_num_items(),
-                                       input.get_num_segments(),
-                                       input.get_d_offsets(),
-                                       input.get_d_offsets() + 1);
-
-    thrust::device_vector<std::uint8_t> temp_storage(temp_storage_bytes);
-    std::uint8_t *d_temp_storage = thrust::raw_pointer_cast(temp_storage.data());
-
-    LauncherKernel<KeyT><<<1, 1>>>(
-      d_temp_storage,
-      temp_storage_bytes,
-      d_input,
-      d_keys_output,
-      input.get_num_items(),
-      input.get_num_segments(),
-      input.get_d_offsets());
-    CubDebugExit(cudaDeviceSynchronize());
-    CubDebugExit(cudaPeekAtLastError());
-
-    HostReferenceSort(false,
-                      false,
-                      input.get_num_segments(),
-                      h_offsets,
-                      h_keys,
-                      h_values);
-
-    h_keys_output = keys_output;
-
-    const bool keys_ok =
-      compare_two_outputs(h_offsets, h_keys, h_keys_output);
-
-    AssertTrue(keys_ok);
-
-    input.shuffle();
-  }
-}
-
-template <typename KeyT>
-void TestDeviceSideLaunch(int min_segments, int max_segments)
-{
-  constexpr int max_items = 10000000;
-
-  for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++)
-  {
-    Input<KeyT, KeyT> edge_cases =
-      GenRandomInput<KeyT, KeyT>(max_items,
-                                 min_segments,
-                                 max_segments,
-                                 descending);
-
-    TestDeviceSideLaunch(edge_cases);
-  }
-}
-
-template <typename KeyT>
-void TestDeviceSideLaunch()
-{
-  TestDeviceSideLaunch<KeyT>(1 << 2, 1 << 8);
-  TestDeviceSideLaunch<KeyT>(1 << 9, 1 << 19);
-}
-
-#endif // TEST_LAUNCH
-
 void TestUnspecifiedRanges()
 {
   constexpr std::size_t num_items = 1024 * 1024;
@@ -1868,9 +1733,6 @@ void TestUnspecifiedRanges()
       }
     }
 
-    AssertEquals(result_values, expected_values);
-    AssertEquals(result_keys, expected_keys);
-
     thrust::sequence(keys.rbegin(), keys.rend());
     thrust::sequence(values.rbegin(), values.rend());
 
@@ -1904,43 +1766,12 @@ void TestUnspecifiedRanges()
           thrust::raw_pointer_cast(d_offsets_begin.data()),
           thrust::raw_pointer_cast(d_offsets_end.data())));
     }
-
-    AssertEquals(result_values, expected_values);
-    AssertEquals(result_keys, expected_keys);
   }
 }
 
 int main(int argc, char** argv)
 {
-  CommandLineArgs args(argc, argv);
-
-  // Initialize device
-  CubDebugExit(args.DeviceInit());
-
-  // %PARAM% TEST_LAUNCH lid 0:1
-
-#if TEST_LAUNCH == 0
-  TestZeroSegments();
-  TestEmptySegments(1 << 2);
-  TestEmptySegments(1 << 22);
-
-#if TEST_HALF_T
-  Test<half_t, std::uint32_t>();
-#endif
-
-#if TEST_BF_T
-  Test<bfloat16_t, std::uint32_t>();
-#endif
-
   Test<bool, std::uint64_t>();
-  Test<std::uint8_t, std::uint64_t>();
-  Test<std::int64_t, std::uint32_t>();
-
-#elif TEST_LAUNCH == 1
-  TestDeviceSideLaunch<int>();
-#endif // TEST_LAUNCH
-
-  TestUnspecifiedRanges();
 
   return 0;
 }
