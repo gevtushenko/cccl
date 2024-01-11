@@ -72,31 +72,6 @@ struct ReversedIota
 };
 
 
-template <typename KeyT>
-struct Iota
-{
-  KeyT *data{};
-  const int *offsets{};
-
-  Iota(KeyT *data, const int *offsets)
-      : data(data)
-      , offsets(offsets)
-  {}
-
-  void operator()(int segment_id) const
-  {
-    const int segment_begin = offsets[segment_id];
-    const int segment_end   = offsets[segment_id + 1];
-
-    int count = 0;
-    for (int i = segment_begin; i < segment_end; i++)
-    {
-      data[i] = static_cast<KeyT>(count++);
-    }
-  }
-};
-
-
 template <typename KeyT,
           typename ValueT = cub::NullType>
 class Input
@@ -110,7 +85,6 @@ class Input
     std::is_same<ValueT, cub::NullType>::value, KeyT, ValueT>;
 
   int num_items {};
-  thrust::device_vector<KeyT> d_keys;
   thrust::device_vector<MaskedValueT> d_values;
   thrust::host_vector<KeyT> h_keys;
   thrust::host_vector<MaskedValueT> h_values;
@@ -122,7 +96,6 @@ public:
       , h_offsets(d_segment_sizes.size() + 1)
       , num_items(static_cast<int>(
           thrust::reduce(d_segment_sizes.begin(), d_segment_sizes.end())))
-      , d_keys(num_items)
       , d_values(num_items)
       , h_keys(num_items)
       , h_values(num_items)
@@ -147,39 +120,14 @@ public:
     return static_cast<unsigned int>(d_segment_sizes.size());
   }
 
-  const KeyT *get_d_keys() const
-  {
-    return thrust::raw_pointer_cast(d_keys.data());
-  }
-
-  thrust::device_vector<KeyT> &get_d_keys_vec()
-  {
-    return d_keys;
-  }
-
   thrust::device_vector<MaskedValueT> &get_d_values_vec()
   {
     return d_values;
   }
 
-  KeyT *get_d_keys()
-  {
-    return thrust::raw_pointer_cast(d_keys.data());
-  }
-
   const thrust::host_vector<int>& get_h_offsets()
   {
     return h_offsets;
-  }
-
-  MaskedValueT *get_d_values()
-  {
-    return thrust::raw_pointer_cast(d_values.data());
-  }
-
-  const int *get_d_offsets() const
-  {
-    return thrust::raw_pointer_cast(d_offsets.data());
   }
 
 private:
@@ -207,9 +155,6 @@ private:
     {
       generator(i);
     }
-
-    d_keys = h_keys;
-    d_values = d_keys;
   }
 };
 
