@@ -113,6 +113,10 @@ function(cub_build_compiler_targets)
     )
   endforeach()
 
+  target_compile_options(cub.compiler_interface INTERFACE
+    $<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:-G>
+  )
+
   foreach (cuda_option IN LISTS cuda_compile_options)
     target_compile_options(cub.compiler_interface INTERFACE
       $<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:${cuda_option}>

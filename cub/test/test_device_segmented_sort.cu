@@ -196,25 +196,10 @@ void HostReferenceSort(unsigned int num_segments,
     const int segment_begin = h_offsets[segment_i];
     const int segment_end   = h_offsets[segment_i + 1];
 
-    if (segment_begin > segment_end)
-    {
-      std::cout << "segment_begin > segment_end" << std::endl;
-    }
-
-    if (segment_begin < 0)
-    {
-      std::cout << "segment_begin < 0" << std::endl;
-    }
-
-    if (segment_end > static_cast<int>(h_keys.size()))
-    {
-      std::cout << "segment_end > h_keys.size()" << std::endl;
-    }
-
-    if (segment_begin > static_cast<int>(h_keys.size()))
-    {
-      std::cout << "segment_begin > h_keys.size()" << std::endl;
-    }
+    std::cout << "segment_begin: " << segment_begin << std::endl;
+    std::cout << "segment_end: " << segment_end << std::endl;
+    std::cout << "segment_size: " << segment_end - segment_begin << std::endl;
+    std::cout << "size: " << h_keys.size() << std::endl;
 
     thrust::stable_sort(h_keys.begin() + segment_begin,
                         h_keys.begin() + segment_end,

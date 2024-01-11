@@ -75,7 +75,9 @@ _CCCL_HOST_DEVICE
 {
   // use stable_partition if we're sorting bool
   // stable_partition puts true values first, so we need to logical_not
+  std::cout << "BEFORE HERE I AM (stable_primitive_sort)!" << std::endl;
   sequential::stable_partition(exec, first, last, thrust::logical_not<bool>());
+  std::cout << "AFTER HERE I AM (stable_primitive_sort)!" << std::endl;
 }
 
 

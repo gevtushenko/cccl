@@ -59,6 +59,8 @@ _CCCL_HOST_DEVICE
 {
   typedef typename thrust::iterator_traits<ForwardIterator>::value_type InputType;
 
+  std::cout << "HERE I AM!" << std::endl;
+
   // copy input to temp buffer
   thrust::detail::temporary_array<InputType,DerivedPolicy> temp(exec, first, last);
 
@@ -85,6 +87,8 @@ _CCCL_HOST_DEVICE
                                    Predicate pred)
 {
   typedef typename thrust::iterator_traits<ForwardIterator>::value_type InputType;
+
+  std::cout << "HERE I AM stencil!" << std::endl;
 
   // copy input to temp buffer
   thrust::detail::temporary_array<InputType,DerivedPolicy> temp(exec, first, last);
@@ -118,6 +122,8 @@ _CCCL_HOST_DEVICE
 {
   thrust::detail::unary_negate<Predicate> not_pred(pred);
 
+  std::cout << "HERE I AM (wtf 2)!" << std::endl;
+
   // remove_copy_if the true partition to out_true
   OutputIterator1 end_of_true_partition = thrust::remove_copy_if(exec, first, last, out_true, not_pred);
 
@@ -145,6 +151,8 @@ _CCCL_HOST_DEVICE
                           Predicate pred)
 {
   thrust::detail::unary_negate<Predicate> not_pred(pred);
+
+  std::cout << "HERE I AM (wtf)!" << std::endl;
 
   // remove_copy_if the true partition to out_true
   OutputIterator1 end_of_true_partition = thrust::remove_copy_if(exec, first, last, stencil, out_true, not_pred);

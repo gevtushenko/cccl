@@ -173,6 +173,8 @@ _CCCL_HOST_DEVICE
                                    ForwardIterator last,
                                    Predicate pred)
 {
+  // std::cout << "HERE I AM (stable_primitive)!" << std::endl;
+
   // wrap pred
   thrust::detail::wrapped_function<
     Predicate,
