@@ -1012,44 +1012,6 @@ void InputTest(bool sort_descending,
           thrust::fill(keys_output.begin(), keys_output.end(), KeyT{});
           thrust::fill(values_output.begin(), values_output.end(), ValueT{});
 
-          cub::DoubleBuffer<KeyT> keys_buffer(input.get_d_keys(),
-                                              d_keys_output);
-          cub::DoubleBuffer<ValueT> values_buffer(input.get_d_values(),
-                                                  d_values_output);
-
-          Sort<KeyT, ValueT>(sort_pairs,
-                             sort_descending,
-                             sort_buffers,
-                             stable_sort,
-                             input.get_d_keys(),
-                             d_keys_output,
-                             input.get_d_values(),
-                             d_values_output,
-                             input.get_num_items(),
-                             input.get_num_segments(),
-                             input.get_d_offsets(),
-                             &keys_buffer.selector,
-                             &values_buffer.selector);
-
-          if (sort_buffers)
-          {
-            if (sort_pairs)
-            {
-            }
-            else
-            {
-            }
-          }
-          else
-          {
-            if (sort_pairs)
-            {
-            }
-            else
-            {
-            }
-          }
-
           input.shuffle();
         }
       }
@@ -1234,30 +1196,11 @@ void InputTestRandom(Input<KeyT, ValueT> &input)
           {
             RandomizeInput(h_keys, h_values);
 
-#if STORE_ON_FAILURE
-            auto h_keys_backup = h_keys;
-            auto h_values_backup = h_values;
-#endif
-
             input.get_d_keys_vec()   = h_keys;
             input.get_d_values_vec() = h_values;
 
             cub::DoubleBuffer<KeyT> keys_buffer(input.get_d_keys(), d_keys_output);
             cub::DoubleBuffer<ValueT> values_buffer(input.get_d_values(), d_values_output);
-
-            Sort<KeyT, ValueT>(sort_pairs,
-                               sort_descending,
-                               sort_buffers,
-                               stable_sort,
-                               input.get_d_keys(),
-                               d_keys_output,
-                               input.get_d_values(),
-                               d_values_output,
-                               input.get_num_items(),
-                               input.get_num_segments(),
-                               input.get_d_offsets(),
-                               &keys_buffer.selector,
-                               &values_buffer.selector);
 
             HostReferenceSort(sort_pairs,
                               sort_descending,
@@ -1299,18 +1242,6 @@ void InputTestRandom(Input<KeyT, ValueT> &input)
               sort_pairs
                 ? compare_two_outputs(h_offsets, h_values, h_values_output)
                 : true;
-
-#if STORE_ON_FAILURE
-            if (!keys_ok || !values_ok)
-            {
-              DumpInput<KeyT, ValueT>(sort_pairs,
-                                      sort_descending,
-                                      sort_buffers,
-                                      input,
-                                      h_keys_backup,
-                                      h_values_backup);
-            }
-#endif
 
             input.shuffle();
           }
