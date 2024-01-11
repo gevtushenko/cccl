@@ -46,66 +46,6 @@
 using namespace cub;
 
 template <typename KeyT>
-struct SegmentChecker
-{
-  const KeyT *sorted_keys {};
-  const int *offsets {};
-
-  SegmentChecker(const KeyT *sorted_keys,
-                 const int *offsets)
-    : sorted_keys(sorted_keys)
-    , offsets(offsets)
-  {}
-
-  bool operator()(int segment_id)
-  {
-    const int segment_begin = offsets[segment_id];
-    const int segment_end = offsets[segment_id + 1];
-
-    int counter = 0;
-    for (int i = segment_begin; i < segment_end; i++)
-    {
-      if (sorted_keys[i] != static_cast<KeyT>(counter++))
-      {
-        return false;
-      }
-    }
-
-    return true;
-  }
-};
-
-template <typename KeyT>
-struct DescendingSegmentChecker
-{
-  const KeyT *sorted_keys{};
-  const int *offsets{};
-
-  DescendingSegmentChecker(const KeyT *sorted_keys,
-                           const int *offsets)
-      : sorted_keys(sorted_keys)
-      , offsets(offsets)
-  {}
-
-  bool operator()(int segment_id)
-  {
-    const int segment_begin = offsets[segment_id];
-    const int segment_end   = offsets[segment_id + 1];
-
-    int counter = 0;
-    for (int i = segment_end - 1; i >= segment_begin; i--)
-    {
-      if (sorted_keys[i] != static_cast<KeyT>(counter++))
-      {
-        return false;
-      }
-    }
-
-    return true;
-  }
-};
-
-template <typename KeyT>
 struct ReversedIota
 {
   KeyT *data {};
@@ -252,67 +192,6 @@ public:
   const int *get_d_offsets() const
   {
     return thrust::raw_pointer_cast(d_offsets.data());
-  }
-
-  template <typename T>
-  bool check_output_implementation(const T *keys_output)
-  {
-    const int *offsets = thrust::raw_pointer_cast(h_offsets.data());
-
-    if (reverse)
-    {
-      DescendingSegmentChecker<T> checker{keys_output, offsets};
-
-      for (int i = 0; i < get_num_segments(); i++)
-      {
-        if (!checker(i))
-        {
-          return false;
-        }
-      }
-    }
-    else
-    {
-      SegmentChecker<T> checker{keys_output, offsets};
-
-      for (int i = 0; i < get_num_segments(); i++)
-      {
-        if (!checker(i))
-        {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }
-
-  bool check_output(const KeyT *d_keys_output,
-                    const MaskedValueT *d_values_output = nullptr)
-  {
-    KeyT *keys_output = thrust::raw_pointer_cast(h_keys.data());
-    MaskedValueT *values_output = thrust::raw_pointer_cast(h_values.data());
-
-    cudaMemcpy(keys_output,
-               d_keys_output,
-               sizeof(KeyT) * num_items,
-               cudaMemcpyDeviceToHost);
-
-    const bool keys_ok = check_output_implementation(keys_output);
-
-    if (std::is_same<ValueT, cub::NullType>::value || d_values_output == nullptr)
-    {
-      return keys_ok;
-    }
-
-    cudaMemcpy(values_output,
-               d_values_output,
-               sizeof(ValueT) * num_items,
-               cudaMemcpyDeviceToHost);
-
-    const bool values_ok = check_output_implementation(values_output);
-
-    return keys_ok && values_ok;
   }
 
 private:
