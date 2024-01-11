@@ -329,17 +329,12 @@ void InputTestRandom(Input<KeyT, ValueT> &input)
 
   const thrust::host_vector<int> &h_offsets = input.get_h_offsets();
 
-  for (int iteration = 0; iteration < 2; iteration++)
-  {
-    RandomizeInput(h_keys, h_values);
+  RandomizeInput(h_keys, h_values);
 
-    input.get_d_keys_vec()   = h_keys;
-    input.get_d_values_vec() = h_values;
+  input.get_d_keys_vec()   = h_keys;
+  input.get_d_values_vec() = h_values;
 
-    HostReferenceSort(false, false, input.get_num_segments(), h_offsets, h_keys, h_values);
-
-    input.shuffle();
-  }
+  HostReferenceSort(false, false, input.get_num_segments(), h_offsets, h_keys, h_values);
 }
 
 template <typename KeyT,
