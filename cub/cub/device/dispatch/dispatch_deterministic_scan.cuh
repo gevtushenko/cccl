@@ -53,54 +53,49 @@ CUB_NAMESPACE_BEGIN
 namespace detail
 {
 
-namespace deterministic_scan
+namespace run_to_run_deterministic_scan
 {
 
-template <typename ScanTileStateT, typename NumSelectedIteratorT>
-CUB_DETAIL_KERNEL_ATTRIBUTES void
-reduce_kernel(ScanTileStateT tile_state, int num_tiles, NumSelectedIteratorT d_num_selected_out)
-{
-  // Initialize tile status
-  tile_state.InitializeStatus(num_tiles);
-
-  // Initialize d_num_selected_out
-  if ((blockIdx.x == 0) && (threadIdx.x == 0))
-  {
-    *d_num_selected_out = 0;
-  }
-}
-
-template <typename ChainedPolicyT,
-          typename InputIteratorT,
-          typename OutputIteratorT,
-          typename ScanTileStateT,
-          typename ScanOpT,
-          typename InitValueT,
-          typename OffsetT,
-          typename AccumT>
+template <class ChainedPolicyT,
+          class InputIteratorT,
+          class ScanOpT,
+          class InitValueT,
+          class OffsetT,
+          class AccumT>
 __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ScanPolicyT::BLOCK_THREADS))
-  CUB_DETAIL_KERNEL_ATTRIBUTES void scan_kernel(
+  CUB_DETAIL_KERNEL_ATTRIBUTES void reduce_kernel(
     InputIteratorT d_in,
-    OutputIteratorT d_out,
-    ScanTileStateT tile_state,
-    int start_tile,
+    AccumT *d_tile_aggregates,
     ScanOpT scan_op,
     InitValueT init_value,
     OffsetT num_items)
 {
-  using RealInitValueT = typename InitValueT::value_type;
-  typedef typename ChainedPolicyT::ActivePolicy::ScanPolicyT ScanPolicyT;
+  // thread block reduces tile to one aggregate
+}
 
-  // Thread block type for scanning input tiles
-  typedef AgentScan<ScanPolicyT, InputIteratorT, OutputIteratorT, ScanOpT, RealInitValueT, OffsetT, AccumT> AgentScanT;
+template <class ChainedPolicyT, class ScanOpT, class AccumT, class OffsetT>
+__launch_bounds__(int(ChainedPolicyT::ActivePolicy::ScanPolicyT::BLOCK_THREADS))
+CUB_DETAIL_KERNEL_ATTRIBUTES void tile_scan_kernel(AccumT *d_tile_aggregates, ScanOpT scan_op, OffsetT num_tiles)
+{
+  // single thread block computes prefix sum of tile aggregates
+}
 
-  // Shared memory for AgentScan
-  __shared__ typename AgentScanT::TempStorage temp_storage;
-
-  RealInitValueT real_init_value = init_value;
-
-  // Process tiles
-  AgentScanT(temp_storage, d_in, d_out, scan_op, real_init_value).ConsumeRange(num_items, tile_state, start_tile);
+// TODO Iterate tiles in reverse order to utilize some cache left from the first pass
+template <class ChainedPolicyT,
+          class InputIteratorT,
+          class OutputIteratorT,
+          class ScanOpT,
+          class OffsetT,
+          class AccumT>
+__launch_bounds__(int(ChainedPolicyT::ActivePolicy::ScanPolicyT::BLOCK_THREADS))
+  CUB_DETAIL_KERNEL_ATTRIBUTES void scan_kernel(
+    InputIteratorT d_in,
+    AccumT d_tile_aggregates,
+    OutputIteratorT d_out,
+    ScanOpT scan_op,
+    OffsetT num_items)
+{
+  // thread block scans tile and writes results to output
 }
 
 template <typename InputIteratorT,
@@ -108,11 +103,12 @@ template <typename InputIteratorT,
           typename ScanOpT,
           typename InitValueT,
           typename OffsetT,
-          typename AccumT         = detail::accumulator_t<ScanOpT,
-                                                  cub::detail::conditional_t<std::is_same<InitValueT, NullType>::value,
-                                                                             cub::detail::value_t<InputIteratorT>,
-                                                                             typename InitValueT::value_type>,
-                                                  cub::detail::value_t<InputIteratorT>>,
+          typename AccumT = //
+          detail::accumulator_t<ScanOpT,
+                                cub::detail::conditional_t<std::is_same<InitValueT, NullType>::value,
+                                                           cub::detail::value_t<InputIteratorT>,
+                                                           typename InitValueT::value_type>,
+                                cub::detail::value_t<InputIteratorT>>,
           typename SelectedPolicy = DeviceScanPolicy<AccumT, ScanOpT>>
 struct dispatch_t : SelectedPolicy
 {
@@ -155,7 +151,6 @@ struct dispatch_t : SelectedPolicy
   Invoke(ReduceKernel reduce_kernel, ScanKernel scan_kernel)
   {
     typedef typename ActivePolicyT::ScanPolicyT Policy;
-    typedef typename cub::ScanTileState<AccumT> ScanTileStateT;
 
     // `LOAD_LDG` makes in-place execution UB and doesn't lead to better
     // performance.
@@ -180,11 +175,7 @@ struct dispatch_t : SelectedPolicy
 
       // Specify temporary storage allocation requirements
       size_t allocation_sizes[1];
-      error = CubDebug(ScanTileStateT::AllocationSize(num_tiles, allocation_sizes[0]));
-      if (cudaSuccess != error)
-      {
-        break; // bytes needed for tile status descriptors
-      }
+      allocation_sizes[0] = num_tiles * sizeof(AccumT);
 
       // Compute allocation pointers into the single storage blob (or compute
       // the necessary size of the blob)
@@ -208,17 +199,6 @@ struct dispatch_t : SelectedPolicy
       {
         break;
       }
-
-      // Construct the tile status interface
-      ScanTileStateT tile_state;
-      error = CubDebug(tile_state.Init(num_tiles, allocations[0], allocation_sizes[0]));
-      if (cudaSuccess != error)
-      {
-        break;
-      }
-
-      // Log init_kernel configuration
-      int init_grid_size = cub::DivideAndRoundUp(num_tiles, INIT_KERNEL_THREADS);
 
 #ifdef CUB_DETAIL_DEBUG_ENABLE_LOG
       _CubLog("Invoking init_kernel<<<%d, %d, 0, %lld>>>()\n", init_grid_size, INIT_KERNEL_THREADS, (long long) stream);
@@ -349,7 +329,7 @@ struct dispatch_t : SelectedPolicy
   }
 };
 
-} // namespace deterministic_scan
+} // namespace run_to_run_deterministic_scan
 } // namespace detail
 
 CUB_NAMESPACE_END
