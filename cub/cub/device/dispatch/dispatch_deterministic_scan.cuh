@@ -110,7 +110,7 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   __shared__ typename AgentReduceT::TempStorage temp_storage;
 
   AccumT block_aggregate =
-    AgentReduceT(temp_storage, d_in, scan_op, ::cuda::std::__identity{}).ConsumeTiles(tile_begin, tile_end);
+    AgentReduceT(temp_storage, d_in, scan_op, ::cuda::std::__identity{}).ConsumeRange(tile_begin, tile_end);
 
   if (threadIdx.x == 0)
   {
@@ -119,13 +119,13 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
 }
 
 template <class ChainedPolicyT, class InitValueT, class ScanOpT, class AccumT, class OffsetT>
-__launch_bounds__(int(ChainedPolicyT::ActivePolicy::ScanPolicyT::BLOCK_THREADS))
+__launch_bounds__(1024)
   CUB_DETAIL_KERNEL_ATTRIBUTES void tile_scan_kernel(
     AccumT* d_tile_aggregates, ScanOpT scan_op, InitValueT init_value, OffsetT num_tiles)
 {
   using policy_t                  = typename ChainedPolicyT::ActivePolicy::ReducePolicy;
   constexpr auto items_per_thread = policy_t::BLOCK_THREADS;
-  constexpr auto block_threads    = policy_t::ITEMS_PER_THREAD;
+  constexpr auto block_threads    = 1024;
   constexpr bool is_inclusive     = ::cuda::std::is_same<InitValueT, NullType>::value;
 
   // single thread block computes prefix sum of tile aggregates
@@ -171,7 +171,7 @@ template <class ChainedPolicyT,
           class ScanOpT,
           class OffsetT,
           class AccumT>
-__launch_bounds__(int(ChainedPolicyT::ActivePolicy::ScanPolicyT::BLOCK_THREADS))
+__launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS))
   CUB_DETAIL_KERNEL_ATTRIBUTES void scan_kernel(
     InputIteratorT d_in,
     AccumT *d_tile_aggregates,
@@ -218,7 +218,7 @@ template <class InputIteratorT,
                                                            cub::detail::value_t<InputIteratorT>,
                                                            typename InitValueT::value_type>,
                                 cub::detail::value_t<InputIteratorT>>,
-          typename SelectedPolicy = DeviceScanPolicy<AccumT, ScanOpT>>
+          typename SelectedPolicy = policy_hub_t<AccumT>>
 struct dispatch_t : SelectedPolicy
 {
   using InputT = cub::detail::value_t<InputIteratorT>;
@@ -349,9 +349,9 @@ struct dispatch_t : SelectedPolicy
 #ifdef CUB_DETAIL_DEBUG_ENABLE_LOG
       _CubLog("Invoking scan_kernel<<<%d, %d, 0, %lld>>>()\n", num_tiles, block_threads, (long long) stream);
 #endif
-      // Invoke tile_scan_kernel to turn tile aggregates into tile prefixes
+      // Invoke scan to turn tile aggregates into tile prefixes
       THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(num_tiles, block_threads, 0, stream)
-        .doit(d_in, d_tile_aggregates, d_out, scan_op, num_items);
+        .doit(scan, d_in, d_tile_aggregates, d_out, scan_op, num_items);
 
       // Check for failure to launch
       error = CubDebug(cudaPeekAtLastError());
@@ -380,7 +380,7 @@ struct dispatch_t : SelectedPolicy
                                  scan_kernel<max_policy_t, InputIteratorT, OutputIteratorT, ScanOpT, OffsetT, AccumT>);
   }
 
-  CUB_RUNTIME_FUNCTION _CCCL_FORCEINLINE static cudaError_t dispatch(
+  CUB_RUNTIME_FUNCTION _CCCL_FORCEINLINE static cudaError_t Dispatch(
     void* d_temp_storage,
     size_t& temp_storage_bytes,
     InputIteratorT d_in,
