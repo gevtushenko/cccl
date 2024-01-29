@@ -62,8 +62,8 @@ struct policy_hub_t
   /// SM35
   struct policy_350_t : ChainedPolicy<350, policy_350_t, policy_350_t>
   {
-    static constexpr int threads_per_block  = 256;
-    static constexpr int items_per_thread   = 4;
+    static constexpr int threads_per_block  = 320;
+    static constexpr int items_per_thread   = 12;
     static constexpr int items_per_vec_load = 4;
 
     using ReducePolicy = AgentReducePolicy<threads_per_block,
@@ -124,7 +124,7 @@ __launch_bounds__(1024)
     AccumT* d_tile_aggregates, ScanOpT scan_op, InitValueT init_value, OffsetT num_tiles)
 {
   using policy_t                  = typename ChainedPolicyT::ActivePolicy::ReducePolicy;
-  constexpr auto items_per_thread = policy_t::BLOCK_THREADS;
+  constexpr auto items_per_thread = policy_t::ITEMS_PER_THREAD;
   constexpr auto block_threads    = 1024;
   constexpr bool is_inclusive     = ::cuda::std::is_same<InitValueT, NullType>::value;
 
@@ -183,8 +183,8 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
 {
   // thread block scans tile and writes results to output
   using policy_t                  = typename ChainedPolicyT::ActivePolicy::ReducePolicy;
-  constexpr auto items_per_thread = policy_t::BLOCK_THREADS;
-  constexpr auto block_threads    = policy_t::ITEMS_PER_THREAD;
+  constexpr auto items_per_thread = policy_t::ITEMS_PER_THREAD;
+  constexpr auto block_threads    = policy_t::BLOCK_THREADS;
 
   using scan_t            = BlockScan<AccumT, block_threads>;
   using temp_storage_t    = typename scan_t::TempStorage;
@@ -198,7 +198,7 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   const auto valid_items = tile_begin + tile_items < num_items ? tile_items : num_items - tile_begin;
 
   BlockScanRunningPrefixOp<AccumT, ScanOpT> prefix_op(scan_op);
-  prefix_op.running_total = d_tile_aggregates[blockIdx.x];
+  prefix_op.running_total = d_tile_aggregates[tile_id];
 
   // TODO block load
   AccumT items[items_per_thread];
@@ -334,6 +334,7 @@ struct dispatch_t : SelectedPolicy
       // Invoke tile_scan_kernel to turn tile aggregates into tile prefixes
       THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(1, 1024, 0, stream)
         .doit(tile_scan, d_tile_aggregates, scan_op, init_value, num_tiles);
+
 
       // Check for failure to launch
       error = CubDebug(cudaPeekAtLastError());
