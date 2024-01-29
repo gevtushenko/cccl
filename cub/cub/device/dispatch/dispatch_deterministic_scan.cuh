@@ -330,7 +330,7 @@ struct dispatch_t : SelectedPolicy
 #endif
       // Invoke tile_scan_kernel to turn tile aggregates into tile prefixes
       THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(1, 1024, 0, stream)
-        .doit(d_tile_aggregates, scan_op, init_value, num_tiles);
+        .doit(tile_scan, d_tile_aggregates, scan_op, init_value, num_tiles);
 
       // Check for failure to launch
       error = CubDebug(cudaPeekAtLastError());

@@ -41,8 +41,10 @@
 #  pragma system_header
 #endif // no system header
 
+#include <cub/device/dispatch/dispatch_deterministic_scan.cuh>
 #include <cub/device/dispatch/dispatch_scan.cuh>
 #include <cub/device/dispatch/dispatch_scan_by_key.cuh>
+#include <cub/guarantees.cuh>
 #include <cub/thread/thread_operators.cuh>
 #include <cub/util_deprecated.cuh>
 
@@ -92,6 +94,42 @@ CUB_NAMESPACE_BEGIN
 //! @endrst
 struct DeviceScan
 {
+private:
+  template <class OffsetT, class InputIteratorT, class OutputIteratorT, class InitT>
+  CUB_RUNTIME_FUNCTION static cudaError_t dispatch(
+    void* d_temp_storage,
+    size_t& temp_storage_bytes,
+    InputIteratorT d_in,
+    OutputIteratorT d_out,
+    int num_items,
+    InitT init_value,
+    cudaStream_t stream,
+    cub::detail::guarantees::determinism_not_guaranteed_t)
+  {
+    return DispatchScan<InputIteratorT, OutputIteratorT, Sum, InitT, OffsetT>::Dispatch(
+      d_temp_storage, temp_storage_bytes, d_in, d_out, Sum(), init_value, num_items, stream);
+  }
+
+  template <class OffsetT, class InputIteratorT, class OutputIteratorT, class InitT>
+  CUB_RUNTIME_FUNCTION static cudaError_t dispatch(
+    void* d_temp_storage,
+    size_t& temp_storage_bytes,
+    InputIteratorT d_in,
+    OutputIteratorT d_out,
+    int num_items,
+    InitT init_value,
+    cudaStream_t stream,
+    cub::detail::guarantees::run_to_run_deterministic_t)
+  {
+    return detail::run_to_run_deterministic_scan::
+      dispatch_t<InputIteratorT, OutputIteratorT, Sum, InitT, OffsetT>::Dispatch(
+        d_temp_storage, temp_storage_bytes, d_in, d_out, Sum(), init_value, num_items, stream);
+  }
+
+public:
+  using default_guarantees_t =
+    cub::detail::guarantees::guarantees_t<cub::detail::guarantees::determinism_not_guaranteed_t>;
+
   //! @name Exclusive scans
   //! @{
 
@@ -172,27 +210,35 @@ struct DeviceScan
   //!   @rst
   //!   **[optional]** CUDA stream to launch kernels within. Default is stream\ :sub:`0`.
   //!   @endrst
-  template <typename InputIteratorT, typename OutputIteratorT>
-  CUB_RUNTIME_FUNCTION static cudaError_t
-  ExclusiveSum(void *d_temp_storage,
-               size_t &temp_storage_bytes,
-               InputIteratorT d_in,
-               OutputIteratorT d_out,
-               int num_items,
-               cudaStream_t stream = 0)
+  template <class InputIteratorT, class OutputIteratorT, class RequirementsT = default_guarantees_t>
+  CUB_RUNTIME_FUNCTION static cudaError_t ExclusiveSum(
+    void* d_temp_storage,
+    size_t& temp_storage_bytes,
+    InputIteratorT d_in,
+    OutputIteratorT d_out,
+    int num_items,
+    cudaStream_t stream        = 0,
+    RequirementsT requirements = RequirementsT())
   {
     // Signed integer type for global offsets
     using OffsetT = int;
-    using InitT = cub::detail::value_t<InputIteratorT>;
+    using InitT   = cub::detail::value_t<InputIteratorT>;
+
+    auto guarantees  = cub::detail::requirements::mask(default_guarantees_t(), requirements);
+    auto determinism = cub::detail::requirements::get<cub::detail::guarantees::run_to_run_deterministic_t>(guarantees);
 
     // Initial value
     InitT init_value{};
 
-    return DispatchScan<
-        InputIteratorT, OutputIteratorT, Sum, detail::InputValue<InitT>,
-        OffsetT>::Dispatch(d_temp_storage, temp_storage_bytes, d_in, d_out,
-                           Sum(), detail::InputValue<InitT>(init_value),
-                           num_items, stream);
+    return dispatch<OffsetT>(
+      d_temp_storage,
+      temp_storage_bytes,
+      d_in,
+      d_out,
+      num_items,
+      detail::InputValue<InitT>(init_value),
+      stream,
+      determinism);
   }
 
   template <typename InputIteratorT, typename OutputIteratorT>
