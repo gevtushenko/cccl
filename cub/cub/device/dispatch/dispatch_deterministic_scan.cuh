@@ -63,7 +63,7 @@ struct policy_hub_t
   struct policy_350_t : ChainedPolicy<350, policy_350_t, policy_350_t>
   {
     static constexpr int threads_per_block  = 256;
-    static constexpr int items_per_thread   = 20;
+    static constexpr int items_per_thread   = 4;
     static constexpr int items_per_vec_load = 4;
 
     using ReducePolicy = AgentReducePolicy<threads_per_block,
@@ -96,7 +96,7 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
 
   const auto tile_id    = static_cast<OffsetT>(blockIdx.x);
   const auto tile_begin = tile_id * tile_items;
-  const auto tile_end   = tile_begin + tile_items ? num_items : tile_begin + tile_items;
+  const auto tile_end   = tile_begin + tile_items < num_items ? tile_begin + tile_items : num_items;
 
   using AgentReduceT =
     AgentReduce<typename ChainedPolicyT::ActivePolicy::ReducePolicy,
@@ -161,6 +161,8 @@ __launch_bounds__(1024)
     CTA_SYNC();
 
     StoreDirectBlocked(threadIdx.x, d_tile_aggregates + offset, items, valid_items);
+
+    offset += tile_items;
   }
 }
 
@@ -191,20 +193,21 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
 
   constexpr auto tile_items = block_threads * items_per_thread;
 
+  const auto tile_id    = static_cast<OffsetT>(blockIdx.x);
+  const auto tile_begin = tile_id * tile_items;
+  const auto valid_items = tile_begin + tile_items < num_items ? tile_items : num_items - tile_begin;
+
   BlockScanRunningPrefixOp<AccumT, ScanOpT> prefix_op(scan_op);
   prefix_op.running_total = d_tile_aggregates[blockIdx.x];
 
-  OffsetT offset = 0;
-  const auto valid_items = CUB_MIN(num_items - offset, tile_items);
-
   // TODO block load
   AccumT items[items_per_thread];
-  LoadDirectBlocked(threadIdx.x, d_in + offset, items, valid_items);
+  LoadDirectBlocked(threadIdx.x, d_in + tile_begin, items, valid_items);
 
   scan_t(temp_storage).ExclusiveScan(items, items, scan_op, prefix_op);
   CTA_SYNC();
 
-  StoreDirectBlocked(threadIdx.x, d_out + offset, items, valid_items);
+  StoreDirectBlocked(threadIdx.x, d_out + tile_begin, items, valid_items);
 }
 
 template <class InputIteratorT,
