@@ -13,6 +13,8 @@ cd $SCRIPT_PATH
 rm -rf img
 mkdir -p img
 
+echo "test"
+
 if [ ! -d cubimg ]; then
     git clone -b gh-pages https://github.com/NVlabs/cub.git cubimg
 fi 
