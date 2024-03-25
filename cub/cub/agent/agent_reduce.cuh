@@ -43,8 +43,6 @@
 #  pragma system_header
 #endif // no system header
 
-#include <iterator>
-
 #include <cub/block/block_load.cuh>
 #include <cub/block/block_reduce.cuh>
 #include <cub/detail/type_traits.cuh>
@@ -148,7 +146,7 @@ struct AgentReduce
   // Wrap the native input pointer with CacheModifiedInputIterator
   // or directly use the supplied input iterator type
   using WrappedInputIteratorT = cub::detail::conditional_t<
-    std::is_pointer<InputIteratorT>::value,
+    ::cuda::std::is_pointer<InputIteratorT>::value,
     CacheModifiedInputIterator<AgentReducePolicy::LOAD_MODIFIER, InputT, OffsetT>,
     InputIteratorT>;
 
@@ -163,7 +161,7 @@ struct AgentReduce
   // pointer to a primitive type
   static constexpr bool ATTEMPT_VECTORIZATION = (VECTOR_LOAD_LENGTH > 1) &&
                             (ITEMS_PER_THREAD % VECTOR_LOAD_LENGTH == 0) &&
-                            (std::is_pointer<InputIteratorT>::value) &&
+                            (::cuda::std::is_pointer<InputIteratorT>::value) &&
                             Traits<InputT>::PRIMITIVE;
 
   static constexpr CacheLoadModifier LOAD_MODIFIER =
