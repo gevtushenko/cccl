@@ -80,7 +80,8 @@ namespace detail
 {
 
 // Impl taken from https://www.boost.org/doc/libs/1_85_0/boost/math/ccmath/ldexp.hpp
-__device__ __host__ __forceinline__ constexpr auto custom_ldexp(double arg, int exp)
+template <typename T>
+__device__ __host__ __forceinline__ constexpr T custom_ldexp(T arg, int exp)
 {
   while (exp > 0)
   {
@@ -207,29 +208,35 @@ struct RFA_bins
   //   return bins_[d];
   // }
 
-  __device__ __host__ static constexpr array<ftype, MAXINDEX + MAXFOLD> initialize_bins()
+  template <int index>
+  __device__ __host__ static inline constexpr ftype initialize_bins()
   {
-    array<ftype, MAXINDEX + MAXFOLD> bins = {};
-    if constexpr (std::is_same_v<ftype, float>)
+    // array<ftype, MAXINDEX + MAXFOLD> bins = {};
+    if (index == 0)
     {
-      bins[0] = custom_ldexp(0.75, MAX_EXP);
-    }
-    else
-    {
-      bins[0] = 2.0 * custom_ldexp(0.75, MAX_EXP - 1);
+      if constexpr (std::is_same_v<ftype, float>)
+      {
+        return static_cast<ftype>(custom_ldexp(static_cast<ftype>(0.75), MAX_EXP));
+      }
+      else
+      {
+        return static_cast<ftype>(2.0 * custom_ldexp(static_cast<ftype>(0.75), MAX_EXP - 1));
+      }
     }
 
-    // // #pragma unroll
+    // #pragma unroll
     //     for (int index = 1; index <= MAXINDEX; index++)
     //     {
     //       bins[index] = custom_ldexp(0.75, MAX_EXP + MANT_DIG - BIN_WIDTH + 1 - index * BIN_WIDTH);
     //       // printf("index=%d\n", index);
     //     }
 
-    for_<MAXINDEX + 1>([&](auto i) {
-      constexpr int index = i.value + 1;
-      bins[index]         = custom_ldexp(0.75, MAX_EXP + MANT_DIG - BIN_WIDTH + 1 - index * BIN_WIDTH);
-    });
+    // for_<MAXINDEX + 1>([&](auto i) {
+    //   constexpr int index = i.value + 1;
+    //   bins[index]         = custom_ldexp(0.75, MAX_EXP + MANT_DIG - BIN_WIDTH + 1 - index * BIN_WIDTH);
+    // });
+    return static_cast<ftype>(
+      custom_ldexp(static_cast<ftype>(0.75), MAX_EXP + MANT_DIG - BIN_WIDTH - index * BIN_WIDTH));
 
     // for (int index = MAXINDEX + 1; index < MAXINDEX + MAXFOLD; index++)
     // {
@@ -240,15 +247,16 @@ struct RFA_bins
     // f<MAXINDEX>();
 
     // f<MAXFOLD>();
-    for_<MAXFOLD>([&](auto i) {
-      constexpr int index = i.value;
-      // if (index > MAXINDEX + MAXFOLD)
-      // {
-      //   return;
-      // }
-      bins[MAXINDEX + index] = bins[(MAXINDEX + index) - 1];
-    });
-    return bins;
+    // for_<MAXFOLD>([&](auto i) {
+    //   constexpr int index = i.value;
+    //   // if (index > MAXINDEX + MAXFOLD)
+    //   // {
+    //   //   return;
+    //   // }
+    //   bins[MAXINDEX + index] = bins[(MAXINDEX + index) - 1];
+    // });
+
+    // return bins[which_index_is_it];
   }
 };
 
@@ -308,14 +316,30 @@ private:
 
   /// Return a binned floating-point reference bin
 
-  __host__ __device__ inline constexpr array<ftype, MAXINDEX + MAXFOLD> binned_bins() const
+  template <int current_index = MAXINDEX + MAXFOLD>
+  __host__ __device__ inline constexpr ftype binned_bins(int index) const
   {
     // #ifdef __CUDA_ARCH__ // must be arch not CC here
     //     return &reinterpret_cast<const ftype*>(bin_device_buffer)[x];
     // #else
     //     return &reinterpret_cast<const ftype*>(bin_host_buffer)[x];
     // #endif
-    return RFA_bins<ftype>::initialize_bins();
+
+    if constexpr (current_index <= 0)
+    {
+      return RFA_bins<ftype>::template initialize_bins<0>();
+    }
+    else
+    {
+      if (current_index == index)
+      {
+        return RFA_bins<ftype>::template initialize_bins<current_index>();
+      }
+      else
+      {
+        return binned_bins<current_index - 1>(index);
+      }
+    }
   }
 
   /// Get the bit representation of a float
@@ -522,10 +546,11 @@ private:
     int X_index = binned_dindex(max_abs_val);
     if (ISZERO(primary(0)))
     {
-      // constexpr auto bins = binned_bins(X_index);
+// constexpr auto bins = binned_bins(X_index);
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
-        primary(i * incpriY) = binned_bins()[i + X_index];
+        primary(i * incpriY) = binned_bins(i + X_index);
         carry(i * inccarY)   = 0.0;
       }
     }
@@ -534,7 +559,7 @@ private:
       int shift = binned_index() - X_index;
       if (shift > 0)
       {
-        // #pragma unroll
+#pragma unroll
         for (int i = FOLD - 1; i >= 1; i--)
         {
           if (i < shift)
@@ -544,15 +569,15 @@ private:
           primary(i * incpriY) = primary((i - shift) * incpriY);
           carry(i * inccarY)   = carry((i - shift) * inccarY);
         }
-        // constexpr auto const bins = binned_bins(X_index);
-        // #pragma unroll
+// constexpr auto const bins = binned_bins(X_index);
+#pragma unroll
         for (int j = 0; j < FOLD; j++)
         {
           if (j >= shift)
           {
             break;
           }
-          primary(j * incpriY) = binned_bins()[j + X_index];
+          primary(j * incpriY) = binned_bins(j + X_index);
           carry(j * inccarY)   = 0.0;
         }
       }
@@ -588,7 +613,7 @@ private:
       M *= EXPANSION * 0.5;
       x += M;
       x += M;
-      // #pragma unroll
+#pragma unroll
       for (int i = 1; i < FOLD - 1; i++)
       {
         M  = primary(i * incpriY);
@@ -607,7 +632,7 @@ private:
     {
       ftype qd = x;
       auto& ql = get_bits(qd);
-      // #pragma unroll
+#pragma unroll
       for (int i = 0; i < FOLD - 1; i++)
       {
         M  = primary(i * incpriY);
@@ -638,6 +663,7 @@ private:
       return;
     }
 
+#pragma unroll
     for (int i = 0; i < FOLD; i++)
     {
       auto tmp_renormd  = primary(i * incpriX);
@@ -701,24 +727,24 @@ private:
       scaled     = max(min(FOLD, (3 * MANT_DIG) / BIN_WIDTH - X_index), 0);
       if (X_index == 0)
       {
-        Y += carry(0) * ((binned_bins()[0 + X_index] / 6.0) * scale_down * EXPANSION);
-        Y += carry(inccarX) * ((binned_bins()[1 + X_index] / 6.0) * scale_down);
-        Y += (primary(0) - binned_bins()[0 + X_index]) * scale_down * EXPANSION;
+        Y += carry(0) * ((binned_bins(0 + X_index) / 6.0) * scale_down * EXPANSION);
+        Y += carry(inccarX) * ((binned_bins(1 + X_index) / 6.0) * scale_down);
+        Y += (primary(0) - binned_bins(0 + X_index)) * scale_down * EXPANSION;
         i = 2;
       }
       else
       {
-        Y += carry(0) * ((binned_bins()[0 + X_index] / 6.0) * scale_down);
+        Y += carry(0) * ((binned_bins(0 + X_index) / 6.0) * scale_down);
         i = 1;
       }
       for (; i < scaled; i++)
       {
-        Y += carry(i * inccarX) * ((binned_bins()[i + X_index] / 6.0) * scale_down);
-        Y += (primary((i - 1) * incpriX) - binned_bins()[i - 1 + X_index]) * scale_down;
+        Y += carry(i * inccarX) * ((binned_bins(i + X_index) / 6.0) * scale_down);
+        Y += (primary((i - 1) * incpriX) - binned_bins(i - 1 + X_index)) * scale_down;
       }
       if (i == FOLD)
       {
-        Y += (primary((FOLD - 1) * incpriX) - binned_bins()[FOLD - 1 + X_index]) * scale_down;
+        Y += (primary((FOLD - 1) * incpriX) - binned_bins(FOLD - 1 + X_index)) * scale_down;
         return Y * scale_up;
       }
       if (std::isinf(Y * scale_up))
@@ -728,20 +754,20 @@ private:
       Y *= scale_up;
       for (; i < FOLD; i++)
       {
-        Y += carry(i * inccarX) * (binned_bins()[i + X_index] / 6.0);
-        Y += primary((i - 1) * incpriX) - binned_bins()[i - 1 + X_index];
+        Y += carry(i * inccarX) * (binned_bins(i + X_index) / 6.0);
+        Y += primary((i - 1) * incpriX) - binned_bins(i - 1 + X_index);
       }
-      Y += primary((FOLD - 1) * incpriX) - binned_bins()[FOLD - 1 + X_index];
+      Y += primary((FOLD - 1) * incpriX) - binned_bins(FOLD - 1 + X_index);
     }
     else
     {
-      Y += carry(0) * (binned_bins()[0 + X_index] / 6.0);
+      Y += carry(0) * (binned_bins(0 + X_index) / 6.0);
       for (i = 1; i < FOLD; i++)
       {
-        Y += carry(i * inccarX) * (binned_bins()[i + X_index] / 6.0);
-        Y += (primary((i - 1) * incpriX) - binned_bins()[i - 1 + X_index]);
+        Y += carry(i * inccarX) * (binned_bins(i + X_index) / 6.0);
+        Y += (primary((i - 1) * incpriX) - binned_bins(i - 1 + X_index));
       }
-      Y += (primary((FOLD - 1) * incpriX) - binned_bins()[FOLD - 1 + X_index]);
+      Y += (primary((FOLD - 1) * incpriX) - binned_bins(FOLD - 1 + X_index));
     }
     return Y;
   }
@@ -771,22 +797,22 @@ private:
     // constexpr auto const bins = binned_bins(X_index);
     if (X_index == 0)
     {
-      Y += (double) carry(0) * (double) (binned_bins()[0 + X_index] / 6.0) * (double) EXPANSION;
-      Y += (double) carry(inccarX) * (double) (binned_bins()[1 + X_index] / 6.0);
-      Y += (double) (primary(0) - binned_bins()[0 + X_index]) * (double) EXPANSION;
+      Y += (double) carry(0) * (double) (binned_bins(0 + X_index) / 6.0) * (double) EXPANSION;
+      Y += (double) carry(inccarX) * (double) (binned_bins(1 + X_index) / 6.0);
+      Y += (double) (primary(0) - binned_bins(0 + X_index)) * (double) EXPANSION;
       i = 2;
     }
     else
     {
-      Y += (double) carry(0) * (double) (binned_bins()[0 + X_index] / 6.0);
+      Y += (double) carry(0) * (double) (binned_bins(0 + X_index) / 6.0);
       i = 1;
     }
     for (; i < FOLD; i++)
     {
-      Y += (double) carry(i * inccarX) * (double) (binned_bins()[i + X_index] / 6.0);
-      Y += (double) (primary((i - 1) * incpriX) - binned_bins()[i - 1 + X_index]);
+      Y += (double) carry(i * inccarX) * (double) (binned_bins(i + X_index) / 6.0);
+      Y += (double) (primary((i - 1) * incpriX) - binned_bins(i - 1 + X_index));
     }
-    Y += (double) (primary((FOLD - 1) * incpriX) - binned_bins()[FOLD - 1 + X_index]);
+    Y += (double) (primary((FOLD - 1) * incpriX) - binned_bins(FOLD - 1 + X_index));
 
     return (float) Y;
   }
@@ -828,9 +854,9 @@ private:
     const auto shift   = Y_index - X_index;
     if (shift > 0)
     {
-      // constexpr auto const bins = binned_bins(Y_index);
-      // shift Y upwards and add X to Y
-      // #pragma unroll
+// constexpr auto const bins = binned_bins(Y_index);
+// shift Y upwards and add X to Y
+#pragma unroll
       for (int i = FOLD - 1; i >= 1; i--)
       {
         if (i < shift)
@@ -838,10 +864,10 @@ private:
           break;
         }
         primary(i * incpriY) =
-          x.primary(i * incpriX) + (primary((i - shift) * incpriY) - binned_bins()[i - shift + Y_index]);
+          x.primary(i * incpriX) + (primary((i - shift) * incpriY) - binned_bins(i - shift + Y_index));
         carry(i * inccarY) = x.carry(i * inccarX) + carry((i - shift) * inccarY);
       }
-      // #pragma unroll
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         if (i == shift)
@@ -854,27 +880,27 @@ private:
     }
     else if (shift < 0)
     {
-      // constexpr auto const bins = binned_bins(X_index);
-      // shift X upwards and add X to Y
-      // #pragma unroll
+// constexpr auto const bins = binned_bins(X_index);
+// shift X upwards and add X to Y
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         if (i < -shift)
         {
           continue;
         }
-        primary(i * incpriY) += x.primary((i + shift) * incpriX) - binned_bins()[i + shift];
+        primary(i * incpriY) += x.primary((i + shift) * incpriX) - binned_bins(i + shift);
         carry(i * inccarY) += x.carry((i + shift) * inccarX);
       }
     }
     else if (shift == 0)
     {
-      // constexpr auto const bins = binned_bins(X_index);
-      // add X to Y
-      // #pragma unroll
+// constexpr auto const bins = binned_bins(X_index);
+// add X to Y
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
-        primary(i * incpriY) += x.primary(i * incpriX) - binned_bins()[i + X_index];
+        primary(i * incpriY) += x.primary(i * incpriX) - binned_bins(i + X_index);
         carry(i * inccarY) += x.carry(i * inccarX);
       }
     }
@@ -1000,10 +1026,12 @@ public:
     if (primary(0) != 0.0)
     {
       // constexpr auto const bins = binned_bins(binned_index());
+
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         temp.primary(i * incpriX) =
-          binned_bins()[i + binned_index()] - (primary(i * incpriX) - binned_bins()[i + binned_index()]);
+          binned_bins(i + binned_index()) - (primary(i * incpriX) - binned_bins(i + binned_index()));
         temp.carry(i * inccarX) = -carry(i * inccarX);
       }
     }

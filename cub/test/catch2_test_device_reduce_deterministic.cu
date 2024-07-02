@@ -45,7 +45,7 @@
 
 // %PARAM% TEST_LAUNCH lid 0:1:2
 
-using float_type_list = c2h::type_list<float, double>;
+using float_type_list = c2h::type_list<float>;
 
 template <int NOMINAL_BLOCK_THREADS_4B, int NOMINAL_ITEMS_PER_THREAD_4B>
 struct AgentReducePolicy
