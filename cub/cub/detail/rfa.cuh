@@ -97,6 +97,54 @@ __device__ __host__ __forceinline__ constexpr T custom_ldexp(T arg, int exp)
   return arg;
 }
 
+// impl taken from https://www.boost.org/doc/libs/1_85_0/boost/math/ccmath/frexp.hpp
+
+template <typename Real>
+__device__ __host__ __forceinline__ constexpr Real frexp_zero_impl(Real arg, int* exp)
+{
+  *exp = 0;
+  return arg;
+}
+
+template <typename Real>
+__device__ __host__ __forceinline__ constexpr Real frexp_impl(Real arg, int* exp)
+{
+  const bool negative_arg = (arg < Real(0));
+
+  Real f                    = negative_arg ? -arg : arg;
+  int e2                    = 0;
+  constexpr Real two_pow_32 = Real(4294967296);
+
+  while (f >= two_pow_32)
+  {
+    f = f / two_pow_32;
+    e2 += 32;
+  }
+
+  while (f >= Real(1))
+  {
+    f = f / Real(2);
+    ++e2;
+  }
+
+  if (exp != nullptr)
+  {
+    *exp = e2;
+  }
+
+  return !negative_arg ? f : -f;
+}
+
+template <typename Real, std::enable_if_t<!std::is_integral_v<Real>, bool> = true>
+__device__ __host__ __forceinline__ constexpr Real frexp_custom(Real arg, int* exp)
+{
+  return arg == Real(0)  ? frexp_zero_impl(arg, exp)
+       : arg == Real(-0) ? frexp_zero_impl(arg, exp)
+       : std::isinf(arg) ? frexp_zero_impl(arg, exp)
+       : std::isnan(arg) ? frexp_zero_impl(arg, exp)
+                         : frexp_impl(arg, exp);
+}
+
 template <class T>
 struct get_vector_type
 {};
@@ -211,7 +259,8 @@ struct RFA_bins
   template <int index>
   __device__ __host__ static inline constexpr ftype initialize_bins()
   {
-    // array<ftype, MAXINDEX + MAXFOLD> bins = {};
+    // array<ftype, 23> bins =
+    // {2.552117751907038476e+38,6.3802943797675961899e+37,7.7884452878022414428e+33,9.5073795017117205112e+29,1.1605687868300440077e+26,1.4167099448608935641e+22,1729382256910270464,211106232532992,25769803776,3145728,384,0.046875,5.7220458984375e-06,6.9849193096160888672e-10,8.5265128291212022305e-14,1.0408340855860842566e-17,1.2705494208814505086e-21,1.5509636485369268904e-25,1.893266172530428333e-29,2.3111159332646830237e-33,2.8211864419734900191e-37,3.4438311059246704335e-41,4.2038953929744512128e-45};
     if (index == 0)
     {
       if constexpr (std::is_same_v<ftype, float>)
@@ -224,39 +273,11 @@ struct RFA_bins
       }
     }
 
-    // #pragma unroll
-    //     for (int index = 1; index <= MAXINDEX; index++)
-    //     {
-    //       bins[index] = custom_ldexp(0.75, MAX_EXP + MANT_DIG - BIN_WIDTH + 1 - index * BIN_WIDTH);
-    //       // printf("index=%d\n", index);
-    //     }
-
-    // for_<MAXINDEX + 1>([&](auto i) {
-    //   constexpr int index = i.value + 1;
-    //   bins[index]         = custom_ldexp(0.75, MAX_EXP + MANT_DIG - BIN_WIDTH + 1 - index * BIN_WIDTH);
-    // });
     return static_cast<ftype>(
       custom_ldexp(static_cast<ftype>(0.75), MAX_EXP + MANT_DIG - BIN_WIDTH - index * BIN_WIDTH));
+    // if constexpr (index >= 23) return 0.00000000000000000000;
 
-    // for (int index = MAXINDEX + 1; index < MAXINDEX + MAXFOLD; index++)
-    // {
-    //   bins[index] = bins[index - 1];
-    // }
-    // printf("max index=%d\n", MAXINDEX);
-    // printf("max fold=%d\n", MAXFOLD);
-    // f<MAXINDEX>();
-
-    // f<MAXFOLD>();
-    // for_<MAXFOLD>([&](auto i) {
-    //   constexpr int index = i.value;
-    //   // if (index > MAXINDEX + MAXFOLD)
-    //   // {
-    //   //   return;
-    //   // }
-    //   bins[MAXINDEX + index] = bins[(MAXINDEX + index) - 1];
-    // });
-
-    // return bins[which_index_is_it];
+    // return bins[index];
   }
 };
 
@@ -507,7 +528,7 @@ private:
       }
       else
       {
-        frexp(x, &exp);
+        frexp_custom(x, &exp);
         return min((MAX_EXP - exp) / BIN_WIDTH, MAXINDEX);
       }
     }
