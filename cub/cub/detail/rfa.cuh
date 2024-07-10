@@ -79,6 +79,12 @@ CUB_NAMESPACE_BEGIN
 namespace detail
 {
 
+static __device__ float* get_shared_bin_array()
+{
+  static __shared__ float bin_computed_array[40];
+  return bin_computed_array;
+}
+
 // Impl taken from https://www.boost.org/doc/libs/1_85_0/boost/math/ccmath/ldexp.hpp
 template <typename T>
 __device__ __host__ __forceinline__ constexpr T custom_ldexp(T arg, int exp)
@@ -338,29 +344,72 @@ private:
   /// Return a binned floating-point reference bin
 
   template <int current_index = MAXINDEX + MAXFOLD>
-  __host__ __device__ inline constexpr ftype binned_bins(int index) const
+  __host__ __device__ inline ftype binned_bins(int index) const
   {
-    // #ifdef __CUDA_ARCH__ // must be arch not CC here
-    //     return &reinterpret_cast<const ftype*>(bin_device_buffer)[x];
-    // #else
-    //     return &reinterpret_cast<const ftype*>(bin_host_buffer)[x];
-    // #endif
-
-    if constexpr (current_index <= 0)
+#ifdef __CUDA_ARCH__
+    ftype* bins = (ftype*) get_shared_bin_array();
+    if (index >= 40)
     {
-      return RFA_bins<ftype>::template initialize_bins<0>();
+      return static_cast<ftype>(bins[39]);
     }
-    else
+    if (index < 0)
     {
-      if (current_index == index)
-      {
-        return RFA_bins<ftype>::template initialize_bins<current_index>();
-      }
-      else
-      {
-        return binned_bins<current_index - 1>(index);
-      }
+      return static_cast<ftype>(bins[0]);
     }
+    return static_cast<ftype>(bins[index]);
+#else
+    static constexpr float bins_host[40] = {
+      2.552117751907038476e+38,
+      6.3802943797675961899e+37,
+      7.7884452878022414428e+33,
+      9.5073795017117205112e+29,
+      1.1605687868300440077e+26,
+      1.4167099448608935641e+22,
+      1729382256910270464,
+      211106232532992,
+      25769803776,
+      3145728,
+      384,
+      0.046875,
+      5.7220458984375e-06,
+      6.9849193096160888672e-10,
+      8.5265128291212022305e-14,
+      1.0408340855860842566e-17,
+      1.2705494208814505086e-21,
+      1.5509636485369268904e-25,
+      1.893266172530428333e-29,
+      2.3111159332646830237e-33,
+      2.8211864419734900191e-37,
+      3.4438311059246704335e-41,
+      4.2038953929744512128e-45,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    };
+    if (index >= 40)
+    {
+      return static_cast<ftype>(bins_host[39]);
+    }
+    if (index < 0)
+    {
+      return static_cast<ftype>(bins_host[0]);
+    }
+    return static_cast<ftype>(bins_host[index]);
+#endif
   }
 
   /// Get the bit representation of a float
