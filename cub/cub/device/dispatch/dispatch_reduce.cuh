@@ -195,55 +195,98 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   // Shared memory storage
   __shared__ typename AgentReduceT::TempStorage temp_storage;
 
-  float* shared_bins       = detail::get_shared_bin_array();
-  constexpr float bins[40] = {
-    2.552117751907038476e+38,
-    6.3802943797675961899e+37,
-    7.7884452878022414428e+33,
-    9.5073795017117205112e+29,
-    1.1605687868300440077e+26,
-    1.4167099448608935641e+22,
-    1729382256910270464,
-    211106232532992,
-    25769803776,
-    3145728,
-    384,
-    0.046875,
-    5.7220458984375e-06,
-    6.9849193096160888672e-10,
-    8.5265128291212022305e-14,
-    1.0408340855860842566e-17,
-    1.2705494208814505086e-21,
-    1.5509636485369268904e-25,
-    1.893266172530428333e-29,
-    2.3111159332646830237e-33,
-    2.8211864419734900191e-37,
-    3.4438311059246704335e-41,
-    4.2038953929744512128e-45,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-  };
+  // Consume input tiles
+  AccumT block_aggregate = AgentReduceT(temp_storage, d_in, reduction_op, transform_op).ConsumeTiles(even_share);
 
-#pragma unroll
-  for (int i = 0; i < 40; ++i)
+  // Output result
+  if (threadIdx.x == 0)
   {
-    shared_bins[i] = static_cast<float>(bins[i]);
+    detail::uninitialized_copy(d_out + blockIdx.x, block_aggregate);
   }
+}
+
+/**
+ * @brief Reduce region kernel entry point (multi-block). Computes privatized
+ *        reductions, one per thread block in deterministic fashion
+ *
+ * @tparam ChainedPolicyT
+ *   Chained tuning policy
+ *
+ * @tparam InputIteratorT
+ *   Random-access input iterator type for reading input items @iterator
+ *
+ * @tparam OffsetT
+ *   Signed integer type for global offsets
+ *
+ * @tparam ReductionOpT
+ *   Binary reduction functor type having member
+ *   `auto operator()(const T &a, const U &b)`
+ *
+ * @tparam InitT
+ *   Initial value type
+ *
+ * @tparam AccumT
+ *   Accumulator type
+ *
+ * @param[in] d_in
+ *   Pointer to the input sequence of data items
+ *
+ * @param[out] d_out
+ *   Pointer to the output aggregate
+ *
+ * @param[in] num_items
+ *   Total number of input data items
+ *
+ * @param[in] even_share
+ *   Even-share descriptor for mapping an equal number of tiles onto each
+ *   thread block
+ *
+ * @param[in] reduction_op
+ *   Binary reduction functor
+ */
+template <typename ChainedPolicyT,
+          typename InputIteratorT,
+          typename OffsetT,
+          typename ReductionOpT,
+          typename AccumT,
+          typename TransformOpT>
+CUB_DETAIL_KERNEL_ATTRIBUTES
+__launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)) void DeterministicDeviceReduceKernel(
+  InputIteratorT d_in,
+  AccumT* d_out,
+  OffsetT num_items,
+  GridEvenShare<OffsetT> even_share,
+  ReductionOpT reduction_op,
+  TransformOpT transform_op)
+{
+  // Thread block type for reducing input tiles
+  using AgentReduceT =
+    AgentReduce<typename ChainedPolicyT::ActivePolicy::ReducePolicy,
+                InputIteratorT,
+                AccumT*,
+                OffsetT,
+                ReductionOpT,
+                AccumT,
+                TransformOpT>;
+
+  // Shared memory storage
+  __shared__ typename AgentReduceT::TempStorage temp_storage;
+
+  using FloatType         = typename AccumT::ftype;
+  constexpr int BinLength = AccumT::MAXINDEX + AccumT::MAXFOLD;
+
+  FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
+
+  // #pragma unroll
+  // for (int i = 0; i < BinLength; ++i)
+  // {
+  //   shared_bins[i] = detail::RFA_bins<FloatType>::initialize_bins(i);
+  // }
+
+  detail::for_<BinLength>([&](auto i) {
+    constexpr int index = i.value;
+    shared_bins[index]  = detail::RFA_bins<FloatType>::template initialize_bins_constexpr_idx<index>();
+  });
 
   // Consume input tiles
   AccumT block_aggregate = AgentReduceT(temp_storage, d_in, reduction_op, transform_op).ConsumeTiles(even_share);
@@ -338,55 +381,115 @@ CUB_DETAIL_KERNEL_ATTRIBUTES __launch_bounds__(
     return;
   }
 
-  float* shared_bins       = detail::get_shared_bin_array();
-  constexpr float bins[40] = {
-    2.552117751907038476e+38,
-    6.3802943797675961899e+37,
-    7.7884452878022414428e+33,
-    9.5073795017117205112e+29,
-    1.1605687868300440077e+26,
-    1.4167099448608935641e+22,
-    1729382256910270464,
-    211106232532992,
-    25769803776,
-    3145728,
-    384,
-    0.046875,
-    5.7220458984375e-06,
-    6.9849193096160888672e-10,
-    8.5265128291212022305e-14,
-    1.0408340855860842566e-17,
-    1.2705494208814505086e-21,
-    1.5509636485369268904e-25,
-    1.893266172530428333e-29,
-    2.3111159332646830237e-33,
-    2.8211864419734900191e-37,
-    3.4438311059246704335e-41,
-    4.2038953929744512128e-45,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-  };
+  // Consume input tiles
+  AccumT block_aggregate =
+    AgentReduceT(temp_storage, d_in, reduction_op, transform_op).ConsumeRange(OffsetT(0), num_items);
 
-#pragma unroll
-  for (int i = 0; i < 40; ++i)
+  // Output result
+  if (threadIdx.x == 0)
   {
-    shared_bins[i] = static_cast<float>(bins[i]);
+    detail::reduce::finalize_and_store_aggregate(d_out, reduction_op, init, block_aggregate);
   }
+}
+
+/**
+ * @brief Deterministically Reduce a single tile kernel entry point (single-block). Can be used
+ *        to aggregate privatized thread block reductions from a previous
+ *        multi-block reduction pass.
+ *
+ * @tparam ChainedPolicyT
+ *   Chained tuning policy
+ *
+ * @tparam InputIteratorT
+ *   Random-access input iterator type for reading input items @iterator
+ *
+ * @tparam OutputIteratorT
+ *   Output iterator type for recording the reduced aggregate @iterator
+ *
+ * @tparam OffsetT
+ *   Signed integer type for global offsets
+ *
+ * @tparam ReductionOpT
+ *   Binary reduction functor type having member
+ *   `T operator()(const T &a, const U &b)`
+ *
+ * @tparam InitT
+ *   Initial value type
+ *
+ * @tparam AccumT
+ *   Accumulator type
+ *
+ * @param[in] d_in
+ *   Pointer to the input sequence of data items
+ *
+ * @param[out] d_out
+ *   Pointer to the output aggregate
+ *
+ * @param[in] num_items
+ *   Total number of input data items
+ *
+ * @param[in] reduction_op
+ *   Binary reduction functor
+ *
+ * @param[in] init
+ *   The initial value of the reduction
+ */
+template <typename ChainedPolicyT,
+          typename InputIteratorT,
+          typename OutputIteratorT,
+          typename OffsetT,
+          typename ReductionOpT,
+          typename InitT,
+          typename AccumT,
+          typename TransformOpT = ::cuda::std::__identity>
+CUB_DETAIL_KERNEL_ATTRIBUTES __launch_bounds__(
+  int(ChainedPolicyT::ActivePolicy::SingleTilePolicy::BLOCK_THREADS),
+  1) void DeterministicDeviceReduceSingleTileKernel(InputIteratorT d_in,
+                                                    OutputIteratorT d_out,
+                                                    OffsetT num_items,
+                                                    ReductionOpT reduction_op,
+                                                    InitT init,
+                                                    TransformOpT transform_op)
+{
+  // Thread block type for reducing input tiles
+  using AgentReduceT =
+    AgentReduce<typename ChainedPolicyT::ActivePolicy::SingleTilePolicy,
+                InputIteratorT,
+                OutputIteratorT,
+                OffsetT,
+                ReductionOpT,
+                AccumT,
+                TransformOpT>;
+
+  // Shared memory storage
+  __shared__ typename AgentReduceT::TempStorage temp_storage;
+
+  // Check if empty problem
+  if (num_items == 0)
+  {
+    if (threadIdx.x == 0)
+    {
+      *d_out = init;
+    }
+
+    return;
+  }
+
+  using FloatType         = typename AccumT::ftype;
+  constexpr int BinLength = AccumT::MAXINDEX + AccumT::MAXFOLD;
+
+  FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
+
+  // #pragma unroll
+  //   for (int i = 0; i < BinLength; ++i)
+  //   {
+  //     shared_bins[i] = detail::RFA_bins<FloatType>::initialize_bins(i);
+  //   }
+
+  detail::for_<BinLength>([&](auto i) {
+    constexpr int index = i.value;
+    shared_bins[index]  = detail::RFA_bins<FloatType>::template initialize_bins_constexpr_idx<index>();
+  });
 
   // Consume input tiles
   AccumT block_aggregate =
@@ -975,6 +1078,20 @@ struct DispatchReduce : SelectedPolicy
     if (num_items <= (SingleTilePolicyT::BLOCK_THREADS * SingleTilePolicyT::ITEMS_PER_THREAD))
     {
       // Small, single tile size
+      if constexpr (std::is_same_v<AccumT, detail::ReproducibleFloatingAccumulator<float>>
+                    || std::is_same_v<AccumT, detail::ReproducibleFloatingAccumulator<double>>)
+      {
+        return InvokeSingleTile<ActivePolicyT>(
+          DeterministicDeviceReduceSingleTileKernel<
+            MaxPolicyT,
+            InputIteratorT,
+            OutputIteratorT,
+            OffsetT,
+            ReductionOpT,
+            InitT,
+            AccumT,
+            TransformOpT>);
+      }
       return InvokeSingleTile<ActivePolicyT>(
         DeviceReduceSingleTileKernel<MaxPolicyT,
                                      InputIteratorT,
@@ -988,6 +1105,27 @@ struct DispatchReduce : SelectedPolicy
     else
     {
       // Regular size
+      if constexpr (std::is_same_v<AccumT, detail::ReproducibleFloatingAccumulator<float>>
+                    || std::is_same_v<AccumT, detail::ReproducibleFloatingAccumulator<double>>)
+      {
+        return InvokePasses<ActivePolicyT>(
+          DeterministicDeviceReduceKernel<typename DispatchReduce::MaxPolicy,
+                                          InputIteratorT,
+                                          OffsetT,
+                                          ReductionOpT,
+                                          AccumT,
+                                          TransformOpT>,
+          DeterministicDeviceReduceSingleTileKernel<
+            MaxPolicyT,
+            AccumT*,
+            OutputIteratorT,
+            int, // Always used with int
+                 // offsets
+            ReductionOpT,
+            InitT,
+            AccumT>);
+      }
+
       return InvokePasses<ActivePolicyT>(
         DeviceReduceKernel<typename DispatchReduce::MaxPolicy, InputIteratorT, OffsetT, ReductionOpT, AccumT, TransformOpT>,
         DeviceReduceSingleTileKernel<MaxPolicyT,
