@@ -201,7 +201,7 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   // Output result
   if (threadIdx.x == 0)
   {
-    detail::uninitialized_copy(d_out + blockIdx.x, block_aggregate);
+    detail::uninitialized_copy_single(d_out + blockIdx.x, block_aggregate);
   }
 }
 
@@ -277,16 +277,22 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
 
   FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
 
-  // #pragma unroll
-  // for (int i = 0; i < BinLength; ++i)
-  // {
-  //   shared_bins[i] = detail::RFA_bins<FloatType>::initialize_bins(i);
-  // }
+// #pragma unroll
+// for (int i = 0; i < BinLength; ++i)
+// {
+//   shared_bins[i] = detail::RFA_bins<FloatType>::initialize_bins(i);
+// }
+#pragma unroll
+  for (int index = threadIdx.x; index < BinLength; index += ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
+  {
+    shared_bins[index] = detail::RFA_bins<FloatType>::initialize_bins(index);
+  }
 
-  detail::for_<BinLength>([&](auto i) {
-    constexpr int index = i.value;
-    shared_bins[index]  = detail::RFA_bins<FloatType>::template initialize_bins_constexpr_idx<index>();
-  });
+  __syncthreads();
+  // detail::for_<BinLength>([&](auto i) {
+  //   constexpr int index = i.value;
+  //   shared_bins[index]  = detail::RFA_bins<FloatType>::template initialize_bins_constexpr_idx<index>();
+  // });
 
   // Consume input tiles
   AccumT block_aggregate = AgentReduceT(temp_storage, d_in, reduction_op, transform_op).ConsumeTiles(even_share);
@@ -486,10 +492,16 @@ CUB_DETAIL_KERNEL_ATTRIBUTES __launch_bounds__(
   //     shared_bins[i] = detail::RFA_bins<FloatType>::initialize_bins(i);
   //   }
 
-  detail::for_<BinLength>([&](auto i) {
-    constexpr int index = i.value;
-    shared_bins[index]  = detail::RFA_bins<FloatType>::template initialize_bins_constexpr_idx<index>();
-  });
+#pragma unroll
+  for (int index = threadIdx.x; index < BinLength; index += ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
+  {
+    shared_bins[index] = detail::RFA_bins<FloatType>::initialize_bins(index);
+  }
+  __syncthreads();
+  // detail::for_<BinLength>([&](auto i) {
+  //   constexpr int index = i.value;
+  //   shared_bins[index]  = detail::RFA_bins<FloatType>::template initialize_bins_constexpr_idx<index>();
+  // });
 
   // Consume input tiles
   AccumT block_aggregate =
