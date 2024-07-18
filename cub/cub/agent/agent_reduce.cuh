@@ -224,7 +224,6 @@ struct AgentReduce
    * @param is_full_tile Whether or not this is a full tile
    * @param can_vectorize Whether or not we can vectorize loads
    */
-  template <int IS_FIRST_TILE>
   _CCCL_DEVICE _CCCL_FORCEINLINE void ConsumeTile(
     AccumT& thread_aggregate,
     OffsetT block_offset,
@@ -255,8 +254,7 @@ struct AgentReduce
         threadIdx.x, d_wrapped_in + block_offset, items, transform_op);
 
       // Reduce items within each thread stripe
-      thread_aggregate = (IS_FIRST_TILE) ? internal::ThreadReduce(items, reduction_op)
-                                         : internal::ThreadReduce(items, reduction_op, thread_aggregate);
+      thread_aggregate = internal::ThreadReduce(items, reduction_op, thread_aggregate);
     }
   }
 
@@ -267,7 +265,6 @@ struct AgentReduce
    * @param is_full_tile Whether or not this is a full tile
    * @param can_vectorize Whether or not we can vectorize loads
    */
-  template <int IS_FIRST_TILE>
   _CCCL_DEVICE _CCCL_FORCEINLINE void ConsumeTile(
     AccumT& thread_aggregate,
     OffsetT block_offset,
@@ -320,8 +317,7 @@ struct AgentReduce
       }
 
       // Reduce items within each thread stripe
-      thread_aggregate = (IS_FIRST_TILE) ? internal::ThreadReduce(items, reduction_op)
-                                         : internal::ThreadReduce(items, reduction_op, thread_aggregate);
+      thread_aggregate = internal::ThreadReduce(items, reduction_op, thread_aggregate);
     }
   }
 
@@ -332,7 +328,7 @@ struct AgentReduce
    * @param is_full_tile Whether or not this is a full tile
    * @param can_vectorize Whether or not we can vectorize loads
    */
-  template <int IS_FIRST_TILE, int CAN_VECTORIZE>
+  template <int CAN_VECTORIZE>
   _CCCL_DEVICE _CCCL_FORCEINLINE void ConsumeTile(
     AccumT& thread_aggregate,
     OffsetT block_offset,
@@ -342,13 +338,6 @@ struct AgentReduce
   {
     // Partial tile
     int thread_offset = threadIdx.x;
-
-    // Read first item
-    if ((IS_FIRST_TILE) && (thread_offset < valid_items))
-    {
-      thread_aggregate = transform_op(d_wrapped_in[block_offset + thread_offset]);
-      thread_offset += BLOCK_THREADS;
-    }
 
     // Continue reading items (block-striped)
     while (thread_offset < valid_items)
@@ -379,7 +368,7 @@ struct AgentReduce
     {
       // First tile isn't full (not all threads have valid items)
       int valid_items = even_share.block_end - even_share.block_offset;
-      ConsumeTile<true>(thread_aggregate, even_share.block_offset, valid_items, Int2Type<false>(), can_vectorize);
+      ConsumeTile(thread_aggregate, even_share.block_offset, valid_items, Int2Type<false>(), can_vectorize);
       return BlockReduceT(temp_storage.reduce).Reduce(thread_aggregate, reduction_op, valid_items);
     }
 
@@ -426,37 +415,10 @@ private:
   _CCCL_DEVICE _CCCL_FORCEINLINE void ConsumeFullTileRange(
     AccumT& thread_aggregate, GridEvenShare<OffsetT>& even_share, Int2Type<CAN_VECTORIZE> can_vectorize)
   {
-    // At least one full block
-    ConsumeTile<true>(thread_aggregate, even_share.block_offset, TILE_ITEMS, Int2Type<true>(), can_vectorize);
-
-    if (even_share.block_end - even_share.block_offset < even_share.block_stride)
+    while (even_share.block_offset < even_share.block_end)
     {
-      // Exit early to handle offset overflow
-      return;
-    }
-
-    even_share.block_offset += even_share.block_stride;
-
-    // Consume subsequent full tiles of input, at least one full tile was processed, so
-    // `even_share.block_end >= TILE_ITEMS`
-    while (even_share.block_offset <= even_share.block_end - TILE_ITEMS)
-    {
-      ConsumeTile<false>(thread_aggregate, even_share.block_offset, TILE_ITEMS, Int2Type<true>(), can_vectorize);
-
-      if (even_share.block_end - even_share.block_offset < even_share.block_stride)
-      {
-        // Exit early to handle offset overflow
-        return;
-      }
-
+      ConsumeTile(thread_aggregate, even_share.block_offset, TILE_ITEMS, Int2Type<true>(), can_vectorize);
       even_share.block_offset += even_share.block_stride;
-    }
-
-    // Consume a partially-full tile
-    if (even_share.block_offset < even_share.block_end)
-    {
-      int valid_items = even_share.block_end - even_share.block_offset;
-      ConsumeTile<false>(thread_aggregate, even_share.block_offset, valid_items, Int2Type<false>(), can_vectorize);
     }
   }
 };
