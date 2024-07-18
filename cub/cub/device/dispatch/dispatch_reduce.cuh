@@ -277,11 +277,6 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
 
   FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
 
-// #pragma unroll
-// for (int i = 0; i < BinLength; ++i)
-// {
-//   shared_bins[i] = detail::RFA_bins<FloatType>::initialize_bins(i);
-// }
 #pragma unroll
   for (int index = threadIdx.x; index < BinLength; index += ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   {
@@ -485,12 +480,6 @@ CUB_DETAIL_KERNEL_ATTRIBUTES __launch_bounds__(
   constexpr int BinLength = AccumT::MAXINDEX + AccumT::MAXFOLD;
 
   FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
-
-  // #pragma unroll
-  //   for (int i = 0; i < BinLength; ++i)
-  //   {
-  //     shared_bins[i] = detail::RFA_bins<FloatType>::initialize_bins(i);
-  //   }
 
 #pragma unroll
   for (int index = threadIdx.x; index < BinLength; index += ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)

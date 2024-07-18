@@ -87,22 +87,10 @@ static __device__ Float* get_shared_bin_array()
 }
 
 // Impl taken from https://www.boost.org/doc/libs/1_85_0/boost/math/ccmath/ldexp.hpp
-template <typename T, int exp_arg>
-__device__ __host__ __forceinline__ constexpr T custom_ldexp(T arg)
+template <typename T>
+__device__ __host__ __forceinline__ T custom_ldexp(T arg, int exp)
 {
-  int exp = exp_arg;
-  while (exp > 0)
-  {
-    arg *= 2;
-    --exp;
-  }
-  while (exp < 0)
-  {
-    arg /= 2;
-    ++exp;
-  }
-
-  return arg;
+  return ldexpf(arg, exp);
 }
 
 // impl taken from https://www.boost.org/doc/libs/1_85_0/boost/math/ccmath/frexp.hpp
@@ -264,63 +252,16 @@ struct RFA_bins
   //   return bins_[d];
   // }
 
-  template <int current_index = MAXINDEX + MAXFOLD>
-  __device__ __host__ static inline constexpr ftype initialize_bins(int index)
+  __device__ __host__ static ftype initialize_bins(int index)
   {
-    // array<ftype, 23> bins =
-    //
-    // {2.552117751907038476e+38,6.3802943797675961899e+37,7.7884452878022414428e+33,9.5073795017117205112e+29,1.1605687868300440077e+26,1.4167099448608935641e+22,1729382256910270464,211106232532992,25769803776,3145728,384,0.046875,5.7220458984375e-06,6.9849193096160888672e-10,8.5265128291212022305e-14,1.0408340855860842566e-17,1.2705494208814505086e-21,1.5509636485369268904e-25,1.893266172530428333e-29,2.3111159332646830237e-33,2.8211864419734900191e-37,3.4438311059246704335e-41,4.2038953929744512128e-45};
-    if constexpr (current_index == 0)
+    if (index == 0)
     {
-      if constexpr (std::is_same_v<ftype, float>)
-      {
-        return static_cast<ftype>(custom_ldexp<ftype, MAX_EXP>(static_cast<ftype>(0.75)));
-      }
-      else
-      {
-        return static_cast<ftype>(2.0 * custom_ldexp<ftype, MAX_EXP - 1>(static_cast<ftype>(0.75)));
-      }
+      return custom_ldexp<ftype>(0.75f, MAX_EXP);
     }
     else
     {
-      if (current_index == index)
-      {
-        return static_cast<ftype>(
-          custom_ldexp<ftype, MAX_EXP + MANT_DIG - BIN_WIDTH - current_index * BIN_WIDTH>(static_cast<ftype>(0.75)));
-      }
-      else
-      {
-        return initialize_bins<current_index - 1>(index);
-      }
+      return custom_ldexp<ftype>(0.75f, MAX_EXP + MANT_DIG - BIN_WIDTH - index * BIN_WIDTH);
     }
-
-    // if constexpr (index >= 23) return 0.00000000000000000000;
-
-    // return bins[index];
-  }
-
-  template <int index>
-  __device__ __host__ static inline constexpr ftype initialize_bins_constexpr_idx()
-  {
-    // array<ftype, 23> bins =
-    // {2.552117751907038476e+38,6.3802943797675961899e+37,7.7884452878022414428e+33,9.5073795017117205112e+29,1.1605687868300440077e+26,1.4167099448608935641e+22,1729382256910270464,211106232532992,25769803776,3145728,384,0.046875,5.7220458984375e-06,6.9849193096160888672e-10,8.5265128291212022305e-14,1.0408340855860842566e-17,1.2705494208814505086e-21,1.5509636485369268904e-25,1.893266172530428333e-29,2.3111159332646830237e-33,2.8211864419734900191e-37,3.4438311059246704335e-41,4.2038953929744512128e-45};
-    if constexpr (index == 0)
-    {
-      if constexpr (std::is_same_v<ftype, float>)
-      {
-        return static_cast<ftype>(custom_ldexp<ftype, MAX_EXP>(static_cast<ftype>(0.75)));
-      }
-      else
-      {
-        return static_cast<ftype>(2.0 * custom_ldexp<ftype, MAX_EXP - 1>(static_cast<ftype>(0.75)));
-      }
-    }
-
-    return static_cast<ftype>(
-      custom_ldexp<ftype, MAX_EXP + MANT_DIG - BIN_WIDTH - index * BIN_WIDTH>(static_cast<ftype>(0.75)));
-    // if constexpr (index >= 23) return 0.00000000000000000000;
-
-    // return bins[index];
   }
 };
 
@@ -797,8 +738,8 @@ private:
     // constexpr auto const bins = binned_bins(X_index);
     if (X_index <= (3 * MANT_DIG) / BIN_WIDTH)
     {
-      scale_down = custom_ldexp<ftype, 1 - (2 * MANT_DIG - BIN_WIDTH)>(0.5);
-      scale_up   = custom_ldexp<ftype, 1 - (2 * MANT_DIG - BIN_WIDTH)>(0.5);
+      scale_down = custom_ldexp<ftype>(0.5f, 1 - (2 * MANT_DIG - BIN_WIDTH));
+      scale_up   = custom_ldexp<ftype>(0.5f, 1 - (2 * MANT_DIG - BIN_WIDTH));
       scaled     = max(min(FOLD, (3 * MANT_DIG) / BIN_WIDTH - X_index), 0);
       if (X_index == 0)
       {
@@ -1139,7 +1080,7 @@ public:
     const double X = std::abs(max_abs_val);
     const double S = std::abs(binned_sum);
     return static_cast<ftype>(
-      max(X, custom_ldexp(0.5, MIN_EXP - 1)) * custom_ldexp(0.5, (1 - FOLD) * BIN_WIDTH + 1) * N
+      max(X, custom_ldexp(0.5f, MIN_EXP - 1)) * custom_ldexp(0.5f, (1 - FOLD) * BIN_WIDTH + 1) * N
       + ((7.0 * EPSILON) / (1.0 - 6.0 * std::sqrt(static_cast<double>(EPSILON)) - 7.0 * EPSILON)) * S);
   }
 
