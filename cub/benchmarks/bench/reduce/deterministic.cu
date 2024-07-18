@@ -99,13 +99,13 @@ void deterministic_sum(nvbench::state& state, nvbench::type_list<T>)
   thrust::device_vector<nvbench::uint8_t> temp_storage(temp_storage_bytes);
   auto* d_temp_storage = thrust::raw_pointer_cast(temp_storage.data());
 
-  state.exec(nvbench::exec_tag::no_batch | nvbench::exec_tag::sync, [&](nvbench::launch& launch) {
+  state.exec(nvbench::exec_tag::no_batch, [&](nvbench::launch& launch) {
     dispatch_t::Dispatch(
       d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<offset_t>(elements), {}, launch.get_stream());
   });
 }
 
-using types = nvbench::type_list<float, double>;
+using types = nvbench::type_list<float>;
 
 NVBENCH_BENCH_TYPES(deterministic_sum, NVBENCH_TYPE_AXES(types))
   .set_name("base")
