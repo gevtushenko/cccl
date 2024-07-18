@@ -86,61 +86,6 @@ static __device__ Float* get_shared_bin_array()
   return bin_computed_array;
 }
 
-// Impl taken from https://www.boost.org/doc/libs/1_85_0/boost/math/ccmath/ldexp.hpp
-template <typename T>
-__device__ __host__ __forceinline__ T custom_ldexp(T arg, int exp)
-{
-  return ldexpf(arg, exp);
-}
-
-// impl taken from https://www.boost.org/doc/libs/1_85_0/boost/math/ccmath/frexp.hpp
-
-template <typename Real>
-__device__ __host__ __forceinline__ constexpr Real frexp_zero_impl(Real arg, int* exp)
-{
-  *exp = 0;
-  return arg;
-}
-
-template <typename Real>
-__device__ __host__ __forceinline__ constexpr Real frexp_impl(Real arg, int* exp)
-{
-  const bool negative_arg = (arg < Real(0));
-
-  Real f                    = negative_arg ? -arg : arg;
-  int e2                    = 0;
-  constexpr Real two_pow_32 = Real(4294967296);
-
-  while (f >= two_pow_32)
-  {
-    f = f / two_pow_32;
-    e2 += 32;
-  }
-
-  while (f >= Real(1))
-  {
-    f = f / Real(2);
-    ++e2;
-  }
-
-  if (exp != nullptr)
-  {
-    *exp = e2;
-  }
-
-  return !negative_arg ? f : -f;
-}
-
-template <typename Real, std::enable_if_t<!std::is_integral_v<Real>, bool> = true>
-__device__ __host__ __forceinline__ constexpr Real frexp_custom(Real arg, int* exp)
-{
-  return arg == Real(0)  ? frexp_zero_impl(arg, exp)
-       : arg == Real(-0) ? frexp_zero_impl(arg, exp)
-       : std::isinf(arg) ? frexp_zero_impl(arg, exp)
-       : std::isnan(arg) ? frexp_zero_impl(arg, exp)
-                         : frexp_impl(arg, exp);
-}
-
 template <class T>
 struct get_vector_type
 {};
@@ -215,11 +160,11 @@ struct RFA_bins
   {
     if (index == 0)
     {
-      return custom_ldexp<ftype>(0.75f, MAX_EXP);
+      return ldexpf(0.75f, MAX_EXP);
     }
     else
     {
-      return custom_ldexp<ftype>(0.75f, MAX_EXP + MANT_DIG - BIN_WIDTH - index * BIN_WIDTH);
+      return ldexpf(0.75f, MAX_EXP + MANT_DIG - BIN_WIDTH - index * BIN_WIDTH);
     }
   }
 };
@@ -482,7 +427,7 @@ private:
       }
       else
       {
-        frexp_custom(x, &exp);
+        frexpf(x, &exp);
         return min((MAX_EXP - exp) / BIN_WIDTH, MAXINDEX);
       }
     }
@@ -697,8 +642,8 @@ private:
     // constexpr auto const bins = binned_bins(X_index);
     if (X_index <= (3 * MANT_DIG) / BIN_WIDTH)
     {
-      scale_down = custom_ldexp<ftype>(0.5f, 1 - (2 * MANT_DIG - BIN_WIDTH));
-      scale_up   = custom_ldexp<ftype>(0.5f, 1 - (2 * MANT_DIG - BIN_WIDTH));
+      scale_down = ldexpf(0.5f, 1 - (2 * MANT_DIG - BIN_WIDTH));
+      scale_up   = ldexpf(0.5f, 1 - (2 * MANT_DIG - BIN_WIDTH));
       scaled     = max(min(FOLD, (3 * MANT_DIG) / BIN_WIDTH - X_index), 0);
       if (X_index == 0)
       {
@@ -1039,7 +984,7 @@ public:
     const double X = std::abs(max_abs_val);
     const double S = std::abs(binned_sum);
     return static_cast<ftype>(
-      max(X, custom_ldexp(0.5f, MIN_EXP - 1)) * custom_ldexp(0.5f, (1 - FOLD) * BIN_WIDTH + 1) * N
+      max(X, ldexpf(0.5f, MIN_EXP - 1)) * ldexpf(0.5f, (1 - FOLD) * BIN_WIDTH + 1) * N
       + ((7.0 * EPSILON) / (1.0 - 6.0 * std::sqrt(static_cast<double>(EPSILON)) - 7.0 * EPSILON)) * S);
   }
 
