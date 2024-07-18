@@ -191,47 +191,6 @@ __host__ __device__ auto abs_max(const float2& x)
   return fmax(fabs(x.x), fabs(x.y));
 }
 
-template <std::size_t N>
-struct num
-{
-  static const constexpr auto value = N;
-};
-
-template <class F, std::size_t... Is>
-__host__ __device__ static inline constexpr void for_(F func, std::index_sequence<Is...>)
-{
-  using expander = int[];
-  (void) expander{0, ((void) func(num<Is>{}), 0)...};
-}
-
-template <std::size_t N, typename F>
-__host__ __device__ static inline constexpr void for_(F func)
-{
-  for_(func, std::make_index_sequence<N>());
-}
-
-template <class T, T x, class F>
-void transparent(F f)
-{
-  f();
-}
-
-template <bool B>
-constexpr void my_assert()
-{
-  static_assert(B, "oh no");
-}
-
-template <int X>
-void f()
-{
-  transparent<int, X + 7>([] {
-    transparent<long, X * X * X>([] {
-      my_assert<X + 10 == -89>();
-    });
-  });
-}
-
 template <class ftype>
 struct RFA_bins
 {
