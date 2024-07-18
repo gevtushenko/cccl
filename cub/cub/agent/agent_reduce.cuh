@@ -194,22 +194,6 @@ struct AgentReduce
   // Utility
   //---------------------------------------------------------------------
 
-  // Whether or not the input is aligned with the vector type (specialized for
-  // types we can vectorize)
-  template <typename Iterator>
-  static _CCCL_DEVICE _CCCL_FORCEINLINE bool IsAligned(Iterator d_in, Int2Type<true> /*can_vectorize*/)
-  {
-    return (size_t(d_in) & (sizeof(VectorT) - 1)) == 0;
-  }
-
-  // Whether or not the input is aligned with the vector type (specialized for
-  // types we cannot vectorize)
-  template <typename Iterator>
-  static _CCCL_DEVICE _CCCL_FORCEINLINE bool IsAligned(Iterator /*d_in*/, Int2Type<false> /*can_vectorize*/)
-  {
-    return false;
-  }
-
   //---------------------------------------------------------------------
   // Constructor
   //---------------------------------------------------------------------
@@ -417,9 +401,7 @@ struct AgentReduce
     GridEvenShare<OffsetT> even_share;
     even_share.template BlockInit<TILE_ITEMS>(block_offset, block_end);
 
-    return (IsAligned(d_in + block_offset, Int2Type<ATTEMPT_VECTORIZATION>()))
-           ? ConsumeRange(even_share, Int2Type < true && ATTEMPT_VECTORIZATION > ())
-           : ConsumeRange(even_share, Int2Type < false && ATTEMPT_VECTORIZATION > ());
+    return ConsumeRange(even_share, Int2Type < true && ATTEMPT_VECTORIZATION > ());
   }
 
   /**
@@ -431,9 +413,7 @@ struct AgentReduce
     // Initialize GRID_MAPPING_STRIP_MINE even-share descriptor for this thread block
     even_share.template BlockInit<TILE_ITEMS, GRID_MAPPING_STRIP_MINE>();
 
-    return (IsAligned(d_in, Int2Type<ATTEMPT_VECTORIZATION>()))
-           ? ConsumeRange(even_share, Int2Type < true && ATTEMPT_VECTORIZATION > ())
-           : ConsumeRange(even_share, Int2Type < false && ATTEMPT_VECTORIZATION > ());
+    return ConsumeRange(even_share, Int2Type < true && ATTEMPT_VECTORIZATION > ());
   }
 
 private:

@@ -228,7 +228,6 @@ private:
 
   /// Return a binned floating-point reference bin
 
-  template <int current_index = MAXINDEX + MAXFOLD>
   __host__ __device__ inline ftype binned_bins(int index) const
   {
 #ifdef __CUDA_ARCH__
