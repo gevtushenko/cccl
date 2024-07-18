@@ -467,6 +467,7 @@ private:
     if (ISZERO(primary(0)))
     {
 // constexpr auto bins = binned_bins(X_index);
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         primary(i * incpriY) = binned_bins(i + X_index);
@@ -478,6 +479,7 @@ private:
       int shift = binned_index() - X_index;
       if (shift > 0)
       {
+#pragma unroll
         for (int i = FOLD - 1; i >= 1; i--)
         {
           if (i < shift)
@@ -488,7 +490,7 @@ private:
           carry(i * inccarY)   = carry((i - shift) * inccarY);
         }
 // constexpr auto const bins = binned_bins(X_index);
-#pragma unroll 1
+#pragma unroll
         for (int j = 0; j < FOLD; j++)
         {
           if (j >= shift)
