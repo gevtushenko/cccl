@@ -35,6 +35,9 @@
 
 #include <cub/config.cuh>
 
+#include <cmath>
+#include <type_traits>
+
 #if defined(_CCCL_IMPLICIT_SYSTEM_HEADER_GCC)
 #  pragma GCC system_header
 #elif defined(_CCCL_IMPLICIT_SYSTEM_HEADER_CLANG)
@@ -43,14 +46,62 @@
 #  pragma system_header
 #endif // no system header
 
+#include <cub/detail/rfa.cuh>
 #include <cub/detail/type_traits.cuh>
 #include <cub/thread/thread_operators.cuh>
+#include <cub/util_type.cuh>
 
 CUB_NAMESPACE_BEGIN
 
 /// Internal namespace (to prevent ADL mishaps between static functions when mixing different CUB installations)
 namespace internal
 {
+
+template <int LENGTH,
+          typename T,
+          typename ReductionOp,
+          typename PrefixT,
+          typename AccumT = detail::accumulator_t<ReductionOp, PrefixT, T>>
+_CCCL_DEVICE _CCCL_FORCEINLINE AccumT ThreadReduceHelper(
+  T* input, ReductionOp reduction_op, PrefixT prefix, Int2Type<LENGTH> /*length*/, Int2Type<true> /* is rfa */)
+{
+  AccumT retval = prefix;
+
+  // float4 float4_input[float4_inp_len + 1];
+  // auto* float4_input           = reinterpret_cast<cub::CubVector<T, 4>*>(input);
+
+#pragma unroll
+  for (int i = 0; i < LENGTH; ++i)
+  {
+    retval.unsafe_add(input[i]);
+  }
+
+  return retval;
+}
+
+template <int LENGTH,
+          typename T,
+          typename ReductionOp,
+          typename PrefixT,
+          typename AccumT = detail::accumulator_t<ReductionOp, PrefixT, T>>
+_CCCL_DEVICE _CCCL_FORCEINLINE AccumT ThreadReduceHelper(
+  T* input,
+  ReductionOp reduction_op,
+  PrefixT prefix,
+  Int2Type<LENGTH> /*length*/,
+  Int2Type<false> /* is rfa */,
+  T input_max = {})
+{
+  AccumT retval = prefix;
+
+#pragma unroll
+  for (int i = 0; i < LENGTH; ++i)
+  {
+    retval = reduction_op(retval, input[i]);
+  }
+
+  return retval;
+}
 
 /**
  * @brief Sequential reduction over statically-sized array types
@@ -72,15 +123,14 @@ template <int LENGTH,
 _CCCL_DEVICE _CCCL_FORCEINLINE AccumT
 ThreadReduce(T* input, ReductionOp reduction_op, PrefixT prefix, Int2Type<LENGTH> /*length*/)
 {
-  AccumT retval = prefix;
-
-#pragma unroll
-  for (int i = 0; i < LENGTH; ++i)
-  {
-    retval = reduction_op(retval, input[i]);
-  }
-
-  return retval;
+  constexpr bool is_rfa =
+    (std::is_invocable_v<ReductionOp, detail::ReproducibleFloatingAccumulator<float>, float4>
+     || std::is_invocable_v<ReductionOp, detail::ReproducibleFloatingAccumulator<double>, double4>)
+    && (std::is_convertible_v<T, float> || std::is_convertible_v<T, double>)
+    && (std::is_same_v<AccumT, detail::ReproducibleFloatingAccumulator<float>>
+        || std::is_same_v<AccumT, detail::ReproducibleFloatingAccumulator<double>>);
+  return ThreadReduceHelper<LENGTH, T, ReductionOp, PrefixT, AccumT>(
+    input, reduction_op, prefix, Int2Type<LENGTH>{}, Int2Type<is_rfa>{});
 }
 
 /**

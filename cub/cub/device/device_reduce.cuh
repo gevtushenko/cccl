@@ -34,6 +34,13 @@
 
 #include <cub/config.cuh>
 
+#include <type_traits>
+
+#include "cub/detail/type_traits.cuh"
+#include "cub/util_type.cuh"
+#include "thrust/iterator/transform_iterator.h"
+#include "thrust/iterator/transform_output_iterator.h"
+
 #if defined(_CCCL_IMPLICIT_SYSTEM_HEADER_GCC)
 #  pragma GCC system_header
 #elif defined(_CCCL_IMPLICIT_SYSTEM_HEADER_CLANG)
@@ -341,6 +348,35 @@ struct DeviceReduce
     CUB_DETAIL_RUNTIME_DEBUG_SYNC_USAGE_LOG
 
     return Sum<InputIteratorT, OutputIteratorT>(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, stream);
+  }
+
+  template <typename InputIteratorT, typename OutputIteratorT, typename NumItemsT>
+  CUB_RUNTIME_FUNCTION static cudaError_t DeterministicSum(
+    void* d_temp_storage,
+    size_t& temp_storage_bytes,
+    InputIteratorT d_in,
+    OutputIteratorT d_out,
+    NumItemsT num_items,
+    cudaStream_t stream = 0)
+  {
+    CUB_DETAIL_NVTX_RANGE_SCOPE_IF(d_temp_storage, "cub::DeviceReduce::DeterministicSum");
+
+    // Signed integer type for global offsets
+    using OffsetT = detail::choose_offset_t<NumItemsT>;
+
+    // The output value type
+    using OutputT = cub::detail::non_void_value_t<OutputIteratorT, cub::detail::value_t<InputIteratorT>>;
+
+    using InitT = OutputT;
+
+    return detail::DeterministicDispatchReduce<InputIteratorT, OutputIteratorT, OffsetT>::Dispatch(
+      d_temp_storage,
+      temp_storage_bytes,
+      d_in,
+      d_out,
+      static_cast<OffsetT>(num_items),
+      InitT{}, // zero-initialize
+      stream);
   }
 
   //! @rst
