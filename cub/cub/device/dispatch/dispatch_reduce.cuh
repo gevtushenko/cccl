@@ -268,9 +268,12 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
                 ReductionOpT,
                 AccumT,
                 TransformOpT>;
-
+  using BlockReduceT =
+    BlockReduce<AccumT,
+                ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS,
+                ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_ALGORITHM>;
   // Shared memory storage
-  __shared__ typename AgentReduceT::TempStorage temp_storage;
+  __shared__ typename BlockReduceT::TempStorage temp_storage;
 
   using FloatType         = typename AccumT::ftype;
   constexpr int BinLength = AccumT::MAXINDEX + AccumT::MAXFOLD;
@@ -295,7 +298,36 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   // });
 
   // Consume input tiles
-  AccumT block_aggregate = AgentReduceT(temp_storage, d_in, reduction_op, transform_op).ConsumeTiles(even_share);
+  // auto const BLOCK_THREADS = ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS;
+  // auto const ITEMS_PER_THREAD = ChainedPolicyT::ActivePolicy::ReducePolicy::ITEMS_PER_THREAD;
+  // AccumT block_aggregate = AgentReduceT(temp_storage, d_in, reduction_op, transform_op).ConsumeTiles(even_share);
+  auto tid = blockDim.x * blockIdx.x + threadIdx.x; // changes per thread per block, per grid
+  AccumT block_aggregate; // per thread
+  FloatType abs_max = d_in[0];
+#pragma unroll
+  for (auto i = tid; i < num_items; i += blockDim.x * gridDim.x)
+  {
+    abs_max = fmax(fabs(d_in[i]), abs_max);
+  }
+
+  block_aggregate.set_max_abs_val(abs_max);
+
+  int count = 0;
+
+  // deposit floats across block threads i.e start at one thread id until total with stride of each block
+#pragma unroll
+  for (auto i = tid; i < num_items; i += blockDim.x * gridDim.x)
+  {
+    block_aggregate.unsafe_add(d_in[i]);
+    count++;
+  }
+
+  if (count > block_aggregate.endurance())
+  {
+    block_aggregate.renorm();
+  }
+
+  block_aggregate = BlockReduceT(temp_storage).Reduce(block_aggregate, reduction_op);
 
   // Output result
   if (threadIdx.x == 0)
