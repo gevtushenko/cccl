@@ -634,7 +634,7 @@ private:
         thread_aggregate.set_max_abs_val(abs_max_val);
         thread_aggregate = internal::ThreadReduce(items, reduction_op, thread_aggregate, Int2Type<ITEMS_PER_THREAD>{});
         count += ITEMS_PER_THREAD;
-        if (count > AccumT::ENDURANCE)
+        if (count > thread_aggregate.endurance())
         {
           thread_aggregate.renorm();
           count = 0;
