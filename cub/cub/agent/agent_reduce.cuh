@@ -606,7 +606,7 @@ private:
     {
       WORDS = ITEMS_PER_THREAD / VECTOR_LOAD_LENGTH
     };
-
+    int count = 0;
 #pragma unroll
     for (auto i = offset; i < total; i += stride)
     {
@@ -647,7 +647,12 @@ private:
 
         thread_aggregate.set_max_abs_val(abs_max_val);
         thread_aggregate = internal::ThreadReduce(items, reduction_op, thread_aggregate, Int2Type<ITEMS_PER_THREAD>{});
-        thread_aggregate.renorm();
+        count += ITEMS_PER_THREAD;
+        if (count > AccumT::ENDURANCE)
+        {
+          thread_aggregate.renorm();
+          count = 0;
+        }
       }
       else if constexpr (((std::is_same_v<cub::detail::ReproducibleFloatingAccumulator<float>, AccumT>)
                           || (std::is_same_v<cub::detail::ReproducibleFloatingAccumulator<double>, AccumT>) ))
