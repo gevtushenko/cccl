@@ -567,38 +567,6 @@ private:
     Int2Type<CAN_VECTORIZE> can_vectorize,
     Int2Type<true> /* is rfa */)
   {
-    // // At least one full block
-    // ConsumeTile<true>(thread_aggregate, even_share.block_offset, TILE_ITEMS, Int2Type<true>(), can_vectorize);
-
-    // if (even_share.block_end - even_share.block_offset < even_share.block_stride)
-    // {
-    //   // Exit early to handle offset overflow
-    //   return;
-    // }
-
-    // even_share.block_offset += even_share.block_stride;
-
-    // // Consume subsequent full tiles of input, at least one full tile was processed, so
-    // // `even_share.block_end >= TILE_ITEMS`
-    // while (even_share.block_offset <= even_share.block_end - TILE_ITEMS)
-    // {
-    //   ConsumeTile<false>(thread_aggregate, even_share.block_offset, TILE_ITEMS, Int2Type<true>(), can_vectorize);
-
-    //   if (even_share.block_end - even_share.block_offset < even_share.block_stride)
-    //   {
-    //     // Exit early to handle offset overflow
-    //     return;
-    //   }
-
-    //   even_share.block_offset += even_share.block_stride;
-    // }
-
-    // // Consume a partially-full tile
-    // if (even_share.block_offset < even_share.block_end)
-    // {
-    //   int valid_items = even_share.block_end - even_share.block_offset;
-    //   ConsumeTile<false>(thread_aggregate, even_share.block_offset, valid_items, Int2Type<false>(), can_vectorize);
-    // }
     auto const total  = even_share.block_end;
     auto const stride = even_share.block_stride;
     auto const offset = even_share.block_offset;
@@ -649,23 +617,6 @@ private:
       {
         thread_aggregate = reduction_op(thread_aggregate, transform_op(d_in[i + (threadIdx.x * VECTOR_LOAD_LENGTH)]));
       }
-      //       std::remove_reference_t<decltype(transform_op(input_items[0]))> items[ITEMS_PER_THREAD];
-      // #pragma unroll
-      //       for (int i = 0; i < ITEMS_PER_THREAD; ++i)
-      //       {
-      //         items[i] = transform_op(input_items[i]);
-      //       }
-
-      //       InputT abs_max_val = items[0];
-
-      // #pragma unroll
-      //       for (int i = 1; i < ITEMS_PER_THREAD; ++i)
-      //       {
-      //         auto abs_f  = fabs(items[i]);
-      //         abs_max_val = fmax(abs_f, abs_max_val);
-      //       }
-
-      // Reduce items within each thread stripe
     }
   }
 
