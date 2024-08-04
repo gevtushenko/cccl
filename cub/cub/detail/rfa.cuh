@@ -375,9 +375,6 @@ public:
 private:
   array<ftype, 2 * FOLD> data = {0};
 
-  int add_count             = 0;
-  ftype max_val_encountered = std::numeric_limits<ftype>::min();
-
   /// Floating-point precision bin width
   static constexpr auto BIN_WIDTH = std::is_same_v<ftype, double> ? 40 : 13;
   static constexpr auto MIN_EXP   = std::numeric_limits<ftype>::min_exponent;
@@ -655,8 +652,8 @@ private:
     int X_index = binned_dindex(max_abs_val);
     if (ISZERO(primary(0)))
     {
-      // constexpr auto bins = binned_bins(X_index);
-      // #pragma unroll
+// constexpr auto bins = binned_bins(X_index);
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         primary(i * incpriY) = binned_bins(i + X_index);
@@ -668,7 +665,7 @@ private:
       int shift = binned_index() - X_index;
       if (shift > 0)
       {
-        // #pragma unroll
+#pragma unroll
         for (int i = FOLD - 1; i >= 1; i--)
         {
           if (i < shift)
@@ -678,8 +675,8 @@ private:
           primary(i * incpriY) = primary((i - shift) * incpriY);
           carry(i * inccarY)   = carry((i - shift) * inccarY);
         }
-        // constexpr auto const bins = binned_bins(X_index);
-        // #pragma unroll
+// constexpr auto const bins = binned_bins(X_index);
+#pragma unroll
         for (int j = 0; j < FOLD; j++)
         {
           if (j >= shift)
@@ -722,7 +719,7 @@ private:
       M *= EXPANSION * 0.5;
       x += M;
       x += M;
-      // #pragma unroll
+#pragma unroll
       for (int i = 1; i < FOLD - 1; i++)
       {
         M  = primary(i * incpriY);
@@ -741,7 +738,7 @@ private:
     {
       ftype qd = x;
       auto& ql = get_bits(qd);
-      // #pragma unroll
+#pragma unroll
       for (int i = 0; i < FOLD - 1; i++)
       {
         M  = primary(i * incpriY);
@@ -772,7 +769,7 @@ private:
       return;
     }
 
-    // #pragma unroll
+#pragma unroll
     for (int i = 0; i < FOLD; i++)
     {
       auto tmp_renormd  = primary(i * incpriX);
@@ -963,9 +960,9 @@ private:
     const auto shift   = Y_index - X_index;
     if (shift > 0)
     {
-      // constexpr auto const bins = binned_bins(Y_index);
-      // shift Y upwards and add X to Y
-      // #pragma unroll
+// constexpr auto const bins = binned_bins(Y_index);
+// shift Y upwards and add X to Y
+#pragma unroll
       for (int i = FOLD - 1; i >= 1; i--)
       {
         if (i < shift)
@@ -976,7 +973,7 @@ private:
           x.primary(i * incpriX) + (primary((i - shift) * incpriY) - binned_bins(i - shift + Y_index));
         carry(i * inccarY) = x.carry(i * inccarX) + carry((i - shift) * inccarY);
       }
-      // #pragma unroll
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         if (i == shift)
@@ -989,9 +986,9 @@ private:
     }
     else if (shift < 0)
     {
-      // constexpr auto const bins = binned_bins(X_index);
-      // shift X upwards and add X to Y
-      // #pragma unroll
+// constexpr auto const bins = binned_bins(X_index);
+// shift X upwards and add X to Y
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         if (i < -shift)
@@ -1004,9 +1001,9 @@ private:
     }
     else if (shift == 0)
     {
-      // constexpr auto const bins = binned_bins(X_index);
-      // add X to Y
-      // #pragma unroll
+// constexpr auto const bins = binned_bins(X_index);
+// add X to Y
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         primary(i * incpriY) += x.primary(i * incpriX) - binned_bins(i + X_index);
@@ -1136,7 +1133,7 @@ public:
     {
       // constexpr auto const bins = binned_bins(binned_index());
 
-      // #pragma unroll
+#pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
         temp.primary(i * incpriX) =
@@ -1195,7 +1192,7 @@ public:
     size_t count = 0;
     size_t N     = last - first;
 
-    // #pragma unroll
+#pragma unroll
     for (; first != last; first++, count++)
     {
       binned_dmddeposit(static_cast<ftype>(*first), 1);
@@ -1241,7 +1238,7 @@ public:
 
   __host__ __device__ void add(ReproducibleFloatingAccumulator* other, const size_t N, const ftype max_abs_val)
   {
-    // #pragma unroll
+#pragma unroll
     for (int i = 0; i < N; ++i)
     {
       *this += other[i];
@@ -1264,7 +1261,7 @@ public:
     }
 
     T max_abs_val = input[0];
-    // #pragma unroll
+#pragma unroll
     for (size_t i = 0; i < N; i++)
     {
       max_abs_val = max(max_abs_val, std::abs(input[i]));
@@ -1457,12 +1454,17 @@ public:
     binned_dmdupdate(std::abs(mav), 1, 1);
   }
 
+  __host__ __device__ void set_max_val(const ftype mav)
+  {
+    binned_dmdupdate(static_cast<ftype>(mav), 1, 1);
+  }
+
   /// Add @p x to the binned fp
   ///
   /// This is intended to be used after a call to `set_max_abs_val()`
   __host__ __device__ void unsafe_add(const ftype x)
   {
-    binned_dmddeposit(x, 1);
+    binned_dmddeposit(static_cast<ftype>(x), 1);
   }
 
   /// Renormalizes the binned fp

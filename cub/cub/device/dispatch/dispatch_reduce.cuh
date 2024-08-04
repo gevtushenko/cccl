@@ -266,12 +266,11 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   // Shared memory storage
   __shared__ typename BlockReduceT::TempStorage temp_storage;
 
-  using FloatType         = typename AccumT::ftype;
-  constexpr int BinLength = AccumT::MAXINDEX + AccumT::MAXFOLD;
-
-  const auto ITEMS_PER_THREAD = ChainedPolicyT::ActivePolicy::ReducePolicy::ITEMS_PER_THREAD;
-  const auto BLOCK_THREADS    = ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS;
-  const auto TILE_SIZE        = BLOCK_THREADS * ITEMS_PER_THREAD;
+  using FloatType                 = typename AccumT::ftype;
+  constexpr int BinLength         = AccumT::MAXINDEX + AccumT::MAXFOLD;
+  constexpr auto ITEMS_PER_THREAD = ChainedPolicyT::ActivePolicy::ReducePolicy::ITEMS_PER_THREAD;
+  constexpr auto BLOCK_THREADS    = ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS;
+  constexpr auto TILE_SIZE        = BLOCK_THREADS * ITEMS_PER_THREAD;
 
   FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
 
@@ -281,34 +280,39 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
     shared_bins[index] = detail::RFA_bins<FloatType>::initialize_bins(index);
   }
 
-  __syncthreads();
+  CTA_SYNC();
 
-  AccumT thread_aggregate; // per thread
-  FloatType items[ITEMS_PER_THREAD];
+  AccumT thread_aggregate{};
+  FloatType items[ITEMS_PER_THREAD] = {};
 
-  cub::detail::load_transform_direct_striped<BLOCK_THREADS>(
-    threadIdx.x, d_in + TILE_SIZE * blockIdx.x, items, transform_op);
-
+#pragma unroll
+  for (int i = 0; i < ITEMS_PER_THREAD; ++i)
+  {
+    const auto idx = i * BLOCK_THREADS + threadIdx.x + TILE_SIZE * blockIdx.x;
+    if (idx >= num_items)
+    {
+      break;
+    }
+    items[i] = transform_op(d_in[idx]);
+  }
   FloatType abs_max = items[0];
 
-  for (auto i = 0; i < ITEMS_PER_THREAD; i++)
+#pragma unroll
+  for (auto i = 1; i < ITEMS_PER_THREAD; i++)
   {
     abs_max = fmax(fabs(items[i]), abs_max);
   }
+  thread_aggregate.set_max_val(abs_max);
 
-  thread_aggregate.set_max_abs_val(abs_max);
-
-  // deposit floats across block threads i.e start at one thread id until total with stride of each block
 #pragma unroll
   for (auto i = 0; i < ITEMS_PER_THREAD; i++)
   {
     thread_aggregate.unsafe_add(items[i]);
   }
 
-  if (ITEMS_PER_THREAD > thread_aggregate.endurance())
-  {
-    thread_aggregate.renorm();
-  }
+  thread_aggregate.renorm();
+
+  static_assert(ITEMS_PER_THREAD < thread_aggregate.endurance());
 
   AccumT block_aggregate = BlockReduceT(temp_storage).Reduce(thread_aggregate, reduction_op);
 
@@ -500,22 +504,20 @@ CUB_DETAIL_KERNEL_ATTRIBUTES __launch_bounds__(
   {
     shared_bins[index] = detail::RFA_bins<FloatType>::initialize_bins(index);
   }
-  __syncthreads();
+  CTA_SYNC();
 
   constexpr auto BLOCK_THREADS = ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS;
-  constexpr auto TILE_SIZE     = ChainedPolicyT::ActivePolicy::ReducePolicy::ITEMS_PER_THREAD
-                           * ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS;
-  const auto REDUCE_GRID_SIZE = (num_items + TILE_SIZE - 1) / TILE_SIZE;
 
-  AccumT thread_aggregate;
+  AccumT thread_aggregate{};
 
   // Consume block aggregates of previous kernel
-  for (int i = threadIdx.x; i < REDUCE_GRID_SIZE; i += BLOCK_THREADS)
+#pragma unroll
+  for (int i = threadIdx.x; i < num_items; i += BLOCK_THREADS)
   {
-    thread_aggregate += d_in[i];
+    thread_aggregate += transform_op(d_in[i]);
   }
 
-  AccumT block_aggregate = BlockReduceT(temp_storage).Reduce(thread_aggregate, reduction_op);
+  AccumT block_aggregate = BlockReduceT(temp_storage).Reduce(thread_aggregate, reduction_op, num_items);
   // Output result
   if (threadIdx.x == 0)
   {
@@ -981,15 +983,9 @@ struct DispatchReduce : SelectedPolicy
         break;
       }
 
-      int reduce_device_occupancy = reduce_config.sm_occupancy * sm_count;
-
-      // Even-share work distribution
-      int max_blocks = reduce_device_occupancy * CUB_SUBSCRIPTION_FACTOR(0);
-      auto tile_size = ActivePolicyT::ReducePolicy::BLOCK_THREADS * ActivePolicyT::ReducePolicy::ITEMS_PER_THREAD;
+      const auto tile_size = ActivePolicyT::ReducePolicy::BLOCK_THREADS * ActivePolicyT::ReducePolicy::ITEMS_PER_THREAD;
       // Get grid size for device_reduce_sweep_kernel
-      int reduce_grid_size = (num_items + tile_size - 1) / tile_size;
-      GridEvenShare<OffsetT> even_share;
-      even_share.DispatchInit(num_items, max_blocks, reduce_config.tile_size);
+      const int reduce_grid_size = (num_items + tile_size - 1) / tile_size;
 
       // Temporary storage allocation requirements
       void* allocations[1]       = {};
@@ -1029,7 +1025,7 @@ struct DispatchReduce : SelectedPolicy
 
       THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
         reduce_grid_size, ActivePolicyT::ReducePolicy::BLOCK_THREADS, 0, stream)
-        .doit(reduce_kernel, d_in, d_block_reductions, num_items, even_share, reduction_op, transform_op);
+        .doit(reduce_kernel, d_in, d_block_reductions, num_items, GridEvenShare<OffsetT>{}, reduction_op, transform_op);
 
       // Check for failure to launch
       error = CubDebug(cudaPeekAtLastError());
