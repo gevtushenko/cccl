@@ -272,6 +272,10 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   constexpr auto BLOCK_THREADS    = ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS;
   constexpr auto TILE_SIZE        = BLOCK_THREADS * ITEMS_PER_THREAD;
 
+  __shared__ int cnt[BLOCK_THREADS];
+
+  cnt[threadIdx.x] = 0;
+
   FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
 
 #pragma unroll
@@ -308,9 +312,14 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   for (auto i = 0; i < ITEMS_PER_THREAD; i++)
   {
     thread_aggregate.unsafe_add(items[i]);
+    cnt[threadIdx.x]++;
   }
 
-  thread_aggregate.renorm();
+  // printf("cnt[%d]=%d\n", threadIdx.x, cnt[threadIdx.x]);
+  if (cnt[threadIdx.x] > thread_aggregate.endurance())
+  {
+    thread_aggregate.renorm();
+  }
 
   static_assert(ITEMS_PER_THREAD < thread_aggregate.endurance());
 
