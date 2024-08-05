@@ -30,7 +30,7 @@
 #include <nvbench/types.cuh>
 #include <nvbench_helper.cuh>
 
-// %RANGE% TUNE_ITEMS_PER_THREAD ipt 7:24:1
+// %RANGE% TUNE_ITEMS_PER_THREAD ipt 3:24:1
 // %RANGE% TUNE_THREADS_PER_BLOCK tpb 128:1024:32
 
 #if !TUNE_BASE

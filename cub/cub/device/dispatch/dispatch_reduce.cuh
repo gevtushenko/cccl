@@ -272,9 +272,9 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   constexpr auto BLOCK_THREADS    = ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS;
   constexpr auto TILE_SIZE        = BLOCK_THREADS * ITEMS_PER_THREAD;
 
-  __shared__ int cnt[BLOCK_THREADS];
+  // __shared__ int cnt[BLOCK_THREADS];
 
-  cnt[threadIdx.x] = 0;
+  // cnt[threadIdx.x] = 0;
 
   FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
 
@@ -306,20 +306,22 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   {
     abs_max = fmax(fabs(items[i]), abs_max);
   }
-  thread_aggregate.set_max_val(abs_max);
+  // thread_aggregate.set_max_val(abs_max);
 
-#pragma unroll
-  for (auto i = 0; i < ITEMS_PER_THREAD; i++)
-  {
-    thread_aggregate.unsafe_add(items[i]);
-    cnt[threadIdx.x]++;
-  }
+  // #pragma unroll
+  //   for (auto i = 0; i < ITEMS_PER_THREAD; i++)
+  //   {
+  //     thread_aggregate.unsafe_add(items[i]);
+  //     // cnt[threadIdx.x]++;
+  //   }
+
+  thread_aggregate.add(items, ITEMS_PER_THREAD, abs_max);
 
   // printf("cnt[%d]=%d\n", threadIdx.x, cnt[threadIdx.x]);
-  if (cnt[threadIdx.x] > thread_aggregate.endurance())
-  {
-    thread_aggregate.renorm();
-  }
+  // if (cnt[threadIdx.x] > thread_aggregate.endurance())
+  // {
+  //   thread_aggregate.renorm();
+  // }
 
   static_assert(ITEMS_PER_THREAD < thread_aggregate.endurance());
 
@@ -731,8 +733,8 @@ struct DeviceReducePolicy
   /// SM60
   struct Policy600 : ChainedPolicy<600, Policy600, Policy350>
   {
-    static constexpr int threads_per_block  = 256;
-    static constexpr int items_per_thread   = 16;
+    static constexpr int threads_per_block  = 512;
+    static constexpr int items_per_thread   = 64;
     static constexpr int items_per_vec_load = 4;
 
     // ReducePolicy (P100: 591 GB/s @ 64M 4B items; 583 GB/s @ 256M 1B items)
