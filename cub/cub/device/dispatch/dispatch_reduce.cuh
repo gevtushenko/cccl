@@ -272,10 +272,6 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   constexpr auto BLOCK_THREADS    = ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS;
   constexpr auto TILE_SIZE        = BLOCK_THREADS * ITEMS_PER_THREAD;
 
-  // __shared__ int cnt[BLOCK_THREADS];
-
-  // cnt[threadIdx.x] = 0;
-
   FloatType* shared_bins = detail::get_shared_bin_array<FloatType, BinLength>();
 
 #pragma unroll
@@ -289,39 +285,38 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   AccumT thread_aggregate{};
   FloatType items[ITEMS_PER_THREAD] = {};
 
+  int proc_idx = ITEMS_PER_THREAD - 1;
+
 #pragma unroll
   for (int i = 0; i < ITEMS_PER_THREAD; ++i)
   {
     const auto idx = i * BLOCK_THREADS + threadIdx.x + TILE_SIZE * blockIdx.x;
     if (idx >= num_items)
     {
+      proc_idx = i - 1;
       break;
     }
     items[i] = transform_op(d_in[idx]);
   }
-  FloatType abs_max = items[0];
+  FloatType abs_max = fabs(items[0]);
 
 #pragma unroll
-  for (auto i = 1; i < ITEMS_PER_THREAD; i++)
+  for (auto i = 1; i <= proc_idx; i++)
   {
     abs_max = fmax(fabs(items[i]), abs_max);
   }
-  // thread_aggregate.set_max_val(abs_max);
+  thread_aggregate.set_max_val(abs_max);
 
-  // #pragma unroll
-  //   for (auto i = 0; i < ITEMS_PER_THREAD; i++)
-  //   {
-  //     thread_aggregate.unsafe_add(items[i]);
-  //     // cnt[threadIdx.x]++;
-  //   }
+#pragma unroll
+  for (auto i = 0; i <= proc_idx; i++)
+  {
+    thread_aggregate.unsafe_add(items[i]);
+  }
 
-  thread_aggregate.add(items, ITEMS_PER_THREAD, abs_max);
-
-  // printf("cnt[%d]=%d\n", threadIdx.x, cnt[threadIdx.x]);
-  // if (cnt[threadIdx.x] > thread_aggregate.endurance())
-  // {
-  //   thread_aggregate.renorm();
-  // }
+  if (proc_idx > thread_aggregate.endurance())
+  {
+    thread_aggregate.renorm();
+  }
 
   static_assert(ITEMS_PER_THREAD < thread_aggregate.endurance());
 
