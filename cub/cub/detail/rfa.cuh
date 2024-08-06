@@ -652,7 +652,7 @@ private:
     int X_index = binned_dindex(max_abs_val);
     if (ISZERO(primary(0)))
     {
-      // constexpr auto bins = binned_bins(X_index);
+// constexpr auto bins = binned_bins(X_index);
 #pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
@@ -675,7 +675,7 @@ private:
           primary(i * incpriY) = primary((i - shift) * incpriY);
           carry(i * inccarY)   = carry((i - shift) * inccarY);
         }
-        // constexpr auto const bins = binned_bins(X_index);
+// constexpr auto const bins = binned_bins(X_index);
 #pragma unroll
         for (int j = 0; j < FOLD; j++)
         {
@@ -960,8 +960,8 @@ private:
     const auto shift   = Y_index - X_index;
     if (shift > 0)
     {
-      // constexpr auto const bins = binned_bins(Y_index);
-      // shift Y upwards and add X to Y
+// constexpr auto const bins = binned_bins(Y_index);
+// shift Y upwards and add X to Y
 #pragma unroll
       for (int i = FOLD - 1; i >= 1; i--)
       {
@@ -986,8 +986,8 @@ private:
     }
     else if (shift < 0)
     {
-      // constexpr auto const bins = binned_bins(X_index);
-      // shift X upwards and add X to Y
+// constexpr auto const bins = binned_bins(X_index);
+// shift X upwards and add X to Y
 #pragma unroll
       for (int i = 0; i < FOLD; i++)
       {
@@ -1001,8 +1001,8 @@ private:
     }
     else if (shift == 0)
     {
-      // constexpr auto const bins = binned_bins(X_index);
-      // add X to Y
+// constexpr auto const bins = binned_bins(X_index);
+// add X to Y
 #pragma unroll
       for (int i = 0; i < FOLD; i++)
       {

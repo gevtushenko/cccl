@@ -285,40 +285,33 @@ __launch_bounds__(int(ChainedPolicyT::ActivePolicy::ReducePolicy::BLOCK_THREADS)
   AccumT thread_aggregate{};
   FloatType items[ITEMS_PER_THREAD] = {};
 
-  int proc_idx = ITEMS_PER_THREAD - 1;
-
 #pragma unroll
   for (int i = 0; i < ITEMS_PER_THREAD; ++i)
   {
     const auto idx = i * BLOCK_THREADS + threadIdx.x + TILE_SIZE * blockIdx.x;
     if (idx >= num_items)
     {
-      proc_idx = i - 1;
-      break;
+      continue;
     }
     items[i] = transform_op(d_in[idx]);
   }
   FloatType abs_max = fabs(items[0]);
 
 #pragma unroll
-  for (auto i = 1; i <= proc_idx; i++)
+  for (auto i = 1; i < ITEMS_PER_THREAD; i++)
   {
     abs_max = fmax(fabs(items[i]), abs_max);
   }
+
   thread_aggregate.set_max_val(abs_max);
 
 #pragma unroll
-  for (auto i = 0; i <= proc_idx; i++)
+  for (auto i = 0; i < ITEMS_PER_THREAD; i++)
   {
     thread_aggregate.unsafe_add(items[i]);
   }
 
-  if (proc_idx > thread_aggregate.endurance())
-  {
-    thread_aggregate.renorm();
-  }
-
-  static_assert(ITEMS_PER_THREAD < thread_aggregate.endurance());
+  thread_aggregate.renorm();
 
   AccumT block_aggregate = BlockReduceT(temp_storage).Reduce(thread_aggregate, reduction_op);
 
@@ -728,8 +721,8 @@ struct DeviceReducePolicy
   /// SM60
   struct Policy600 : ChainedPolicy<600, Policy600, Policy350>
   {
-    static constexpr int threads_per_block  = 512;
-    static constexpr int items_per_thread   = 64;
+    static constexpr int threads_per_block  = 256;
+    static constexpr int items_per_thread   = 16;
     static constexpr int items_per_vec_load = 4;
 
     // ReducePolicy (P100: 591 GB/s @ 64M 4B items; 583 GB/s @ 256M 1B items)
