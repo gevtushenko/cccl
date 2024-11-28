@@ -44,6 +44,18 @@ constexpr bool is_descending   = false;
 constexpr bool is_overwrite_ok = false;
 
 #if !TUNE_BASE
+struct onesweep_policy_t
+{
+  static constexpr int RANK_NUM_PARTS   = 1;
+  static constexpr int RADIX_BITS       = TUNE_RADIX_BITS;
+  static constexpr int ITEMS_PER_THREAD = TUNE_ITEMS_PER_THREAD;
+  static constexpr int BLOCK_THREADS    = TUNE_THREADS_PER_BLOCK;
+
+  static constexpr cub::RadixRankAlgorithm RANK_ALGORITHM       = cub::RADIX_RANK_MATCH_EARLY_COUNTS_ANY;
+  static constexpr cub::BlockScanAlgorithm SCAN_ALGORITHM       = cub::BLOCK_SCAN_RAKING_MEMOIZE;
+  static constexpr cub::RadixSortStoreAlgorithm STORE_ALGORITHM = cub::RADIX_SORT_STORE_DIRECT;
+};
+
 template <typename KeyT, typename ValueT, typename OffsetT>
 struct policy_hub_t
 {
@@ -58,15 +70,7 @@ struct policy_hub_t
     static constexpr bool OFFSET_64BIT       = sizeof(OffsetT) == 8;
 
     // Onesweep policy
-    using OnesweepPolicy = cub::AgentRadixSortOnesweepPolicy<
-      TUNE_THREADS_PER_BLOCK,
-      TUNE_ITEMS_PER_THREAD,
-      DominantT,
-      1,
-      cub::RADIX_RANK_MATCH_EARLY_COUNTS_ANY,
-      cub::BLOCK_SCAN_RAKING_MEMOIZE,
-      cub::RADIX_SORT_STORE_DIRECT,
-      ONESWEEP_RADIX_BITS>;
+    using OnesweepPolicy = onesweep_policy_t;
 
     // These kernels are launched once, no point in tuning at the moment
     using HistogramPolicy    = cub::AgentRadixSortHistogramPolicy<128, 16, 1, KeyT, ONESWEEP_RADIX_BITS>;
@@ -205,6 +209,8 @@ void radix_sort_keys(std::integral_constant<bool, true>, nvbench::state& state, 
 template <typename T, typename OffsetT>
 void radix_sort_keys(std::integral_constant<bool, false>, nvbench::state&, nvbench::type_list<T, OffsetT>)
 {
+  static_assert(sizeof(OffsetT) < 1, "This tuning doesn't fit shared memory");
+
   (void) is_descending;
   (void) is_overwrite_ok;
 }
