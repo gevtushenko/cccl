@@ -126,12 +126,16 @@ _CCCL_DEVICE void transform_kernel_impl(
     out += offset;
   }
 
+  _CCCL_PDL_GRID_DEPENDENCY_SYNC();
+
   {
     // TODO(bgruber): replace by fold over comma in C++17
     // extra zero at the end handles empty packs
     int dummy[] = {(prefetch_tile<block_dim>(THRUST_NS_QUALIFIER::raw_reference_cast(ins), tile_size), 0)..., 0};
     (void) &dummy; // nvcc 11.1 needs extra strong unused warning suppression
   }
+
+  _CCCL_PDL_TRIGGER_NEXT_LAUNCH();
 
   // TODO(bgruber): use `auto full_tile` and pass true_type/false_type in C++14 to strengthen the compile-time intent
   auto process_tile = [&](bool full_tile) {
@@ -168,10 +172,11 @@ _CCCL_DEVICE _CCCL_FORCEINLINE auto poor_apply_impl(F&& f, Tuple&& t, ::cuda::st
 }
 
 template <class F, class Tuple>
-_CCCL_DEVICE _CCCL_FORCEINLINE auto poor_apply(F&& f, Tuple&& t) -> decltype(poor_apply_impl(
-  ::cuda::std::forward<F>(f),
-  ::cuda::std::forward<Tuple>(t),
-  ::cuda::std::make_index_sequence<::cuda::std::tuple_size<::cuda::std::remove_reference_t<Tuple>>::value>{}))
+_CCCL_DEVICE _CCCL_FORCEINLINE auto poor_apply(F&& f, Tuple&& t)
+  -> decltype(poor_apply_impl(
+    ::cuda::std::forward<F>(f),
+    ::cuda::std::forward<Tuple>(t),
+    ::cuda::std::make_index_sequence<::cuda::std::tuple_size<::cuda::std::remove_reference_t<Tuple>>::value>{}))
 {
   return poor_apply_impl(
     ::cuda::std::forward<F>(f),
@@ -331,6 +336,8 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
   const int tile_size     = (::cuda::std::min)(num_items - offset, Offset{tile_stride});
 
   const bool inner_blocks = 0 < blockIdx.x && blockIdx.x + 2 < gridDim.x;
+
+  _CCCL_PDL_GRID_DEPENDENCY_SYNC();
   if (inner_blocks)
   {
     // use one thread to setup the entire bulk copy
@@ -369,6 +376,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 
     cooperative_groups::wait(cooperative_groups::this_thread_block());
   }
+  _CCCL_PDL_TRIGGER_NEXT_LAUNCH();
 
   // move the whole index and iterator to the block/thread index, to reduce arithmetic in the loops below
   out += offset;
@@ -471,9 +479,8 @@ using needs_aligned_ptr_t =
 
 #ifdef _CUB_HAS_TRANSFORM_UBLKCP
 template <Algorithm Alg, typename It, ::cuda::std::enable_if_t<needs_aligned_ptr_t<Alg>::value, int> = 0>
-_CCCL_DEVICE _CCCL_FORCEINLINE auto
-select_kernel_arg(::cuda::std::integral_constant<Algorithm, Alg>, kernel_arg<It>&& arg)
-  -> aligned_base_ptr<value_t<It>>&&
+_CCCL_DEVICE _CCCL_FORCEINLINE auto select_kernel_arg(
+  ::cuda::std::integral_constant<Algorithm, Alg>, kernel_arg<It>&& arg) -> aligned_base_ptr<value_t<It>>&&
 {
   return ::cuda::std::move(arg.aligned_ptr);
 }
@@ -659,9 +666,10 @@ struct dispatch_t<RequiresStableAddress,
   // TODO(bgruber): I want to write tests for this but those are highly depending on the architecture we are running
   // on?
   template <typename ActivePolicy>
-  CUB_RUNTIME_FUNCTION _CCCL_VISIBILITY_HIDDEN _CCCL_FORCEINLINE auto configure_ublkcp_kernel() -> PoorExpected<
-    ::cuda::std::
-      tuple<THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron, decltype(CUB_DETAIL_TRANSFORM_KERNEL_PTR), int>>
+  CUB_RUNTIME_FUNCTION _CCCL_VISIBILITY_HIDDEN _CCCL_FORCEINLINE auto configure_ublkcp_kernel()
+    -> PoorExpected<
+      ::cuda::std::
+        tuple<THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron, decltype(CUB_DETAIL_TRANSFORM_KERNEL_PTR), int>>
   {
     using policy_t          = typename ActivePolicy::algo_policy;
     constexpr int block_dim = policy_t::block_threads;
@@ -733,7 +741,7 @@ struct dispatch_t<RequiresStableAddress,
 
     const auto grid_dim = static_cast<unsigned int>(::cuda::ceil_div(num_items, Offset{config->tile_size}));
     return ::cuda::std::make_tuple(
-      THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(grid_dim, block_dim, config->smem_size, stream),
+      THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(grid_dim, block_dim, config->smem_size, stream, true),
       CUB_DETAIL_TRANSFORM_KERNEL_PTR,
       config->elem_per_thread);
   }
@@ -814,7 +822,7 @@ struct dispatch_t<RequiresStableAddress,
     const int tile_size = block_dim * items_per_thread_clamped;
     const auto grid_dim = static_cast<unsigned int>(::cuda::ceil_div(num_items, Offset{tile_size}));
     return CubDebug(
-      THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(grid_dim, block_dim, 0, stream)
+      THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(grid_dim, block_dim, 0, stream, true)
         .doit(
           CUB_DETAIL_TRANSFORM_KERNEL_PTR,
           num_items,
