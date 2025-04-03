@@ -54,6 +54,7 @@ target_link_libraries(cccl.c.parallel PRIVATE
   cccl.compiler_interface_cpp20
   CUB::CUB
   Thrust::Thrust
+  PUBLIC
   fmt::fmt-header-only
 )
 target_compile_definitions(cccl.c.parallel PUBLIC CCCL_C_EXPERIMENTAL=1 _CUB_HAS_TRANSFORM_UBLKCP=0)
