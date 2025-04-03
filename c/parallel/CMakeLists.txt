@@ -5,6 +5,19 @@ project(CCCL_C_Parallel LANGUAGES CUDA CXX C)
 option(CCCL_C_Parallel_ENABLE_TESTING "Build CUDA Experimental's tests." OFF)
 option(CCCL_C_Parallel_ENABLE_HEADER_TESTING "Build CUDA Experimental's standalone headers." OFF)
 
+if (NOT CCCL_TOPLEVEL_PROJECT)
+  include(../../cmake/AppendOptionIfAvailable.cmake)
+  include(../../cmake/CCCLUtilities.cmake) # include this before other CCCL helpers
+
+  include(../../cmake/CCCLBuildCompilerTargets.cmake)
+  include(../../cmake/CCCLClangdCompileInfo.cmake)
+  include(../../cmake/CCCLConfigureTarget.cmake)
+  include(../../cmake/CCCLGenerateHeaderTests.cmake)
+  include(../../cmake/CCCLGetDependencies.cmake)
+
+  cccl_build_compiler_targets()
+endif()
+
 cccl_get_fmt()
 
 # FIXME Ideally this would be handled by presets and install rules, but for now
