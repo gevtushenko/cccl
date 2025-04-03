@@ -12,8 +12,6 @@
 #include <cub/detail/launcher/cuda_driver.cuh>
 #include <cub/device/device_select.cuh>
 
-#include <format>
-
 #include "cub/block/block_scan.cuh"
 #include "kernels/iterators.h"
 #include "kernels/operators.h"
@@ -23,6 +21,7 @@
 #include "util/tuning.h"
 #include "util/types.h"
 #include <cccl/c/unique_by_key.h>
+#include <fmt/format.h>
 #include <nvrtc/command_list.h>
 #include <nvrtc/ltoir_list_appender.h>
 
@@ -116,7 +115,7 @@ std::string get_compact_init_kernel_name(cccl_iterator_t output_num_selected_it)
   const std::string num_selected_iterator_t =
     get_iterator_name(output_num_selected_it, unique_by_key_iterator_t::num_selected);
 
-  return std::format(
+  return fmt::format(
     "cub::detail::scan::DeviceCompactInitKernel<cub::ScanTileState<{0}>, {1}>", offset_t, num_selected_iterator_t);
 }
 
@@ -142,12 +141,12 @@ std::string get_sweep_kernel_name(
   std::string offset_t;
   check(nvrtcGetTypeName<OffsetT>(&offset_t));
 
-  auto tile_state_t = std::format("cub::ScanTileState<{0}>", offset_t);
+  auto tile_state_t = fmt::format("cub::ScanTileState<{0}>", offset_t);
 
   std::string equality_op_t;
   check(nvrtcGetTypeName<op_wrapper>(&equality_op_t));
 
-  return std::format(
+  return fmt::format(
     "cub::detail::unique_by_key::DeviceUniqueByKeySweepKernel<{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}>",
     chained_policy_t,
     input_keys_iterator_t,
@@ -313,7 +312,7 @@ struct device_unique_by_key_policy {{
 {13}
 )XXX";
 
-    const std::string src = std::format(
+    const std::string src = fmt::format(
       src_template,
       input_keys_it.value_type.size, // 0
       input_keys_it.value_type.alignment, // 1
@@ -342,7 +341,7 @@ struct device_unique_by_key_policy {{
     std::string compact_init_kernel_lowered_name;
     std::string sweep_kernel_lowered_name;
 
-    const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
+    const std::string arch = fmt::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
     constexpr size_t num_args  = 7;
     const char* args[num_args] = {arch.c_str(), cub_path, thrust_path, libcudacxx_path, ctk_path, "-rdc=true", "-dlto"};

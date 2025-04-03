@@ -12,8 +12,6 @@
 #include <cub/detail/launcher/cuda_driver.cuh>
 #include <cub/device/device_merge_sort.cuh>
 
-#include <format>
-
 #include "kernels/iterators.h"
 #include "kernels/operators.h"
 #include "util/context.h"
@@ -21,6 +19,7 @@
 #include "util/tuning.h"
 #include "util/types.h"
 #include <cccl/c/merge_sort.h>
+#include <fmt/format.h>
 #include <nvrtc/command_list.h>
 #include <nvrtc/ltoir_list_appender.h>
 
@@ -159,7 +158,7 @@ std::string get_merge_sort_kernel_name(
       ? "cub::NullType"
       : cccl_type_enum_to_name<items_storage_t>(output_items_it.value_type.type);
 
-  return std::format(
+  return fmt::format(
     "cub::detail::merge_sort::{0}<{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}>",
     kernel_name,
     chained_policy_t,
@@ -185,7 +184,7 @@ std::string get_partition_kernel_name(cccl_iterator_t output_keys_it)
 
   std::string key_t = cccl_type_enum_to_name(output_keys_it.value_type.type);
 
-  return std::format(
+  return fmt::format(
     "cub::detail::merge_sort::DeviceMergeSortPartitionKernel<{0}, {1}, {2}, {3}>",
     output_keys_iterator_t,
     offset_t,
@@ -313,7 +312,7 @@ CUresult cccl_device_merge_sort_build(
 
     const std::string op_src = make_kernel_user_comparison_operator(input_keys_it_value_t, op);
 
-    const std::string src = std::format(
+    const std::string src = fmt::format(
       "#include <cub/device/dispatch/kernels/merge_sort.cuh>\n"
       "#include <cub/util_type.cuh>\n" // needed for cub::NullType
       "struct __align__({1}) storage_t {{\n"
@@ -368,7 +367,7 @@ CUresult cccl_device_merge_sort_build(
     std::string partition_kernel_lowered_name;
     std::string merge_kernel_lowered_name;
 
-    const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
+    const std::string arch = fmt::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
     constexpr size_t num_args  = 7;
     const char* args[num_args] = {arch.c_str(), cub_path, thrust_path, libcudacxx_path, ctk_path, "-rdc=true", "-dlto"};

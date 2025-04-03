@@ -118,11 +118,11 @@ extern "C" __device__ void {0}(
 }}
 )XXX";
   const std::string offset_iterator_advance_src =
-    std::format(offset_iterator_src_tmpl, /*0*/ advance_offset_method_name);
+    fmt::format(offset_iterator_src_tmpl, /*0*/ advance_offset_method_name);
 
   const std::string deref_offset_method_name = "dereference_offset_it";
   const std::string offset_iterator_deref_src =
-    std::format(R"XXX(
+    fmt::format(R"XXX(
 extern "C" __device__ unsigned long long {0}(
   row_offset_iterator_state_t* state)
 {{
@@ -212,7 +212,7 @@ extern "C" __device__ pair {0}(pair lhs, pair rhs) {{
   return pair{{ lhs.a + rhs.a, lhs.b + rhs.b }};
 }}
 )XXX";
-  std::string plus_pair_op_src                     = std::format(plus_pair_op_template, device_op_name);
+  std::string plus_pair_op_src                     = fmt::format(plus_pair_op_template, device_op_name);
 
   operation_t op = make_operation(device_op_name, plus_pair_op_src);
   pair v0        = pair{4, 2};
@@ -279,7 +279,7 @@ struct {0} {{
   unsigned long long step;
 }};
 )XXX";
-  std::string offset_iter_state_src                     = std::format(offset_iter_state_src_tmpl, offset_it_state_name);
+  std::string offset_iter_state_src                     = fmt::format(offset_iter_state_src_tmpl, offset_it_state_name);
 
   const std::string offset_advance_fn_name                = "advance_offset_it";
   constexpr std::string_view offset_advance_mthd_src_tmpl = R"XXX(
@@ -288,7 +288,7 @@ extern "C" __device__ void {0}({1} *state, unsigned long long offset) {{
 }}
 )XXX";
   const std::string offset_advance_mthd_src =
-    std::format(offset_advance_mthd_src_tmpl, offset_advance_fn_name, offset_it_state_name);
+    fmt::format(offset_advance_mthd_src_tmpl, offset_advance_fn_name, offset_it_state_name);
 
   const std::string offset_deref_fn_name                = "dereference_offset_it";
   constexpr std::string_view offset_deref_mthd_src_tmpl = R"XXX(
@@ -297,7 +297,7 @@ extern "C" __device__ unsigned long long {0}({1} *state) {{
 }}
 )XXX";
   const std::string offset_deref_mthd_src =
-    std::format(offset_deref_mthd_src_tmpl, offset_deref_fn_name, offset_it_state_name);
+    fmt::format(offset_deref_mthd_src_tmpl, offset_deref_fn_name, offset_it_state_name);
 
   iterator_t<SizeT, strided_offset_iterator_state_t> start_offset_it =
     make_iterator<SizeT, strided_offset_iterator_state_t>(
@@ -326,11 +326,11 @@ struct {0} {{
 }};
 )XXX";
   const std::string input_iterator_state_src =
-    std::format(input_iterator_state_src_tmpl, /* 0 */ input_it_state_name, /* 1 */ value_type_name);
+    fmt::format(input_iterator_state_src_tmpl, /* 0 */ input_it_state_name, /* 1 */ value_type_name);
 
   const std::string transpose_it_advance_fn_name = "advance_transposed_it";
   const std::string transpose_it_advance_mthd_src =
-    std::format(offset_advance_mthd_src_tmpl, transpose_it_advance_fn_name, input_it_state_name);
+    fmt::format(offset_advance_mthd_src_tmpl, transpose_it_advance_fn_name, input_it_state_name);
 
   const std::string transpose_it_deref_fn_name           = "dereference_transposed_it";
   constexpr std::string_view transpose_it_deref_src_tmpl = R"XXX(
@@ -340,7 +340,7 @@ extern "C" __device__ {1} {0}({2} *state) {{
   return *(state->ptr + row_id * (state->n_cols) + col_id);
 }}
 )XXX";
-  const std::string tranpose_it_deref_src                = std::format(
+  const std::string tranpose_it_deref_src                = fmt::format(
     transpose_it_deref_src_tmpl, /* 0 */ transpose_it_deref_fn_name, /*1*/ value_type_name, /*2*/ input_it_state_name);
 
   iterator_t<ValueT, input_transposed_iterator_state_t> input_transposed_iterator_it =

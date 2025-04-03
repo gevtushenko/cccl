@@ -16,7 +16,6 @@
 #include <cub/util_temporary_storage.cuh>
 #include <cub/util_type.cuh>
 
-#include <format>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -31,6 +30,7 @@
 #include "util/scan_tile_state.h"
 #include "util/types.h"
 #include <cccl/c/scan.h>
+#include <fmt/format.h>
 #include <nvrtc.h>
 #include <nvrtc/command_list.h>
 #include <nvrtc/ltoir_list_appender.h>
@@ -130,7 +130,7 @@ get_init_kernel_name(cccl_iterator_t input_it, cccl_iterator_t /*output_it*/, cc
 {
   const cccl_type_info accum_t  = scan::get_accumulator_type(op, input_it, init);
   const std::string accum_cpp_t = cccl_type_enum_to_name(accum_t.type);
-  return std::format("cub::detail::scan::DeviceScanInitKernel<cub::ScanTileState<{0}>>", accum_cpp_t);
+  return fmt::format("cub::detail::scan::DeviceScanInitKernel<cub::ScanTileState<{0}>>", accum_cpp_t);
 }
 
 std::string get_scan_kernel_name(
@@ -157,8 +157,8 @@ std::string get_scan_kernel_name(
   std::string scan_op_t;
   check(nvrtcGetTypeName<op_wrapper>(&scan_op_t));
 
-  auto tile_state_t = std::format("cub::ScanTileState<{0}>", accum_cpp_t);
-  return std::format(
+  auto tile_state_t = fmt::format("cub::ScanTileState<{0}>", accum_cpp_t);
+  return fmt::format(
     "cub::detail::scan::DeviceScanKernel<{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}>",
     chained_policy_t, // 0
     input_iterator_t, // 1
@@ -271,7 +271,7 @@ struct device_scan_policy {{
 {6}
 )XXX";
 
-    const std::string& src = std::format(
+    const std::string& src = fmt::format(
       src_template,
       input_it.value_type.size, // 0
       input_it.value_type.alignment, // 1
@@ -293,7 +293,7 @@ struct device_scan_policy {{
     std::string init_kernel_lowered_name;
     std::string scan_kernel_lowered_name;
 
-    const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
+    const std::string arch = fmt::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
     constexpr size_t num_args  = 7;
     const char* args[num_args] = {arch.c_str(), cub_path, thrust_path, libcudacxx_path, ctk_path, "-rdc=true", "-dlto"};

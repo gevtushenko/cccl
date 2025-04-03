@@ -8,10 +8,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <format>
+#include <optional>
 #include <regex>
 
 #include "scan_tile_state.h"
+#include <fmt/format.h>
 
 // TODO: NVRTC doesn't currently support extracting basic type
 // information (e.g., type sizes and alignments) from compiled
@@ -24,7 +25,7 @@ static constexpr auto ptx_u64_assignment_regex = R"(\.visible\s+\.global\s+\.ali
 
 std::optional<size_t> find_size_t(char* ptx, std::string_view name)
 {
-  std::regex regex(std::format(ptx_u64_assignment_regex, name));
+  std::regex regex(fmt::format(ptx_u64_assignment_regex, name));
   std::cmatch match;
   if (std::regex_search(ptx, match, regex))
   {
@@ -54,7 +55,7 @@ std::pair<size_t, size_t> get_tile_state_bytes_per_tile(
         __device__ size_t payload_bytes_per_tile = cub::ScanTileState<{2}>::payload_bytes_per_tile;
         )XXX";
 
-  const std::string ptx_src = std::format(ptx_src_template, accum_t.size, accum_t.alignment, accum_cpp);
+  const std::string ptx_src = fmt::format(ptx_src_template, accum_t.size, accum_t.alignment, accum_cpp);
   auto compile_result =
     make_nvrtc_command_list()
       .add_program(nvrtc_translation_unit{ptx_src.c_str(), "tile_state_info"})

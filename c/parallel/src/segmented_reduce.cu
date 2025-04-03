@@ -14,7 +14,6 @@
 #include <cub/thread/thread_load.cuh> // cub::LoadModifier
 
 #include <exception> // std::exception
-#include <format> // std::format
 #include <string> // std::string
 #include <string_view> // std::string_view
 #include <type_traits> // std::is_same_v
@@ -27,6 +26,7 @@
 #include "util/types.h"
 #include <cccl/c/segmented_reduce.h>
 #include <cccl/c/types.h> // cccl_type_info
+#include <fmt/format.h> // fmt::format
 #include <nvrtc/command_list.h>
 #include <nvrtc/ltoir_list_appender.h>
 #include <stdio.h> // printf
@@ -200,7 +200,7 @@ std::string get_device_segmented_reduce_kernel_name(
             typename AccumT>               // 8
    DeviceSegmentedReduceKernel(...);
   */
-  return std::format(
+  return fmt::format(
     "cub::detail::reduce::DeviceSegmentedReduceKernel<{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}>",
     chained_policy_t, // 0
     input_iterator_t, // 1
@@ -312,7 +312,7 @@ struct device_segmented_reduce_policy {{
 {6}
 )XXX";
 
-    std::string src = std::format(
+    std::string src = fmt::format(
       program_preamble_template,
       input_it.value_type.size, // 0
       input_it.value_type.alignment, // 1
@@ -330,7 +330,7 @@ struct device_segmented_reduce_policy {{
       op, input_it, output_it, start_offset_it, end_offset_it, init);
     std::string segmented_reduce_kernel_lowered_name;
 
-    const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
+    const std::string arch = fmt::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
     constexpr size_t num_args  = 7;
     const char* args[num_args] = {arch.c_str(), cub_path, thrust_path, libcudacxx_path, ctk_path, "-rdc=true", "-dlto"};

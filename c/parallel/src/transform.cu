@@ -15,7 +15,6 @@
 #include <cub/util_temporary_storage.cuh>
 #include <cub/util_type.cuh>
 
-#include <format>
 #include <string>
 #include <type_traits>
 
@@ -27,6 +26,7 @@
 #include "util/types.h"
 #include <cccl/c/transform.h>
 #include <cccl/c/types.h> // cccl_type_info
+#include <fmt/format.h>
 #include <nvrtc/command_list.h>
 #include <nvrtc/ltoir_list_appender.h>
 #include <stdio.h> // printf
@@ -117,7 +117,7 @@ std::string get_kernel_name(cccl_iterator_t input_it, cccl_iterator_t output_it,
   std::string transform_op_t;
   check(nvrtcGetTypeName<op_wrapper>(&transform_op_t));
 
-  return std::format(
+  return fmt::format(
     "cub::detail::transform::transform_kernel<{0}, {1}, {2}, {3}, {4}>",
     chained_policy_t, // 0
     offset_t, // 1
@@ -142,7 +142,7 @@ get_kernel_name(cccl_iterator_t input1_it, cccl_iterator_t input2_it, cccl_itera
   std::string transform_op_t;
   check(nvrtcGetTypeName<op_wrapper>(&transform_op_t));
 
-  return std::format(
+  return fmt::format(
     "cub::detail::transform::transform_kernel<{0}, {1}, {2}, {3}, {4}, {5}>",
     chained_policy_t, // 0
     offset_t, // 1
@@ -242,7 +242,7 @@ struct device_transform_policy {{
 {10}
 )XXX";
 
-    const std::string& src = std::format(
+    const std::string& src = fmt::format(
       src_template,
       input_it.value_type.size, // 0
       input_it.value_type.alignment, // 1
@@ -265,7 +265,7 @@ struct device_transform_policy {{
     std::string kernel_name = transform::get_kernel_name(input_it, output_it, op);
     std::string kernel_lowered_name;
 
-    const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
+    const std::string arch = fmt::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
     // Note: `-default-device` is needed because of the use of lambdas
     // in the transform kernel code. Qualifying those explicitly with
@@ -431,7 +431,7 @@ struct device_transform_policy {{
 
 {13}
 )XXX";
-    const std::string& src                  = std::format(
+    const std::string& src                  = fmt::format(
       src_template,
       input1_it.value_type.size, // 0
       input1_it.value_type.alignment, // 1
@@ -457,7 +457,7 @@ struct device_transform_policy {{
     std::string kernel_name = transform::get_kernel_name(input1_it, input2_it, output_it, op);
     std::string kernel_lowered_name;
 
-    const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
+    const std::string arch = fmt::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
     constexpr size_t num_args  = 8;
     const char* args[num_args] = {

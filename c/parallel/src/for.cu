@@ -12,11 +12,11 @@
 #include <cub/grid/grid_even_share.cuh>
 #include <cub/util_device.cuh>
 
-#include <format>
 #include <type_traits>
 
 #include <cccl/c/for.h>
 #include <cccl/c/types.h>
+#include <fmt/format.h>
 #include <for/for_op_helper.h>
 #include <nvrtc/command_list.h>
 #include <util/context.h>
@@ -62,7 +62,7 @@ static std::string get_device_for_kernel_name()
   check(nvrtcGetTypeName<for_each_wrapper>(&function_op_t));
   check(nvrtcGetTypeName<OffsetT>(&offset_t));
 
-  return std::format("cub::detail::for_each::static_kernel<device_for_policy, {0}, {1}>", offset_t, function_op_t);
+  return fmt::format("cub::detail::for_each::static_kernel<device_for_policy, {0}, {1}>", offset_t, function_op_t);
 }
 
 CUresult cccl_device_for_build(
@@ -92,7 +92,7 @@ CUresult cccl_device_for_build(
     const std::string for_kernel_name   = get_device_for_kernel_name();
     const std::string device_for_kernel = get_for_kernel(op, d_data);
 
-    const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
+    const std::string arch = fmt::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
     constexpr size_t num_args  = 7;
     const char* args[num_args] = {arch.c_str(), cub_path, thrust_path, libcudacxx_path, ctk_path, "-rdc=true", "-dlto"};

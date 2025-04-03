@@ -8,7 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <format>
+#include <fmt/format.h>
 
 #include "cccl/c/types.h"
 #include <kernels/iterators.h>
@@ -43,7 +43,7 @@ std::string make_kernel_input_iterator(
   std::string_view deref,
   std::string_view advance)
 {
-  const std::string iter_def = std::format(R"XXX(
+  const std::string iter_def = fmt::format(R"XXX(
 extern "C" __device__ VALUE_T DEREF(const void *self_ptr);
 extern "C" __device__ void ADVANCE(void *self_ptr, DIFF_T offset);
 struct __align__(OP_ALIGNMENT) {0} {{
@@ -70,7 +70,7 @@ struct __align__(OP_ALIGNMENT) {0} {{
 )XXX",
                                            iterator_name);
 
-  return std::format(format_template, diff_t, alignment, size, value_t, deref, advance, iter_def);
+  return fmt::format(format_template, diff_t, alignment, size, value_t, deref, advance, iter_def);
 };
 
 std::string make_kernel_input_iterator(
@@ -94,7 +94,7 @@ std::string make_kernel_output_iterator(
   std::string_view deref,
   std::string_view advance)
 {
-  const std::string iter_def = std::format(R"XXX(
+  const std::string iter_def = fmt::format(R"XXX(
 extern "C" __device__ void DEREF(const void *self_ptr, VALUE_T x);
 extern "C" __device__ void ADVANCE(void *self_ptr, DIFF_T offset);
 struct __align__(OP_ALIGNMENT) {0}_state_t {{
@@ -133,7 +133,7 @@ struct {0} {{
 )XXX",
                                            iterator_name);
 
-  return std::format(format_template, diff_t, alignment, size, value_t, deref, advance, iter_def);
+  return fmt::format(format_template, diff_t, alignment, size, value_t, deref, advance, iter_def);
 };
 
 std::string make_kernel_output_iterator(
@@ -189,7 +189,7 @@ struct output_iterator_t {{
 }};
 )XXX";
 
-  return std::format(format_template, diff_t, alignment, size, value_t, deref, advance);
+  return fmt::format(format_template, diff_t, alignment, size, value_t, deref, advance);
 };
 
 std::string make_kernel_inout_iterator(std::string_view offset_t, std::string_view input_value_t, cccl_iterator_t iter)

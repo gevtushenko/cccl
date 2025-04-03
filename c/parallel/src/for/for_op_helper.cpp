@@ -10,7 +10,7 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <format>
+#include <fmt/format.h>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -60,7 +60,7 @@ using for_each_iterator_t = input_iterator_state_t;
 )XXX";
 
   return (iter.type == cccl_iterator_kind_t::CCCL_ITERATOR)
-         ? std::format(
+         ? fmt::format(
              stateful_iterator,
              offset_t, // 0 - type
              iter.alignment, // 1 - iter alignment
@@ -69,7 +69,7 @@ using for_each_iterator_t = input_iterator_state_t;
              iter.dereference.name, // 4 - deref
              iter.advance.name // 5 - advance name
              )
-         : std::format(stateless_iterator, input_it_value_t);
+         : fmt::format(stateless_iterator, input_it_value_t);
 }
 
 static std::string get_for_kernel_user_op(cccl_op_t user_op, cccl_iterator_t iter)
@@ -110,7 +110,7 @@ struct user_op_t {{
 
   bool user_op_stateful = cccl_op_kind_t::CCCL_STATEFUL == user_op.type;
 
-  return std::format(
+  return fmt::format(
     op_format,
     user_op_stateful, // 0 - stateful user op
     user_op.name, // 1 - user op function name
@@ -125,7 +125,7 @@ std::string get_for_kernel(cccl_op_t user_op, cccl_iterator_t iter)
   auto storage_align = iter.value_type.alignment;
   auto storage_size  = iter.value_type.size;
 
-  return std::format(
+  return fmt::format(
     R"XXX(
 #include <cuda/std/iterator>
 #include <cub/agent/agent_for.cuh>

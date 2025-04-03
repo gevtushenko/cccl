@@ -16,6 +16,7 @@ function(cccl_c_parallel_add_test target_name_var source)
     CUDA::nvrtc
     Catch2::Catch2
     cccl.compiler_interface_cpp20
+    fmt::fmt-header-only
   )
 
   target_compile_definitions(${target_name} PRIVATE
@@ -53,7 +54,8 @@ function(cccl_c_parallel_add_c_test target_name_var)
   )
   target_include_directories(${target_name} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
   target_link_libraries(${target_name} PRIVATE
-    cccl.c.parallel
+    cccl.c.parallel 
+    fmt::fmt-header-only
   )
 endfunction()
 

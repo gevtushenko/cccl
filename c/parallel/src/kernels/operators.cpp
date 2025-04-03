@@ -8,7 +8,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <format>
+#include <fmt/format.h>
 #include <string_view>
 
 #include "cccl/c/types.h"
@@ -59,10 +59,10 @@ std::string make_kernel_binary_operator_full_source(
   std::string_view lhs_t, std::string_view rhs_t, cccl_op_t operation, std::string_view return_type)
 {
   const std::string op_alignment =
-    operation.type == cccl_op_kind_t::CCCL_STATELESS ? "" : std::format("{}", operation.alignment);
-  const std::string op_size = operation.type == cccl_op_kind_t::CCCL_STATELESS ? "" : std::format("{}", operation.size);
+    operation.type == cccl_op_kind_t::CCCL_STATELESS ? "" : fmt::format("{}", operation.alignment);
+  const std::string op_size = operation.type == cccl_op_kind_t::CCCL_STATELESS ? "" : fmt::format("{}", operation.size);
 
-  return std::format(
+  return fmt::format(
     binary_op_template,
     lhs_t,
     rhs_t,
@@ -70,8 +70,8 @@ std::string make_kernel_binary_operator_full_source(
     op_alignment,
     op_size,
     operation.type == cccl_op_kind_t::CCCL_STATELESS
-      ? std::format(stateless_binary_op_template, return_type)
-      : std::format(stateful_binary_op_template, return_type));
+      ? fmt::format(stateless_binary_op_template, return_type)
+      : fmt::format(stateful_binary_op_template, return_type));
 }
 
 std::string make_kernel_user_binary_operator(
@@ -129,7 +129,7 @@ struct op_wrapper {
 )XXX";
 
   return (operation.type == cccl_op_kind_t::CCCL_STATELESS)
-         ? std::format(unary_op_template, input_t, output_t, operation.name, "", "", stateless_op)
-         : std::format(
+         ? fmt::format(unary_op_template, input_t, output_t, operation.name, "", "", stateless_op)
+         : fmt::format(
              unary_op_template, input_t, output_t, operation.name, operation.alignment, operation.size, stateful_op);
 }

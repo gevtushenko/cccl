@@ -19,7 +19,6 @@
 #include <cuda/std/functional> // ::cuda::std::identity
 #include <cuda/std/variant>
 
-#include <format>
 #include <memory>
 
 #include "kernels/iterators.h"
@@ -29,6 +28,7 @@
 #include "util/indirect_arg.h"
 #include "util/types.h"
 #include <cccl/c/reduce.h>
+#include <fmt/format.h>
 #include <nvrtc/command_list.h>
 #include <nvrtc/ltoir_list_appender.h>
 
@@ -168,7 +168,7 @@ std::string get_single_tile_kernel_name(
   std::string reduction_op_t;
   check(nvrtcGetTypeName<op_wrapper>(&reduction_op_t));
 
-  return std::format(
+  return fmt::format(
     "cub::detail::reduce::DeviceReduceSingleTileKernel<{0}, {1}, {2}, {3}, {4}, {5}, {6}>",
     chained_policy_t,
     input_iterator_t,
@@ -200,7 +200,7 @@ std::string get_device_reduce_kernel_name(cccl_op_t op, cccl_iterator_t input_it
   std::string transform_op_t;
   check(nvrtcGetTypeName<cuda::std::__identity>(&transform_op_t));
 
-  return std::format(
+  return fmt::format(
     "cub::detail::reduce::DeviceReduceKernel<{0}, {1}, {2}, {3}, {4}, {5}>",
     chained_policy_t,
     input_iterator_t,
@@ -283,7 +283,7 @@ CUresult cccl_device_reduce_build(
 
     const std::string op_src = make_kernel_user_binary_operator(accum_cpp, accum_cpp, accum_cpp, op);
 
-    const std::string src = std::format(
+    const std::string src = fmt::format(
       R"XXX(
 #include <cub/block/block_reduce.cuh>
 #include <cub/device/dispatch/kernels/reduce.cuh>
@@ -330,7 +330,7 @@ struct device_reduce_policy {{
     std::string single_tile_second_kernel_lowered_name;
     std::string reduction_kernel_lowered_name;
 
-    const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
+    const std::string arch = fmt::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
     constexpr size_t num_args  = 7;
     const char* args[num_args] = {arch.c_str(), cub_path, thrust_path, libcudacxx_path, ctk_path, "-rdc=true", "-dlto"};
