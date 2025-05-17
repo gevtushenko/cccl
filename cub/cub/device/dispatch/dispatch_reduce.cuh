@@ -147,7 +147,7 @@ template <typename InputIteratorT,
             InitT,
             AccumT,
             TransformOpT>,
-          typename KernelLauncherFactory = detail::TripleChevronFactory>
+          typename KernelLauncherFactory = CUB_DETAIL_DEFAULT_KERNEL_LAUNCHER>
 struct DispatchReduce
 {
   //---------------------------------------------------------------------------
