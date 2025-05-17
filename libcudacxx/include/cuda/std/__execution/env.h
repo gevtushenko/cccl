@@ -367,6 +367,21 @@ _CCCL_GLOBAL_CONSTANT get_env_t get_env{};
 template <class _Ty>
 using env_of_t _CCCL_NODEBUG_ALIAS = decltype(get_env(declval<_Ty>()));
 
+namespace __detail
+{
+template <class EnvT, class Query, class Default, enable_if_t<!__queryable_with<EnvT, Query>, int> = 0>
+auto __query_or(EnvT&, Query, Default value)
+{
+  return value;
+}
+
+template <class EnvT, class Query, class Default, enable_if_t<__queryable_with<EnvT, Query>, int> = 0>
+auto __query_or(EnvT& env, Query query, Default)
+{
+  return env.query(query);
+}
+} // namespace __detail
+
 _LIBCUDACXX_END_NAMESPACE_EXECUTION
 
 #include <cuda/std/__cccl/epilogue.h>

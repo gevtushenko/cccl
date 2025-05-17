@@ -50,7 +50,13 @@
 
 #include <thrust/iterator/tabulate_output_iterator.h>
 
+#include <cuda/memory_resource>
+#include <cuda/std/__execution/env.h>
 #include <cuda/std/limits>
+
+// TOOD: use libcudacxx
+#include <cuda/experimental/__stream/get_stream.cuh>
+#include <cuda/experimental/memory_resource.cuh>
 
 CUB_NAMESPACE_BEGIN
 
@@ -223,6 +229,42 @@ struct DeviceReduce
 
     return DispatchReduce<InputIteratorT, OutputIteratorT, OffsetT, ReductionOpT, T>::Dispatch(
       d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<OffsetT>(num_items), reduction_op, init, stream);
+  }
+
+  template <typename InputIteratorT,
+            typename OutputIteratorT,
+            typename ReductionOpT,
+            typename T,
+            typename NumItemsT,
+            typename EnvT = ::cuda::std::execution::env<>>
+  CUB_RUNTIME_FUNCTION static cudaError_t Reduce(
+    InputIteratorT d_in, OutputIteratorT d_out, NumItemsT num_items, ReductionOpT reduction_op, T init, EnvT env = {})
+  {
+    namespace cudax = cuda::experimental;
+
+    ::cuda::stream_ref stream = ::cuda::std::execution::__detail::__query_or(env, cudax::get_stream, cudaStream_t{0});
+
+    auto mr =
+      ::cuda::std::execution::__detail::__query_or(env, cudax::get_memory_resource, cudax::device_memory_resource{});
+
+    void* d_temp_storage      = nullptr;
+    size_t temp_storage_bytes = 0;
+
+    cudaError_t error =
+      Reduce(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, stream.get());
+
+    if (error != cudaSuccess)
+    {
+      return error;
+    }
+
+    d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);
+
+    error = Reduce(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, stream.get());
+
+    mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream);
+
+    return error;
   }
 
   //! @rst
