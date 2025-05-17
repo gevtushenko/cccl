@@ -33,6 +33,7 @@ if (C2H_ENABLE_CURAND)
 else()
   target_compile_definitions(cccl.c2h PRIVATE C2H_HAS_CURAND=0)
 endif()
+target_compile_definitions(cccl.c2h PRIVATE LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE)
 
 add_library(cccl.c2h.main OBJECT
   catch2_runner.cpp

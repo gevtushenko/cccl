@@ -112,7 +112,9 @@ function(cub_add_test target_name_var test_name test_src cub_target launcher_id)
         cccl.c2h
         CUDA::nvrtc
         CUDA::cuda_driver
+        CCCL::cudax
       )
+      target_compile_definitions(${config_c2h_target} INTERFACE LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE)
     endif() # config_c2h_target
 
     add_executable(${test_target} "${test_src}")
@@ -162,10 +164,11 @@ function(cub_add_test target_name_var test_name test_src cub_target launcher_id)
     )
     cub_clone_target_properties(${test_target} ${cub_target})
     target_include_directories(${test_target} PRIVATE "${CUB_SOURCE_DIR}/test")
-    target_compile_definitions(${test_target} PRIVATE CUB_DEBUG_SYNC)
+    target_compile_definitions(${test_target} PRIVATE CUB_DEBUG_SYNC LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE)
 
     if ("${test_target}" MATCHES "nvtx_in_usercode")
       target_link_libraries(${test_target} PRIVATE nvtx3-cpp)
+      target_compile_definitions(${test_target} PRIVATE LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE)
     endif()
 
     _cub_is_fail_test(is_fail_test "${test_src}")
@@ -216,7 +219,7 @@ function(cub_add_test target_name_var test_name test_src cub_target launcher_id)
   endif() # Not catch2 test
 
   # Ensure that we test with assertions enabled
-  target_compile_definitions(${test_target} PRIVATE CCCL_ENABLE_ASSERTIONS)
+  target_compile_definitions(${test_target} PRIVATE CCCL_ENABLE_ASSERTIONS LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE)
 endfunction()
 
 # Sets out_var to launch id if the label contains launch variants
@@ -275,6 +278,7 @@ foreach (test_src IN LISTS test_srcs)
       # Only one version of this test.
       cub_add_test(test_target ${test_name} "${test_src}" ${cub_target} ${launcher})
       cub_configure_cuda_target(${test_target} RDC ${CUB_FORCE_RDC})
+      target_compile_definitions(${test_target} PRIVATE LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE)
     else() # has variants:
       cccl_log_variant_params("${test_name}" ${num_variants} variant_labels variant_defs)
 
@@ -339,7 +343,7 @@ foreach (test_src IN LISTS test_srcs)
         cub_configure_cuda_target(${test_target} RDC ${cdp_val})
         add_dependencies(${variant_meta_target} ${test_target})
         add_dependencies(${cub_variant_meta_target} ${test_target})
-        target_compile_definitions(${test_target} PRIVATE ${defs})
+        target_compile_definitions(${test_target} PRIVATE ${defs} LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE)
       endforeach() # Variant
     endif() # Has variants
   endforeach() # CUB targets
