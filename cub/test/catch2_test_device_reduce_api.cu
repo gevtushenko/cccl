@@ -24,6 +24,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
+
+struct StreamRegistryFactory;
+#define CUB_DETAIL_DEFAULT_KERNEL_LAUNCHER StreamRegistryFactory
+
 #include "insert_nested_NVTX_range_guard.h"
 // above header needs to be included first
 
@@ -38,6 +42,53 @@
 #include <cstdint>
 
 #include <c2h/catch2_test_helper.h>
+
+struct StreamRegistryFactory
+{
+  thrust::cuda_cub::detail::triple_chevron
+  operator()(dim3 grid, dim3 block, size_t shared_mem, cudaStream_t stream, bool dependent_launch = false) const
+  {
+    std::cout << "Launch on " << stream << std::endl;
+    return thrust::cuda_cub::detail::triple_chevron(grid, block, shared_mem, stream, dependent_launch);
+  }
+
+  cudaError_t PtxVersion(int& version)
+  {
+    return cub::PtxVersion(version);
+  }
+
+  cudaError_t MultiProcessorCount(int& sm_count) const
+  {
+    int device_ordinal;
+    cudaError_t error = cudaGetDevice(&device_ordinal);
+    if (cudaSuccess != error)
+    {
+      return error;
+    }
+
+    // Get SM count
+    return cudaDeviceGetAttribute(&sm_count, cudaDevAttrMultiProcessorCount, device_ordinal);
+  }
+
+  template <typename Kernel>
+  cudaError_t MaxSmOccupancy(int& sm_occupancy, Kernel kernel_ptr, int block_size, int dynamic_smem_bytes = 0)
+  {
+    return cudaOccupancyMaxActiveBlocksPerMultiprocessor(&sm_occupancy, kernel_ptr, block_size, dynamic_smem_bytes);
+  }
+
+  cudaError_t MaxGridDimX(int& max_grid_dim_x) const
+  {
+    int device_ordinal;
+    cudaError_t error = cudaGetDevice(&device_ordinal);
+    if (cudaSuccess != error)
+    {
+      return error;
+    }
+
+    // Get max grid dimension
+    return cudaDeviceGetAttribute(&max_grid_dim_x, cudaDevAttrMaxGridDimX, device_ordinal);
+  }
+};
 
 namespace cudax = cuda::experimental;
 
