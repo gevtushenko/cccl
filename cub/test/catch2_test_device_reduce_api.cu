@@ -31,16 +31,36 @@
 
 #include <thrust/device_vector.h>
 
+#include <cuda/experimental/__execution/env.cuh>
+#include <cuda/experimental/memory_resource.cuh>
+#include <cuda/experimental/stream.cuh>
+
 #include <cstdint>
 
 #include <c2h/catch2_test_helper.h>
 
-TEST_CASE("Device reduce works with environment", "[reduce][device]")
+namespace cudax = cuda::experimental;
+
+TEST_CASE("Device reduce works with default environment", "[reduce][device]")
 {
   thrust::device_vector<int> d_in{1, 2, 3, 4, 5};
   thrust::device_vector<int> d_out(1);
 
   cudaError_t err = cub::DeviceReduce::Reduce(d_in.begin(), d_out.begin(), d_in.size(), cuda::std::plus<>{}, 0);
+  REQUIRE(err == cudaSuccess);
+
+  REQUIRE(d_out[0] == 15);
+}
+
+TEST_CASE("Device reduce works with cudax environment", "[reduce][device]")
+{
+  cudax::stream stream;
+  cudax::env_t<cuda::mr::device_accessible> env{cudax::device_memory_resource{}, stream};
+
+  thrust::device_vector<int> d_in{1, 2, 3, 4, 5};
+  thrust::device_vector<int> d_out(1);
+
+  cudaError_t err = cub::DeviceReduce::Reduce(d_in.begin(), d_out.begin(), d_in.size(), cuda::std::plus<>{}, 0, env);
   REQUIRE(err == cudaSuccess);
 
   REQUIRE(d_out[0] == 15);
