@@ -50,13 +50,10 @@
 
 #include <thrust/iterator/tabulate_output_iterator.h>
 
-#include <cuda/memory_resource>
+#include <cuda/__memory_resource/get_memory_resource.h>
+#include <cuda/__stream/get_stream.h>
 #include <cuda/std/__execution/env.h>
 #include <cuda/std/limits>
-
-// TOOD: use libcudacxx
-#include <cuda/experimental/__stream/get_stream.cuh>
-#include <cuda/experimental/memory_resource.cuh>
 
 CUB_NAMESPACE_BEGIN
 
@@ -78,6 +75,40 @@ struct unzip_and_write_arg_extremum_op
   }
 };
 } // namespace reduce
+
+struct device_memory_resource
+{
+  void* allocate(size_t bytes, size_t /* alignment */)
+  {
+    void* ptr{nullptr};
+    _CCCL_TRY_CUDA_API(::cudaMalloc, "allocate failed to allocate with cudaMalloc", &ptr, bytes);
+    return ptr;
+  }
+
+  void deallocate(void* ptr, size_t /* bytes */)
+  {
+    _CCCL_ASSERT_CUDA_API(::cudaFree, "deallocate failed", ptr);
+  }
+
+  [[nodiscard]] void* allocate_async(size_t bytes, size_t /* alignment */, ::cuda::stream_ref stream)
+  {
+    return allocate_async(bytes, stream);
+  }
+
+  void* allocate_async(size_t bytes, ::cuda::stream_ref stream)
+  {
+    void* ptr{nullptr};
+    _CCCL_TRY_CUDA_API(
+      ::cudaMallocAsync, "allocate_async failed to allocate with cudaMallocAsync", &ptr, bytes, stream.get());
+    return ptr;
+  }
+
+  void deallocate_async(void* ptr, size_t /* bytes */, const ::cuda::stream_ref stream)
+  {
+    _CCCL_ASSERT_CUDA_API(::cudaFreeAsync, "deallocate_async failed", ptr, stream.get());
+  }
+};
+
 } // namespace detail
 
 //! @rst
@@ -240,12 +271,10 @@ struct DeviceReduce
   CUB_RUNTIME_FUNCTION static cudaError_t Reduce(
     InputIteratorT d_in, OutputIteratorT d_out, NumItemsT num_items, ReductionOpT reduction_op, T init, EnvT env = {})
   {
-    namespace cudax = cuda::experimental;
+    ::cuda::stream_ref stream = ::cuda::std::execution::__detail::__query_or(env, ::cuda::get_stream, cudaStream_t{0});
 
-    ::cuda::stream_ref stream = ::cuda::std::execution::__detail::__query_or(env, cudax::get_stream, cudaStream_t{0});
-
-    auto mr =
-      ::cuda::std::execution::__detail::__query_or(env, cudax::get_memory_resource, cudax::device_memory_resource{});
+    auto mr = ::cuda::std::execution::__detail::__query_or(
+      env, ::cuda::mr::__get_memory_resource, detail::device_memory_resource{});
 
     void* d_temp_storage      = nullptr;
     size_t temp_storage_bytes = 0;
