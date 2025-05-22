@@ -25,8 +25,8 @@
  *
  ******************************************************************************/
 
-struct StreamRegistryFactory;
-#define CUB_DETAIL_DEFAULT_KERNEL_LAUNCHER StreamRegistryFactory
+struct stream_registry_factory_t;
+#define CUB_DETAIL_DEFAULT_KERNEL_LAUNCHER stream_registry_factory_t
 
 #include "insert_nested_NVTX_range_guard.h"
 // above header needs to be included first
@@ -39,16 +39,23 @@ struct StreamRegistryFactory;
 // #include <cuda/experimental/memory_resource.cuh>
 // #include <cuda/experimental/stream.cuh>
 
+#include <cuda/std/optional>
+
 #include <cstdint>
 
 #include <c2h/catch2_test_helper.h>
 
-struct StreamRegistryFactory
+struct stream_registry_factory_t
 {
+  cuda::std::optional<cudaStream_t> m_stream;
+
   thrust::cuda_cub::detail::triple_chevron
   operator()(dim3 grid, dim3 block, size_t shared_mem, cudaStream_t stream, bool dependent_launch = false) const
   {
-    std::cout << "Launch on " << stream << std::endl;
+    if (m_stream)
+    {
+      REQUIRE(stream == m_stream);
+    }
     return thrust::cuda_cub::detail::triple_chevron(grid, block, shared_mem, stream, dependent_launch);
   }
 
@@ -90,6 +97,26 @@ struct StreamRegistryFactory
   }
 };
 
+// singleton
+stream_registry_factory_t& get_stream_registry_factory()
+{
+  static stream_registry_factory_t factory;
+  return factory;
+}
+
+struct stream_scope
+{
+  stream_scope(cudaStream_t stream)
+  {
+    get_stream_registry_factory().m_stream = stream;
+  }
+
+  ~stream_scope()
+  {
+    get_stream_registry_factory().m_stream = cuda::std::nullopt;
+  }
+};
+
 TEST_CASE("Device reduce works with default environment", "[reduce][device]")
 {
   thrust::device_vector<int> d_in{1, 2, 3, 4, 5};
@@ -103,16 +130,21 @@ TEST_CASE("Device reduce works with default environment", "[reduce][device]")
 
 TEST_CASE("Device reduce works with cudax environment", "[reduce][device]")
 {
-  /*
-  cudax::stream stream;
-  cudax::env_t<cuda::mr::device_accessible> env{cudax::device_memory_resource{}, stream};
+  cudaStream_t stream;
+  REQUIRE(cudaStreamCreate(&stream) == cudaSuccess);
 
   thrust::device_vector<int> d_in{1, 2, 3, 4, 5};
   thrust::device_vector<int> d_out(1);
 
-  cudaError_t err = cub::DeviceReduce::Reduce(d_in.begin(), d_out.begin(), d_in.size(), cuda::std::plus<>{}, 0, env);
-  REQUIRE(err == cudaSuccess);
+  cuda::std::execution::prop env{cuda::get_stream, stream};
+
+  {
+    stream_scope scope(stream);
+    REQUIRE(
+      cudaSuccess == cub::DeviceReduce::Reduce(d_in.begin(), d_out.begin(), d_in.size(), cuda::std::plus<>{}, 0, env));
+  }
 
   REQUIRE(d_out[0] == 15);
-  */
+
+  REQUIRE(cudaStreamDestroy(stream) == cudaSuccess);
 }

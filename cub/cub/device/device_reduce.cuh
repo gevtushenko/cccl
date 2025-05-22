@@ -34,6 +34,8 @@
 
 #include <cub/config.cuh>
 
+#include <iostream>
+
 #if defined(_CCCL_IMPLICIT_SYSTEM_HEADER_GCC)
 #  pragma GCC system_header
 #elif defined(_CCCL_IMPLICIT_SYSTEM_HEADER_CLANG)
@@ -271,10 +273,10 @@ struct DeviceReduce
   CUB_RUNTIME_FUNCTION static cudaError_t Reduce(
     InputIteratorT d_in, OutputIteratorT d_out, NumItemsT num_items, ReductionOpT reduction_op, T init, EnvT env = {})
   {
-    ::cuda::stream_ref stream = ::cuda::std::execution::__detail::__query_or(env, ::cuda::get_stream, cudaStream_t{0});
+    ::cuda::stream_ref stream = ::cuda::std::execution::__query_or(env, ::cuda::get_stream, cudaStream_t{0});
 
-    auto mr = ::cuda::std::execution::__detail::__query_or(
-      env, ::cuda::mr::__get_memory_resource, detail::device_memory_resource{});
+    auto mr =
+      ::cuda::std::execution::__query_or(env, ::cuda::mr::__get_memory_resource, detail::device_memory_resource{});
 
     void* d_temp_storage      = nullptr;
     size_t temp_storage_bytes = 0;
