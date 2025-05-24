@@ -92,7 +92,7 @@ struct device_memory_resource
     _CCCL_ASSERT_CUDA_API(::cudaFree, "deallocate failed", ptr);
   }
 
-  [[nodiscard]] void* allocate_async(size_t bytes, size_t /* alignment */, ::cuda::stream_ref stream)
+  void* allocate_async(size_t bytes, size_t /* alignment */, ::cuda::stream_ref stream)
   {
     return allocate_async(bytes, stream);
   }
