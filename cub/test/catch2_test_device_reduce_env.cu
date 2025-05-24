@@ -34,6 +34,7 @@ struct stream_registry_factory_t;
 #include <cub/device/device_reduce.cuh>
 
 #include <thrust/device_vector.h>
+#include <thrust/iterator/constant_iterator.h>
 
 // #include <cuda/experimental/__execution/env.cuh>
 // #include <cuda/experimental/memory_resource.cuh>
@@ -41,9 +42,9 @@ struct stream_registry_factory_t;
 
 #include <cuda/std/optional>
 
-#include <cstdint>
-
 #include <c2h/catch2_test_helper.h>
+
+namespace stdexec = cuda::std::execution;
 
 struct stream_registry_factory_t
 {
@@ -117,34 +118,86 @@ struct stream_scope
   }
 };
 
+struct device_memory_resource : cub::detail::device_memory_resource
+{
+  size_t* bytes_allocated   = nullptr;
+  size_t* bytes_deallocated = nullptr;
+
+  void* allocate(size_t /* bytes */, size_t /* alignment */)
+  {
+    FAIL("CUB shouldn't use synchronous allocation");
+    return nullptr;
+  }
+
+  void deallocate(void* /* ptr */, size_t /* bytes */)
+  {
+    FAIL("CUB shouldn't use synchronous deallocation");
+  }
+
+  void* allocate_async(size_t bytes, size_t /* alignment */, ::cuda::stream_ref stream)
+  {
+    return allocate_async(bytes, stream);
+  }
+
+  void* allocate_async(size_t bytes, ::cuda::stream_ref stream)
+  {
+    if (bytes_allocated)
+    {
+      *bytes_allocated = bytes;
+    }
+    return cub::detail::device_memory_resource::allocate_async(bytes, stream);
+  }
+
+  void deallocate_async(void* ptr, size_t bytes, const ::cuda::stream_ref stream)
+  {
+    if (bytes_deallocated)
+    {
+      *bytes_deallocated = bytes;
+    }
+    cub::detail::device_memory_resource::deallocate_async(ptr, bytes, stream);
+  }
+};
+
 TEST_CASE("Device reduce works with default environment", "[reduce][device]")
 {
-  thrust::device_vector<int> d_in{1, 2, 3, 4, 5};
-  thrust::device_vector<int> d_out(1);
+  auto num_items = GENERATE(1 << 4, 1 << 24);
+  auto d_in      = thrust::make_constant_iterator(1);
+  auto d_out     = thrust::device_vector<int>(1);
 
-  cudaError_t err = cub::DeviceReduce::Reduce(d_in.begin(), d_out.begin(), d_in.size(), cuda::std::plus<>{}, 0);
-  REQUIRE(err == cudaSuccess);
-
-  REQUIRE(d_out[0] == 15);
+  REQUIRE(cudaSuccess == cub::DeviceReduce::Reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0));
+  REQUIRE(d_out[0] == num_items);
 }
 
-TEST_CASE("Device reduce works with cudax environment", "[reduce][device]")
+TEST_CASE("Device reduce uses environment", "[reduce][device]")
 {
-  cudaStream_t stream;
+  cudaStream_t stream{};
   REQUIRE(cudaStreamCreate(&stream) == cudaSuccess);
 
-  thrust::device_vector<int> d_in{1, 2, 3, 4, 5};
-  thrust::device_vector<int> d_out(1);
+  auto num_items = GENERATE(1 << 4, 1 << 24);
+  auto d_in      = thrust::make_constant_iterator(1);
+  auto d_out     = thrust::device_vector<int>(1);
 
-  cuda::std::execution::prop env{cuda::get_stream, stream};
+  size_t bytes_allocated   = 0;
+  size_t bytes_deallocated = 0;
+
+  auto mr         = device_memory_resource{{}, &bytes_allocated, &bytes_deallocated};
+  auto mr_env     = stdexec::prop{cuda::mr::__get_memory_resource_t{}, mr};
+  auto stream_env = stdexec::prop{cuda::get_stream, stream};
+  auto env        = stdexec::env{stream_env, mr_env};
 
   {
     stream_scope scope(stream);
-    REQUIRE(
-      cudaSuccess == cub::DeviceReduce::Reduce(d_in.begin(), d_out.begin(), d_in.size(), cuda::std::plus<>{}, 0, env));
+    REQUIRE(cudaSuccess == cub::DeviceReduce::Reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0, env));
   }
 
-  REQUIRE(d_out[0] == 15);
-
+  REQUIRE(d_out[0] == num_items);
   REQUIRE(cudaStreamDestroy(stream) == cudaSuccess);
+
+  size_t expected_bytes_allocated{};
+  REQUIRE(cudaSuccess
+          == cub::DeviceReduce::Reduce(
+            nullptr, expected_bytes_allocated, d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0));
+
+  REQUIRE(expected_bytes_allocated == bytes_allocated);
+  REQUIRE(bytes_deallocated == bytes_allocated);
 }
