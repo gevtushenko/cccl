@@ -180,10 +180,11 @@ TEST_CASE("Device reduce uses environment", "[reduce][device]")
   size_t bytes_allocated   = 0;
   size_t bytes_deallocated = 0;
 
-  auto mr         = device_memory_resource{{}, &bytes_allocated, &bytes_deallocated};
-  auto mr_env     = stdexec::prop{cuda::mr::__get_memory_resource_t{}, mr};
-  auto stream_env = stdexec::prop{cuda::get_stream, stream};
-  auto env        = stdexec::env{stream_env, mr_env};
+  auto mr              = device_memory_resource{{}, &bytes_allocated, &bytes_deallocated};
+  auto mr_env          = stdexec::prop{cuda::mr::__get_memory_resource_t{}, mr};
+  auto stream_env      = stdexec::prop{cuda::get_stream, stream};
+  auto determinism_env = cuda::execution::require(cuda::execution::determinism::run_to_run);
+  auto env             = stdexec::env{stream_env, mr_env, determinism_env};
 
   {
     stream_scope scope(stream);

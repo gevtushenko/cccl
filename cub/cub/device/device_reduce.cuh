@@ -52,6 +52,7 @@
 
 #include <thrust/iterator/tabulate_output_iterator.h>
 
+#include <cuda/__execution/determinism.h>
 #include <cuda/__memory_resource/get_memory_resource.h>
 #include <cuda/__stream/get_stream.h>
 #include <cuda/std/__execution/env.h>
@@ -277,6 +278,9 @@ struct DeviceReduce
 
     auto mr =
       ::cuda::std::execution::__query_or(env, ::cuda::mr::__get_memory_resource, detail::device_memory_resource{});
+
+    auto determinism = ::cuda::std::execution::__query_or(
+      env, ::cuda::execution::determinism::get_determinism, ::cuda::execution::determinism::run_to_run);
 
     void* d_temp_storage      = nullptr;
     size_t temp_storage_bytes = 0;
