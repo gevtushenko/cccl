@@ -282,7 +282,7 @@ struct DeviceReduce
     size_t temp_storage_bytes = 0;
 
     cudaError_t error =
-      Reduce(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, stream.get());
+      CubDebug(Reduce(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, stream.get()));
 
     if (error != cudaSuccess)
     {
@@ -291,7 +291,8 @@ struct DeviceReduce
 
     d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);
 
-    error = Reduce(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, stream.get());
+    error =
+      CubDebug(Reduce(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, stream.get()));
 
     mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream);
 
