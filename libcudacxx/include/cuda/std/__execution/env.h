@@ -394,13 +394,13 @@ template <class _Tag>
 _CCCL_CONCEPT __forwarding_query = forwarding_query(_Tag{});
 
 template <class EnvT, class Query, class Default, enable_if_t<!__queryable_with<EnvT, Query>, int> = 0>
-auto __query_or(const EnvT&, Query, Default value)
+_CCCL_API auto __query_or(const EnvT&, Query, Default value)
 {
   return value;
 }
 
 template <class EnvT, class Query, class Default, enable_if_t<__queryable_with<EnvT, Query>, int> = 0>
-auto __query_or(const EnvT& env, Query query, Default)
+_CCCL_API auto __query_or(const EnvT& env, Query query, Default)
 {
   return env.query(query);
 }

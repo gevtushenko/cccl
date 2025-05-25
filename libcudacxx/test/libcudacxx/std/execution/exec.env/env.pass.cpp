@@ -57,6 +57,8 @@ __host__ __device__ TEST_CONSTEXPR_CXX20 bool test()
 
   cuda::std::execution::env e2{cuda::std::execution::prop{query1, 42}};
   assert(e2.query(query1) == 42);
+  assert(cuda::std::execution::__query_or(e2, query1, 24) == 42);
+  assert(cuda::std::execution::__query_or(e2, query2, 24) == 24);
   using expected_e2_t = cuda::std::execution::env<cuda::std::execution::prop<query1_t, int>>;
   static_assert(cuda::std::is_same_v<decltype(e2), expected_e2_t>);
   static_assert(is_trivial_aggregate<expected_e2_t>(), "");

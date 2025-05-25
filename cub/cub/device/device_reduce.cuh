@@ -79,6 +79,7 @@ struct unzip_and_write_arg_extremum_op
 };
 } // namespace reduce
 
+// TODO(gevtushenko): move cudax `device_memory_resource` to `cuda::__device_memory_resource` and use it here
 struct device_memory_resource
 {
   void* allocate(size_t bytes, size_t /* alignment */)
