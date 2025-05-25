@@ -184,6 +184,36 @@ Debug(cudaError_t error, [[maybe_unused]] const char* filename, [[maybe_unused]]
 #endif
 
 /**
+ * \brief C++17 style error checking macro that returns on error
+ *
+ * This macro uses C++17's "if statement with initializer" feature to
+ * provide a cleaner, more modern error handling pattern.
+ *
+ * Usage: CUB_RETURN_ON_ERROR(some_cuda_call());
+ */
+#if _CCCL_STD_VER >= 2017
+#  ifndef CUB_RETURN_ON_ERROR
+#    define CUB_RETURN_ON_ERROR(e)                                                                                    \
+      if (cudaError_t error_ = CUB_NS_QUALIFIER::Debug((cudaError_t) (e), __FILE__, __LINE__); error_ != cudaSuccess) \
+      {                                                                                                               \
+        return error_;                                                                                                \
+      }
+#  endif
+#else
+// Fallback for pre-C++17
+#  ifndef CUB_RETURN_ON_ERROR
+#    define CUB_RETURN_ON_ERROR(e)                                                           \
+      {                                                                                      \
+        cudaError_t error_ = CUB_NS_QUALIFIER::Debug((cudaError_t) (e), __FILE__, __LINE__); \
+        if (error_ != cudaSuccess)                                                           \
+        {                                                                                    \
+          return error_;                                                                     \
+        }                                                                                    \
+      }
+#  endif
+#endif
+
+/**
  * \brief Log macro for printf statements.
  */
 #if !defined(_CubLog)

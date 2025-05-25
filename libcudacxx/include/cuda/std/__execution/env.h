@@ -405,6 +405,9 @@ auto __query_or(EnvT& env, Query query, Default)
   return env.query(query);
 }
 
+template <class EnvT, class Query, class Default>
+using __query_or_t = decltype(__query_or(declval<EnvT>(), declval<Query>(), declval<Default>()));
+
 _LIBCUDACXX_END_NAMESPACE_EXECUTION
 
 #include <cuda/std/__cccl/epilogue.h>

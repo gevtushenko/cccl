@@ -274,20 +274,32 @@ struct DeviceReduce
   CUB_RUNTIME_FUNCTION static cudaError_t Reduce(
     InputIteratorT d_in, OutputIteratorT d_out, NumItemsT num_items, ReductionOpT reduction_op, T init, EnvT env = {})
   {
-    ::cuda::stream_ref stream = ::cuda::std::execution::__query_or(env, ::cuda::get_stream, cudaStream_t{0});
+    _CCCL_NVTX_RANGE_SCOPE("cub::DeviceReduce::Reduce");
 
-    auto mr =
-      ::cuda::std::execution::__query_or(env, ::cuda::mr::__get_memory_resource, detail::device_memory_resource{});
+    namespace stdexec = ::cuda::std::execution;
+    namespace exec    = ::cuda::execution;
 
-    auto determinism = ::cuda::std::execution::__query_or(
-      env, ::cuda::execution::determinism::get_determinism, ::cuda::execution::determinism::run_to_run);
+    using offset_t   = detail::choose_offset_t<NumItemsT>;
+    using dispatch_t = DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T>;
+    using determinism_t =
+      stdexec::__query_or_t<EnvT, //
+                            exec::determinism::get_determinism_t,
+                            exec::determinism::__run_to_run_t>;
+
+    // Query relevant properties from the environment
+    auto stream = stdexec::__query_or(env, ::cuda::get_stream, cudaStream_t{0});
+    auto mr     = stdexec::__query_or(env, ::cuda::mr::__get_memory_resource, detail::device_memory_resource{});
 
     void* d_temp_storage      = nullptr;
     size_t temp_storage_bytes = 0;
 
-    cudaError_t error =
-      CubDebug(Reduce(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, stream.get()));
+    static_assert(determinism_t::value == exec::determinism::not_guaranteed
+                    || determinism_t::value == exec::determinism::run_to_run,
+                  "Only not_guaranteed or run_to_run determinism are supported");
 
+    // Query the required temporary storage size
+    cudaError_t error = CubDebug(dispatch_t::Dispatch(
+      d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<offset_t>(num_items), reduction_op, init, stream));
     if (error != cudaSuccess)
     {
       return error;
@@ -295,8 +307,9 @@ struct DeviceReduce
 
     d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);
 
-    error =
-      CubDebug(Reduce(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, stream.get()));
+    // Run the algorithm
+    error = CubDebug(dispatch_t::Dispatch(
+      d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<offset_t>(num_items), reduction_op, init, stream));
 
     mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream);
 
