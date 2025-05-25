@@ -143,7 +143,7 @@ struct device_memory_resource : cub::detail::device_memory_resource
   {
     if (bytes_allocated)
     {
-      *bytes_allocated = bytes;
+      *bytes_allocated += bytes;
     }
     return cub::detail::device_memory_resource::allocate_async(bytes, stream);
   }
@@ -152,7 +152,7 @@ struct device_memory_resource : cub::detail::device_memory_resource
   {
     if (bytes_deallocated)
     {
-      *bytes_deallocated = bytes;
+      *bytes_deallocated += bytes;
     }
     cub::detail::device_memory_resource::deallocate_async(ptr, bytes, stream);
   }
@@ -168,7 +168,10 @@ TEST_CASE("Device reduce works with default environment", "[reduce][device]")
   REQUIRE(d_out[0] == num_items);
 }
 
-TEST_CASE("Device reduce uses environment", "[reduce][device]")
+using requirements =
+  c2h::type_list<cuda::execution::determinism::run_to_run_t, cuda::execution::determinism::not_guaranteed_t>;
+
+C2H_TEST("Device reduce uses environment", "[reduce][device]", requirements)
 {
   cudaStream_t stream{};
   REQUIRE(cudaStreamCreate(&stream) == cudaSuccess);
@@ -177,13 +180,13 @@ TEST_CASE("Device reduce uses environment", "[reduce][device]")
   auto d_in      = thrust::make_constant_iterator(1);
   auto d_out     = thrust::device_vector<int>(1);
 
-  size_t bytes_allocated   = 0;
-  size_t bytes_deallocated = 0;
+  size_t bytes_allocated{};
+  size_t bytes_deallocated{};
 
   auto mr              = device_memory_resource{{}, &bytes_allocated, &bytes_deallocated};
   auto mr_env          = stdexec::prop{cuda::mr::__get_memory_resource_t{}, mr};
   auto stream_env      = stdexec::prop{cuda::get_stream, stream};
-  auto determinism_env = cuda::execution::require(cuda::execution::determinism::run_to_run);
+  auto determinism_env = cuda::execution::require(c2h::get<0, TestType>{});
   auto env             = stdexec::env{stream_env, mr_env, determinism_env};
 
   {

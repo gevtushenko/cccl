@@ -291,7 +291,7 @@ struct DeviceReduce
     using determinism_t =
       stdexec::__query_or_t<EnvT, //
                             exec::determinism::get_determinism_t,
-                            exec::determinism::__run_to_run_t>;
+                            exec::determinism::run_to_run_t>;
 
     // Query relevant properties from the environment
     auto stream = stdexec::__query_or(env, ::cuda::get_stream, cudaStream_t{0});
@@ -301,8 +301,8 @@ struct DeviceReduce
     size_t temp_storage_bytes = 0;
 
     // TODO(gevtushenko): dispatch to RFA and atomic reduce once merged
-    static_assert(determinism_t::value == exec::determinism::not_guaranteed
-                    || determinism_t::value == exec::determinism::run_to_run,
+    static_assert(::cuda::std::is_same_v<determinism_t, exec::determinism::not_guaranteed_t>
+                    || ::cuda::std::is_same_v<determinism_t, exec::determinism::run_to_run_t>,
                   "Only not_guaranteed or run_to_run determinism are supported");
 
     // Query the required temporary storage size

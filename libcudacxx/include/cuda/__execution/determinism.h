@@ -45,19 +45,20 @@ struct __determinism_holder_t : __requirement
 {
   static constexpr __determinism_t value = _Guarantee;
 
-  [[nodiscard]] _CCCL_TRIVIAL_API constexpr __determinism_t query(const get_determinism_t&) const noexcept
+  [[nodiscard]] _CCCL_TRIVIAL_API constexpr auto query(const get_determinism_t&) const noexcept
+    -> __determinism_holder_t<_Guarantee>
   {
-    return _Guarantee;
+    return *this;
   }
 };
 
-using __gpu_to_gpu_t     = __determinism_holder_t<__determinism_t::_gpu_to_gpu>;
-using __run_to_run_t     = __determinism_holder_t<__determinism_t::_run_to_run>;
-using __not_guaranteed_t = __determinism_holder_t<__determinism_t::_not_guaranteed>;
+using gpu_to_gpu_t     = __determinism_holder_t<__determinism_t::_gpu_to_gpu>;
+using run_to_run_t     = __determinism_holder_t<__determinism_t::_run_to_run>;
+using not_guaranteed_t = __determinism_holder_t<__determinism_t::_not_guaranteed>;
 
-_CCCL_GLOBAL_CONSTANT __gpu_to_gpu_t gpu_to_gpu{};
-_CCCL_GLOBAL_CONSTANT __run_to_run_t run_to_run{};
-_CCCL_GLOBAL_CONSTANT __not_guaranteed_t not_guaranteed{};
+_CCCL_GLOBAL_CONSTANT gpu_to_gpu_t gpu_to_gpu{};
+_CCCL_GLOBAL_CONSTANT run_to_run_t run_to_run{};
+_CCCL_GLOBAL_CONSTANT not_guaranteed_t not_guaranteed{};
 
 template <class _T>
 inline constexpr bool __is_determinism_holder_v = false;
