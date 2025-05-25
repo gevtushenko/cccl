@@ -294,7 +294,7 @@ struct DeviceReduce
                             exec::determinism::run_to_run_t>;
 
     // Query relevant properties from the environment
-    auto stream = stdexec::__query_or(env, ::cuda::get_stream, cudaStream_t{0});
+    auto stream = stdexec::__query_or(env, ::cuda::get_stream, ::cuda::stream_ref{});
     auto mr     = stdexec::__query_or(env, ::cuda::mr::__get_memory_resource, detail::device_memory_resource{});
 
     void* d_temp_storage      = nullptr;
@@ -307,7 +307,14 @@ struct DeviceReduce
 
     // Query the required temporary storage size
     cudaError_t error = CubDebug(dispatch_t::Dispatch(
-      d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<offset_t>(num_items), reduction_op, init, stream));
+      d_temp_storage,
+      temp_storage_bytes,
+      d_in,
+      d_out,
+      static_cast<offset_t>(num_items),
+      reduction_op,
+      init,
+      stream.get()));
     if (error != cudaSuccess)
     {
       return error;
@@ -324,7 +331,14 @@ struct DeviceReduce
 
     // Run the algorithm
     error = CubDebug(dispatch_t::Dispatch(
-      d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<offset_t>(num_items), reduction_op, init, stream));
+      d_temp_storage,
+      temp_storage_bytes,
+      d_in,
+      d_out,
+      static_cast<offset_t>(num_items),
+      reduction_op,
+      init,
+      stream.get()));
     if (error != cudaSuccess)
     {
       return error;

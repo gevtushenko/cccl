@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2025, NVIDIA CORPORATION.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,6 +25,7 @@
  *
  ******************************************************************************/
 
+// Should precede any includes
 struct stream_registry_factory_t;
 #define CUB_DETAIL_DEFAULT_KERNEL_LAUNCHER stream_registry_factory_t
 
@@ -36,9 +37,14 @@ struct stream_registry_factory_t;
 #include <thrust/device_vector.h>
 #include <thrust/iterator/constant_iterator.h>
 
-// #include <cuda/experimental/__execution/env.cuh>
-// #include <cuda/experimental/memory_resource.cuh>
-// #include <cuda/experimental/stream.cuh>
+#include "catch2_test_env_launch_helper.h"
+
+DECLARE_LAUNCH_WRAPPER(cub::DeviceReduce::Reduce, device_reduce);
+
+// Env interface allocates memory with `cudaMallocAsync`,
+// which makes it not suitable for device-side launch by default.
+// Skipping lid 1.
+// %PARAM% TEST_LAUNCH lid 0:2
 
 #include <cuda/std/optional>
 
@@ -46,118 +52,10 @@ struct stream_registry_factory_t;
 
 namespace stdexec = cuda::std::execution;
 
-struct stream_registry_factory_t
-{
-  cuda::std::optional<cudaStream_t> m_stream;
-
-  thrust::cuda_cub::detail::triple_chevron
-  operator()(dim3 grid, dim3 block, size_t shared_mem, cudaStream_t stream, bool dependent_launch = false) const
-  {
-    if (m_stream)
-    {
-      REQUIRE(stream == m_stream);
-    }
-    return thrust::cuda_cub::detail::triple_chevron(grid, block, shared_mem, stream, dependent_launch);
-  }
-
-  cudaError_t PtxVersion(int& version)
-  {
-    return cub::PtxVersion(version);
-  }
-
-  cudaError_t MultiProcessorCount(int& sm_count) const
-  {
-    int device_ordinal;
-    cudaError_t error = cudaGetDevice(&device_ordinal);
-    if (cudaSuccess != error)
-    {
-      return error;
-    }
-
-    // Get SM count
-    return cudaDeviceGetAttribute(&sm_count, cudaDevAttrMultiProcessorCount, device_ordinal);
-  }
-
-  template <typename Kernel>
-  cudaError_t MaxSmOccupancy(int& sm_occupancy, Kernel kernel_ptr, int block_size, int dynamic_smem_bytes = 0)
-  {
-    return cudaOccupancyMaxActiveBlocksPerMultiprocessor(&sm_occupancy, kernel_ptr, block_size, dynamic_smem_bytes);
-  }
-
-  cudaError_t MaxGridDimX(int& max_grid_dim_x) const
-  {
-    int device_ordinal;
-    cudaError_t error = cudaGetDevice(&device_ordinal);
-    if (cudaSuccess != error)
-    {
-      return error;
-    }
-
-    // Get max grid dimension
-    return cudaDeviceGetAttribute(&max_grid_dim_x, cudaDevAttrMaxGridDimX, device_ordinal);
-  }
-};
-
-// singleton
-stream_registry_factory_t& get_stream_registry_factory()
-{
-  static stream_registry_factory_t factory;
-  return factory;
-}
-
-struct stream_scope
-{
-  stream_scope(cudaStream_t stream)
-  {
-    get_stream_registry_factory().m_stream = stream;
-  }
-
-  ~stream_scope()
-  {
-    get_stream_registry_factory().m_stream = cuda::std::nullopt;
-  }
-};
-
-struct device_memory_resource : cub::detail::device_memory_resource
-{
-  size_t* bytes_allocated   = nullptr;
-  size_t* bytes_deallocated = nullptr;
-
-  void* allocate(size_t /* bytes */, size_t /* alignment */)
-  {
-    FAIL("CUB shouldn't use synchronous allocation");
-    return nullptr;
-  }
-
-  void deallocate(void* /* ptr */, size_t /* bytes */)
-  {
-    FAIL("CUB shouldn't use synchronous deallocation");
-  }
-
-  void* allocate_async(size_t bytes, size_t /* alignment */, ::cuda::stream_ref stream)
-  {
-    return allocate_async(bytes, stream);
-  }
-
-  void* allocate_async(size_t bytes, ::cuda::stream_ref stream)
-  {
-    if (bytes_allocated)
-    {
-      *bytes_allocated += bytes;
-    }
-    return cub::detail::device_memory_resource::allocate_async(bytes, stream);
-  }
-
-  void deallocate_async(void* ptr, size_t bytes, const ::cuda::stream_ref stream)
-  {
-    if (bytes_deallocated)
-    {
-      *bytes_deallocated += bytes;
-    }
-    cub::detail::device_memory_resource::deallocate_async(ptr, bytes, stream);
-  }
-};
-
+// Launcher helper always passes an environment.
+// We need a test of simple use to check if default environment works.
+// ifdef it out not to spend time compiling and runing it twice.
+#if TEST_LAUNCH == 0
 TEST_CASE("Device reduce works with default environment", "[reduce][device]")
 {
   auto num_items = GENERATE(1 << 4, 1 << 24);
@@ -167,35 +65,24 @@ TEST_CASE("Device reduce works with default environment", "[reduce][device]")
   REQUIRE(cudaSuccess == cub::DeviceReduce::Reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0));
   REQUIRE(d_out[0] == num_items);
 }
+#endif
 
 using requirements =
   c2h::type_list<cuda::execution::determinism::run_to_run_t, cuda::execution::determinism::not_guaranteed_t>;
 
 C2H_TEST("Device reduce uses environment", "[reduce][device]", requirements)
 {
-  cudaStream_t stream{};
-  REQUIRE(cudaStreamCreate(&stream) == cudaSuccess);
-
   auto num_items = GENERATE(1 << 4, 1 << 24);
   auto d_in      = thrust::make_constant_iterator(1);
   auto d_out     = thrust::device_vector<int>(1);
 
-  size_t bytes_allocated{};
-  size_t bytes_deallocated{};
+  // Equivalent to `cuexec::require(cuexec::determinism::run_to_run)` and
+  //               `cuexec::require(cuexec::determinism::not_guaranteed)`
+  auto env = cuda::execution::require(c2h::get<0, TestType>{});
 
-  auto mr              = device_memory_resource{{}, &bytes_allocated, &bytes_deallocated};
-  auto mr_env          = stdexec::prop{cuda::mr::__get_memory_resource_t{}, mr};
-  auto stream_env      = stdexec::prop{cuda::get_stream, stream};
-  auto determinism_env = cuda::execution::require(c2h::get<0, TestType>{});
-  auto env             = stdexec::env{stream_env, mr_env, determinism_env};
-
-  {
-    stream_scope scope(stream);
-    REQUIRE(cudaSuccess == cub::DeviceReduce::Reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0, env));
-  }
+  size_t bytes_allocated = device_reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0, env);
 
   REQUIRE(d_out[0] == num_items);
-  REQUIRE(cudaStreamDestroy(stream) == cudaSuccess);
 
   size_t expected_bytes_allocated{};
   REQUIRE(cudaSuccess
@@ -203,5 +90,4 @@ C2H_TEST("Device reduce uses environment", "[reduce][device]", requirements)
             nullptr, expected_bytes_allocated, d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0));
 
   REQUIRE(expected_bytes_allocated == bytes_allocated);
-  REQUIRE(bytes_deallocated == bytes_allocated);
 }
