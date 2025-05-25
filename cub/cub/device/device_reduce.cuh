@@ -282,7 +282,9 @@ struct DeviceReduce
     using offset_t    = detail::choose_offset_t<NumItemsT>;
     using accum_t     = ::cuda::std::__accumulator_t<ReductionOpT, detail::it_value_t<InputIteratorT>, T>;
     using transform_t = ::cuda::std::__identity;
-    using tuning_t    = detail::reduce::policy_hub<accum_t, offset_t, ReductionOpT>;
+
+    // TODO(gevtushenko): retreive tuning from the environment
+    using tuning_t = detail::reduce::policy_hub<accum_t, offset_t, ReductionOpT>;
     using dispatch_t =
       DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T, accum_t, transform_t, tuning_t>;
 
@@ -298,6 +300,7 @@ struct DeviceReduce
     void* d_temp_storage      = nullptr;
     size_t temp_storage_bytes = 0;
 
+    // TODO(gevtushenko): dispatch to RFA and atomic reduce once merged
     static_assert(determinism_t::value == exec::determinism::not_guaranteed
                     || determinism_t::value == exec::determinism::run_to_run,
                   "Only not_guaranteed or run_to_run determinism are supported");
