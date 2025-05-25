@@ -80,6 +80,7 @@ C2H_TEST("Device reduce uses environment", "[reduce][device]", requirements)
   //               `cuexec::require(cuexec::determinism::not_guaranteed)`
   auto env = cuda::execution::require(c2h::get<0, TestType>{});
 
+  // TODO(gevtushenko): how to check if given requirement is met?
   size_t bytes_allocated = device_reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0, env);
 
   REQUIRE(d_out[0] == num_items);

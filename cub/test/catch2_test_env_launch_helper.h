@@ -250,6 +250,9 @@ size_t launch(ActionT action, Args... args)
     REQUIRE(cudaStreamCreate(&stream) == cudaSuccess);
   }
 
+  // cuda graphs do not support default stream
+  REQUIRE(stream != cudaStream_t{0});
+
   size_t bytes_allocated{};
   size_t bytes_deallocated{};
 
