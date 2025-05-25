@@ -279,8 +279,13 @@ struct DeviceReduce
     namespace stdexec = ::cuda::std::execution;
     namespace exec    = ::cuda::execution;
 
-    using offset_t   = detail::choose_offset_t<NumItemsT>;
-    using dispatch_t = DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T>;
+    using offset_t    = detail::choose_offset_t<NumItemsT>;
+    using accum_t     = ::cuda::std::__accumulator_t<ReductionOpT, detail::it_value_t<InputIteratorT>, T>;
+    using transform_t = ::cuda::std::__identity;
+    using tuning_t    = detail::reduce::policy_hub<accum_t, offset_t, ReductionOpT>;
+    using dispatch_t =
+      DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T, accum_t, transform_t, tuning_t>;
+
     using determinism_t =
       stdexec::__query_or_t<EnvT, //
                             exec::determinism::get_determinism_t,
@@ -305,15 +310,33 @@ struct DeviceReduce
       return error;
     }
 
-    d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);
+    try
+    {
+      d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);
+    }
+    catch (...)
+    {
+      return cudaErrorMemoryAllocation;
+    }
 
     // Run the algorithm
     error = CubDebug(dispatch_t::Dispatch(
       d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<offset_t>(num_items), reduction_op, init, stream));
+    if (error != cudaSuccess)
+    {
+      return error;
+    }
 
-    mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream);
+    try
+    {
+      mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream);
+    }
+    catch (...)
+    {
+      return cudaErrorMemoryAllocation;
+    }
 
-    return error;
+    return cudaSuccess;
   }
 
   //! @rst
