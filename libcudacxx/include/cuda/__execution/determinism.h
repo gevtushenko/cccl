@@ -23,6 +23,7 @@
 
 #include <cuda/__execution/require.h>
 #include <cuda/std/__execution/env.h>
+#include <cuda/std/__type_traits/is_one_of.h>
 
 #include <cuda/std/__cccl/prologue.h>
 
@@ -33,7 +34,7 @@ namespace determinism
 
 struct get_determinism_t;
 
-enum class __determinism_t
+enum __determinism_t
 {
   _not_guaranteed,
   _run_to_run,
@@ -60,29 +61,31 @@ _CCCL_GLOBAL_CONSTANT gpu_to_gpu_t gpu_to_gpu{};
 _CCCL_GLOBAL_CONSTANT run_to_run_t run_to_run{};
 _CCCL_GLOBAL_CONSTANT not_guaranteed_t not_guaranteed{};
 
-template <class _T>
-inline constexpr bool __is_determinism_holder_v = false;
+template <class _Tp>
+_CCCL_CONCEPT_FRAGMENT(
+  __is_determinism_holder_,
+  requires()(requires(_CUDA_VSTD::__is_one_of_v<_Tp, gpu_to_gpu_t, run_to_run_t, not_guaranteed_t>)));
 
-template <__determinism_t _Guarantee>
-inline constexpr bool __is_determinism_holder_v<__determinism_holder_t<_Guarantee>> = true;
+template <class _Tp>
+_CCCL_CONCEPT __is_determinism_holder = _CCCL_FRAGMENT(__is_determinism_holder_, _Tp);
 
 template <class _Env>
 _CCCL_CONCEPT __has_query_get_determinism =
   _CCCL_REQUIRES_EXPR((_Env), const _Env& __env, const get_determinism_t& __cpo)(
-    requires(__is_determinism_holder_v<decltype(__env.query(__cpo))>));
+    requires(__is_determinism_holder<decltype(__env.query(__cpo))>));
 
 struct get_determinism_t
 {
   _CCCL_EXEC_CHECK_DISABLE
   _CCCL_TEMPLATE(class _Env)
   _CCCL_REQUIRES(__has_query_get_determinism<_Env>)
-  [[nodiscard]] _CCCL_HIDE_FROM_ABI constexpr auto operator()(const _Env& __env) const noexcept
+  [[nodiscard]] _CCCL_TRIVIAL_API constexpr auto operator()(const _Env& __env) const noexcept
   {
     static_assert(noexcept(__env.query(*this)), "");
     return __env.query(*this);
   }
 
-  [[nodiscard]] _CCCL_HIDE_FROM_ABI static constexpr auto query(_CUDA_STD_EXEC::forwarding_query_t) noexcept -> bool
+  [[nodiscard]] _CCCL_TRIVIAL_API static constexpr auto query(_CUDA_STD_EXEC::forwarding_query_t) noexcept -> bool
   {
     return true;
   }
