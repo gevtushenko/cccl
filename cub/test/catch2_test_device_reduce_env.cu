@@ -41,10 +41,7 @@ struct stream_registry_factory_t;
 
 DECLARE_LAUNCH_WRAPPER(cub::DeviceReduce::Reduce, device_reduce);
 
-// Env interface allocates memory with `cudaMallocAsync`,
-// which makes it not suitable for device-side launch by default.
-// Skipping lid 1.
-// %PARAM% TEST_LAUNCH lid 0:2
+// %PARAM% TEST_LAUNCH lid 0:1:2
 
 #include <cuda/std/optional>
 
@@ -76,19 +73,18 @@ C2H_TEST("Device reduce uses environment", "[reduce][device]", requirements)
   auto d_in      = thrust::make_constant_iterator(1);
   auto d_out     = thrust::device_vector<int>(1);
 
-  // Equivalent to `cuexec::require(cuexec::determinism::run_to_run)` and
-  //               `cuexec::require(cuexec::determinism::not_guaranteed)`
-  auto env = cuda::execution::require(c2h::get<0, TestType>{});
-
-  // TODO(gevtushenko): how to check if given requirement is met?
-  size_t bytes_allocated = device_reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0, env);
-
-  REQUIRE(d_out[0] == num_items);
-
   size_t expected_bytes_allocated{};
   REQUIRE(cudaSuccess
           == cub::DeviceReduce::Reduce(
             nullptr, expected_bytes_allocated, d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0));
 
-  REQUIRE(expected_bytes_allocated == bytes_allocated);
+  // Equivalent to `cuexec::require(cuexec::determinism::run_to_run)` and
+  //               `cuexec::require(cuexec::determinism::not_guaranteed)`
+  auto env = stdexec::env{cuda::execution::require(c2h::get<0, TestType>{}), // determinism
+                          expected_allocation_size(expected_bytes_allocated)}; // temp storage size
+
+  // TODO(gevtushenko): how to check if given requirement is met?
+  device_reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0, env);
+
+  REQUIRE(d_out[0] == num_items);
 }

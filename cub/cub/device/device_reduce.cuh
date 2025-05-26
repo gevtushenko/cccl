@@ -321,14 +321,13 @@ struct DeviceReduce
       return error;
     }
 
-    try
-    {
-      d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);
-    }
-    catch (...)
-    {
-      return cudaErrorMemoryAllocation;
-    }
+    NV_IF_ELSE_TARGET(
+      NV_IS_HOST,
+      (
+        try { d_temp_storage = mr.allocate_async(temp_storage_bytes, stream); } catch (...) {
+          return cudaErrorMemoryAllocation;
+        }),
+      (d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);));
 
     // Run the algorithm
     error = CubDebug(dispatch_t::Dispatch(
@@ -345,14 +344,13 @@ struct DeviceReduce
       return error;
     }
 
-    try
-    {
-      mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream);
-    }
-    catch (...)
-    {
-      return cudaErrorMemoryAllocation;
-    }
+    NV_IF_ELSE_TARGET(
+      NV_IS_HOST,
+      (
+        try { mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream); } catch (...) {
+          return cudaErrorMemoryAllocation;
+        }),
+      (mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream);));
 
     return cudaSuccess;
   }

@@ -42,7 +42,7 @@
 //!
 //! ```
 //! // Add PARAM to make CMake generate a test for both host and device launch:
-//! // %PARAM% TEST_LAUNCH lid 0:2
+//! // %PARAM% TEST_LAUNCH lid 0:1:2
 //!
 //! // Declare CDP wrapper for CUB API. The wrapper will accept the same
 //! // arguments as the CUB API. The wrapper name is provided as the second argument.
@@ -62,29 +62,35 @@
 //! Consult with `test/catch2_test_cdp_wrapper.cu` for more usage examples.
 
 #if !defined(TEST_LAUNCH)
-#  error Test file should contain %PARAM% TEST_LAUNCH lid 0:2
+#  error Test file should contain %PARAM% TEST_LAUNCH lid 0:1:2
 #endif
+
+struct get_expected_allocation_size_t
+{};
+
+_CCCL_HOST_DEVICE static cuda::std::execution::prop<get_expected_allocation_size_t, size_t>
+expected_allocation_size(size_t expected)
+{
+  return cuda::std::execution::prop{get_expected_allocation_size_t{}, expected};
+}
 
 struct stream_registry_factory_t
 {
   cuda::std::optional<cudaStream_t> m_stream;
 
-  thrust::cuda_cub::detail::triple_chevron
+  CUB_RUNTIME_FUNCTION thrust::cuda_cub::detail::triple_chevron
   operator()(dim3 grid, dim3 block, size_t shared_mem, cudaStream_t stream, bool dependent_launch = false) const
   {
-    if (m_stream)
-    {
-      REQUIRE(stream == m_stream);
-    }
+    NV_IF_TARGET(NV_IS_HOST, (if (m_stream) { REQUIRE(stream == m_stream); }));
     return thrust::cuda_cub::detail::triple_chevron(grid, block, shared_mem, stream, dependent_launch);
   }
 
-  cudaError_t PtxVersion(int& version)
+  CUB_RUNTIME_FUNCTION cudaError_t PtxVersion(int& version)
   {
     return cub::PtxVersion(version);
   }
 
-  cudaError_t MultiProcessorCount(int& sm_count) const
+  CUB_RUNTIME_FUNCTION cudaError_t MultiProcessorCount(int& sm_count) const
   {
     int device_ordinal;
     cudaError_t error = cudaGetDevice(&device_ordinal);
@@ -98,12 +104,13 @@ struct stream_registry_factory_t
   }
 
   template <typename Kernel>
-  cudaError_t MaxSmOccupancy(int& sm_occupancy, Kernel kernel_ptr, int block_size, int dynamic_smem_bytes = 0)
+  CUB_RUNTIME_FUNCTION cudaError_t
+  MaxSmOccupancy(int& sm_occupancy, Kernel kernel_ptr, int block_size, int dynamic_smem_bytes = 0)
   {
     return cudaOccupancyMaxActiveBlocksPerMultiprocessor(&sm_occupancy, kernel_ptr, block_size, dynamic_smem_bytes);
   }
 
-  cudaError_t MaxGridDimX(int& max_grid_dim_x) const
+  CUB_RUNTIME_FUNCTION cudaError_t MaxGridDimX(int& max_grid_dim_x) const
   {
     int device_ordinal;
     cudaError_t error = cudaGetDevice(&device_ordinal);
@@ -161,7 +168,7 @@ struct device_memory_resource : cub::detail::device_memory_resource
 
   void* allocate_async(size_t bytes, ::cuda::stream_ref stream)
   {
-    REQUIRE(target_stream == stream.get());
+    NV_IF_TARGET(NV_IS_HOST, (REQUIRE(target_stream == stream.get());));
 
     if (bytes_allocated)
     {
@@ -172,13 +179,53 @@ struct device_memory_resource : cub::detail::device_memory_resource
 
   void deallocate_async(void* ptr, size_t bytes, const ::cuda::stream_ref stream)
   {
-    REQUIRE(target_stream == stream.get());
+    NV_IF_TARGET(NV_IS_HOST, (REQUIRE(target_stream == stream.get());));
 
     if (bytes_deallocated)
     {
       *bytes_deallocated += bytes;
     }
     cub::detail::device_memory_resource::deallocate_async(ptr, bytes, stream);
+  }
+};
+
+struct device_side_memory_resource
+{
+  void* ptr{};
+  size_t* bytes_allocated   = nullptr;
+  size_t* bytes_deallocated = nullptr;
+
+  __host__ __device__ void* allocate(size_t /* bytes */, size_t /* alignment */)
+  {
+    cuda::std::terminate();
+    return nullptr;
+  }
+
+  __host__ __device__ void deallocate(void* /* ptr */, size_t /* bytes */)
+  {
+    cuda::std::terminate();
+  }
+
+  __host__ __device__ void* allocate_async(size_t bytes, size_t /* alignment */, ::cuda::stream_ref stream)
+  {
+    return allocate_async(bytes, stream);
+  }
+
+  __host__ __device__ void* allocate_async(size_t bytes, ::cuda::stream_ref /* stream */)
+  {
+    if (bytes_allocated)
+    {
+      *bytes_allocated += bytes;
+    }
+    return static_cast<void*>(static_cast<char*>(ptr) + *bytes_allocated);
+  }
+
+  __host__ __device__ void deallocate_async(void* /* ptr */, size_t bytes, const ::cuda::stream_ref /* stream */)
+  {
+    if (bytes_deallocated)
+    {
+      *bytes_deallocated += bytes;
+    }
   }
 };
 
@@ -204,9 +251,9 @@ auto replace_back(cuda::std::integer_sequence<size_t, Is...>, TplT tpl, EnvT env
   [[maybe_unused]] inline constexpr struct WRAPPED_API_NAME##_t \
   {                                                             \
     template <class... As>                                      \
-    size_t operator()(As... args) const                         \
+    void operator()(As... args) const                           \
     {                                                           \
-      return launch(WRAPPED_API_NAME##_invocable_t{}, args...); \
+      launch(WRAPPED_API_NAME##_invocable_t{}, args...);        \
     }                                                           \
   } WRAPPED_API_NAME
 
@@ -225,7 +272,7 @@ auto replace_back(cuda::std::integer_sequence<size_t, Is...>, TplT tpl, EnvT env
 #if TEST_LAUNCH == 2
 
 template <class ActionT, class... Args>
-size_t launch(ActionT action, Args... args)
+void launch(ActionT action, Args... args)
 {
   // Environment is always last
   constexpr size_t env_idx = sizeof...(Args) - 1;
@@ -298,17 +345,66 @@ size_t launch(ActionT action, Args... args)
     REQUIRE(cudaSuccess == cudaStreamDestroy(stream));
   }
 
-  return bytes_allocated;
+  size_t expected_bytes_allocated = fixed_env.query(get_expected_allocation_size_t{});
+  REQUIRE(expected_bytes_allocated == bytes_allocated);
 }
 
 #elif TEST_LAUNCH == 1
 
-#  error "Device-side launch of environment APIs is not supported"
+template <class ActionT, class... Args>
+__global__ void device_side_api_launch_kernel(cudaError_t* d_error, ActionT action, Args... args)
+{
+  *d_error = action(args...);
+}
+
+template <class ActionT, class... Args>
+void launch(ActionT action, Args... args)
+{
+  // Environment is always last
+  constexpr size_t env_idx = sizeof...(Args) - 1;
+
+  // Extract environment from the argument list
+  using tpl_t = cuda::std::tuple<Args...>;
+  using env_t = cuda::std::tuple_element_t<env_idx, tpl_t>;
+  tpl_t tuple(args...);
+  env_t env = cuda::std::get<env_idx>(tuple);
+
+  size_t expected_bytes_allocated = env.query(get_expected_allocation_size_t{});
+
+  c2h::device_vector<cudaError_t> d_error(1, cudaErrorInvalidValue);
+  c2h::device_vector<std::size_t> d_temp_storage(expected_bytes_allocated);
+  c2h::device_vector<std::size_t> d_allocated(1, 0);
+  c2h::device_vector<std::size_t> d_deallocated(1, 0);
+
+  // Host-side stream is unusable in device code, force it to be 0
+  auto stream_env = cuda::std::execution::prop{cuda::get_stream_t{}, cuda::stream_ref{}};
+
+  static_assert(!cuda::std::execution::__queryable_with<env_t, cuda::mr::__get_memory_resource_t>,
+                "Don't specify memory resource for launch tests.");
+  auto mr = device_side_memory_resource{
+    thrust::raw_pointer_cast(d_temp_storage.data()),
+    thrust::raw_pointer_cast(d_allocated.data()),
+    thrust::raw_pointer_cast(d_deallocated.data())};
+  auto mr_env    = cuda::std::execution::prop{cuda::mr::__get_memory_resource_t{}, mr};
+  auto fixed_env = cuda::std::execution::env{mr_env, stream_env, env};
+
+  auto fixed_args = replace_back(cuda::std::make_index_sequence<env_idx>{}, tuple, fixed_env);
+
+  cuda::std::apply(
+    [&](auto... args) {
+      device_side_api_launch_kernel<<<1, 1>>>(thrust::raw_pointer_cast(d_error.data()), action, args...);
+      REQUIRE(cudaSuccess == d_error[0]);
+    },
+    fixed_args);
+
+  REQUIRE(cudaSuccess == cudaPeekAtLastError());
+  REQUIRE(cudaSuccess == cudaDeviceSynchronize());
+}
 
 #else // TEST_LAUNCH == 0
 
 template <class ActionT, class... Args>
-size_t launch(ActionT action, Args... args)
+void launch(ActionT action, Args... args)
 {
   // Environment is always last
   constexpr size_t env_idx = sizeof...(Args) - 1;
@@ -364,7 +460,8 @@ size_t launch(ActionT action, Args... args)
     REQUIRE(cudaSuccess == cudaStreamDestroy(stream));
   }
 
-  return bytes_allocated;
+  size_t expected_bytes_allocated = fixed_env.query(get_expected_allocation_size_t{});
+  REQUIRE(expected_bytes_allocated == bytes_allocated);
 }
 
 #endif // TEST_LAUNCH == 0
