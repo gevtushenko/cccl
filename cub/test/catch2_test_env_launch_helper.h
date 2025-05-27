@@ -74,15 +74,60 @@ expected_allocation_size(size_t expected)
   return cuda::std::execution::prop{get_expected_allocation_size_t{}, expected};
 }
 
-struct stream_registry_factory_t
+struct get_allowed_kernels_t
+{};
+
+_CCCL_HOST_DEVICE static cuda::std::execution::prop<get_allowed_kernels_t, cuda::std::span<void*>>
+allowed_kernels(cuda::std::span<void*> allowed_kernels)
+{
+  return cuda::std::execution::prop{get_allowed_kernels_t{}, allowed_kernels};
+}
+
+struct stream_registry_factory_state_t
 {
   cuda::std::optional<cudaStream_t> m_stream;
+  cuda::std::span<void*> m_kernels;
+};
 
-  CUB_RUNTIME_FUNCTION thrust::cuda_cub::detail::triple_chevron
+static CUB_RUNTIME_FUNCTION stream_registry_factory_state_t* get_stream_registry_factory_state()
+{
+  stream_registry_factory_state_t* ptr{};
+  NV_IF_ELSE_TARGET(NV_IS_HOST, (static stream_registry_factory_state_t state; ptr = &state;), (ptr = nullptr;));
+  return ptr;
+}
+
+struct kernel_launcher_t : thrust::cuda_cub::detail::triple_chevron
+{
+  template <class... Args>
+  CUB_RUNTIME_FUNCTION kernel_launcher_t(Args... args)
+      : thrust::cuda_cub::detail::triple_chevron(args...)
+  {}
+
+  template <class K, class... Args>
+  CUB_RUNTIME_FUNCTION cudaError_t doit(K kernel, Args const&... args) const
+  {
+    NV_IF_TARGET(NV_IS_HOST, (if (!get_stream_registry_factory_state()->m_kernels.empty()) {
+                   if (cuda::std::find(get_stream_registry_factory_state()->m_kernels.begin(),
+                                       get_stream_registry_factory_state()->m_kernels.end(),
+                                       reinterpret_cast<void*>(kernel))
+                       == get_stream_registry_factory_state()->m_kernels.end())
+                   {
+                     FAIL("Kernel is not allowed");
+                   }
+                 }));
+    return thrust::cuda_cub::detail::triple_chevron::doit(kernel, args...);
+  }
+};
+
+struct stream_registry_factory_t
+{
+  CUB_RUNTIME_FUNCTION kernel_launcher_t
   operator()(dim3 grid, dim3 block, size_t shared_mem, cudaStream_t stream, bool dependent_launch = false) const
   {
-    NV_IF_TARGET(NV_IS_HOST, (if (m_stream) { REQUIRE(stream == m_stream); }));
-    return thrust::cuda_cub::detail::triple_chevron(grid, block, shared_mem, stream, dependent_launch);
+    NV_IF_TARGET(NV_IS_HOST, (if (get_stream_registry_factory_state()->m_stream) {
+                   REQUIRE(stream == get_stream_registry_factory_state()->m_stream);
+                 }));
+    return kernel_launcher_t(grid, block, shared_mem, stream, dependent_launch);
   }
 
   CUB_RUNTIME_FUNCTION cudaError_t PtxVersion(int& version)
@@ -124,23 +169,29 @@ struct stream_registry_factory_t
   }
 };
 
-// singleton
-stream_registry_factory_t& get_stream_registry_factory()
-{
-  static stream_registry_factory_t factory;
-  return factory;
-}
-
 struct stream_scope
 {
   stream_scope(cudaStream_t stream)
   {
-    get_stream_registry_factory().m_stream = stream;
+    get_stream_registry_factory_state()->m_stream = stream;
   }
 
   ~stream_scope()
   {
-    get_stream_registry_factory().m_stream = cuda::std::nullopt;
+    get_stream_registry_factory_state()->m_stream = cuda::std::nullopt;
+  }
+};
+
+struct kernel_scope
+{
+  kernel_scope(cuda::std::span<void*> allowed_kernels)
+  {
+    get_stream_registry_factory_state()->m_kernels = allowed_kernels;
+  }
+
+  ~kernel_scope()
+  {
+    get_stream_registry_factory_state()->m_kernels = {};
   }
 };
 
@@ -397,6 +448,8 @@ void launch(ActionT action, Args... args)
     },
     fixed_args);
 
+  REQUIRE(d_allocated[0] == expected_bytes_allocated);
+  REQUIRE(d_allocated[0] == d_deallocated[0]);
   REQUIRE(cudaSuccess == cudaPeekAtLastError());
   REQUIRE(cudaSuccess == cudaDeviceSynchronize());
 }
@@ -440,11 +493,13 @@ void launch(ActionT action, Args... args)
   auto fixed_env  = cuda::std::execution::env{mr_env, stream_env, env};
 
   auto fixed_args = replace_back(cuda::std::make_index_sequence<env_idx>{}, tuple, fixed_env);
+  auto kernels    = cuda::std::execution::__query_or(env, get_allowed_kernels_t{}, cuda::std::span<void*>{});
 
   cuda::std::apply(
-    [stream, action](auto... args) {
+    [stream, action, kernels](auto... args) {
       // Make sure specified stream is used
-      stream_scope scope(stream);
+      stream_scope allowed_stream(stream);
+      kernel_scope allowed_kernels(kernels);
       cudaError_t error = action(args...);
       REQUIRE(cudaSuccess == error);
     },
