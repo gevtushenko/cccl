@@ -219,7 +219,7 @@ struct device_memory_resource : cub::detail::device_memory_resource
 
   void* allocate_async(size_t bytes, ::cuda::stream_ref stream)
   {
-    NV_IF_TARGET(NV_IS_HOST, (REQUIRE(target_stream == stream.get());));
+    REQUIRE(target_stream == stream.get());
 
     if (bytes_allocated)
     {
@@ -230,13 +230,44 @@ struct device_memory_resource : cub::detail::device_memory_resource
 
   void deallocate_async(void* ptr, size_t bytes, const ::cuda::stream_ref stream)
   {
-    NV_IF_TARGET(NV_IS_HOST, (REQUIRE(target_stream == stream.get());));
+    REQUIRE(target_stream == stream.get());
 
     if (bytes_deallocated)
     {
       *bytes_deallocated += bytes;
     }
     cub::detail::device_memory_resource::deallocate_async(ptr, bytes, stream);
+  }
+};
+
+struct throwing_memory_resource
+{
+  void* allocate(size_t /* bytes */, size_t /* alignment */)
+  {
+    FAIL("CUB shouldn't use synchronous allocation");
+    return nullptr;
+  }
+
+  void deallocate(void* /* ptr */, size_t /* bytes */)
+  {
+    FAIL("CUB shouldn't use synchronous deallocation");
+  }
+
+  void* allocate_async(size_t /* bytes */, size_t /* alignment */, ::cuda::stream_ref /* stream */)
+  {
+    throw "test";
+    return nullptr;
+  }
+
+  void* allocate_async(size_t /* bytes */, ::cuda::stream_ref /* stream */)
+  {
+    throw "test";
+    return nullptr;
+  }
+
+  void deallocate_async(void* /* ptr */, size_t /* bytes */, const ::cuda::stream_ref /* stream */)
+  {
+    throw "test";
   }
 };
 
@@ -487,6 +518,20 @@ void launch(ActionT action, Args... args)
 
   static_assert(!cuda::std::execution::__queryable_with<env_t, cuda::mr::__get_memory_resource_t>,
                 "Don't specify memory resource for launch tests.");
+
+  {
+    auto mr         = throwing_memory_resource{};
+    auto mr_env     = cuda::std::execution::prop{cuda::mr::__get_memory_resource_t{}, mr};
+    auto fixed_env  = cuda::std::execution::env{mr_env, env};
+    auto fixed_args = replace_back(cuda::std::make_index_sequence<env_idx>{}, tuple, fixed_env);
+
+    cuda::std::apply(
+      [action](auto... args) {
+        REQUIRE(cudaErrorMemoryAllocation == action(args...));
+      },
+      fixed_args);
+  }
+
   auto mr         = device_memory_resource{{}, stream, &bytes_allocated, &bytes_deallocated};
   auto mr_env     = cuda::std::execution::prop{cuda::mr::__get_memory_resource_t{}, mr};
   auto stream_env = cuda::std::execution::prop{cuda::get_stream_t{}, cuda::stream_ref{stream}};
