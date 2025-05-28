@@ -8,8 +8,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef __CUDA_STD__REQUIRE_H
-#define __CUDA_STD__REQUIRE_H
+#ifndef __CUDA_STD__TUNE_H
+#define __CUDA_STD__TUNE_H
 
 #include <cuda/std/detail/__config>
 
@@ -29,14 +29,11 @@
 
 _LIBCUDACXX_BEGIN_NAMESPACE_CUDA_EXECUTION
 
-class __requirement
-{};
-
-struct get_requirements_t
+struct get_tuning_t
 {
   _CCCL_EXEC_CHECK_DISABLE
   _CCCL_TEMPLATE(class _Env)
-  _CCCL_REQUIRES(_CUDA_STD_EXEC::__queryable_with<_Env, get_requirements_t>)
+  _CCCL_REQUIRES(_CUDA_STD_EXEC::__queryable_with<_Env, get_tuning_t>)
   [[nodiscard]] _CCCL_TRIVIAL_API constexpr auto operator()(const _Env& __env) const noexcept
   {
     static_assert(noexcept(__env.query(*this)), "");
@@ -49,19 +46,16 @@ struct get_requirements_t
   }
 };
 
-_CCCL_GLOBAL_CONSTANT auto get_requirements = get_requirements_t{};
+_CCCL_GLOBAL_CONSTANT auto get_tuning = get_tuning_t{};
 
-template <class... _Requirements>
-[[nodiscard]] _CCCL_TRIVIAL_API auto require(_Requirements... _requirements)
+template <class... _Tunings>
+[[nodiscard]] _CCCL_TRIVIAL_API auto tune(_Tunings... __tunings)
 {
-  static_assert(_CUDA_VSTD::conjunction_v<_CUDA_VSTD::is_base_of<__requirement, _Requirements>...>,
-                "Only requirements can be passed to require");
-
-  return _CUDA_STD_EXEC::prop{get_requirements_t{}, _CUDA_STD_EXEC::env{_requirements...}};
+  return _CUDA_STD_EXEC::prop{get_tuning_t{}, _CUDA_STD_EXEC::env{__tunings...}};
 }
 
 _LIBCUDACXX_END_NAMESPACE_CUDA_EXECUTION
 
 #include <cuda/std/__cccl/epilogue.h>
 
-#endif // __CUDA_STD__REQUIRE_H
+#endif // __CUDA_STD__TUNE_H

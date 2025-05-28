@@ -51,6 +51,8 @@
 #include <thrust/iterator/tabulate_output_iterator.h>
 
 #include <cuda/__execution/determinism.h>
+#include <cuda/__execution/require.h>
+#include <cuda/__execution/tune.h>
 #include <cuda/__memory_resource/get_memory_resource.h>
 #include <cuda/__stream/get_stream.h>
 #include <cuda/std/__execution/env.h>
@@ -62,6 +64,25 @@ namespace detail
 {
 namespace reduce
 {
+
+struct get_reduce_tuning_query_t
+{};
+
+template <class Derived>
+struct reduce_tuning
+{
+  [[nodiscard]] _CCCL_TRIVIAL_API constexpr auto query(const get_reduce_tuning_query_t&) const noexcept -> Derived
+  {
+    return static_cast<const Derived&>(*this);
+  }
+};
+
+struct default_tuning : reduce_tuning<default_tuning>
+{
+  template <class AccumT, class Offset, class OpT>
+  using type = policy_hub<AccumT, Offset, OpT>;
+};
+
 template <typename ExtremumOutIteratorT, typename IndexOutIteratorT>
 struct unzip_and_write_arg_extremum_op
 {
@@ -282,10 +303,12 @@ struct DeviceReduce
     using accum_t     = ::cuda::std::__accumulator_t<ReductionOpT, detail::it_value_t<InputIteratorT>, T>;
     using transform_t = ::cuda::std::__identity;
 
-    // TODO(gevtushenko): retreive tuning from the environment
-    using tuning_t = detail::reduce::policy_hub<accum_t, offset_t, ReductionOpT>;
+    using tuning_t = stdexec::__query_or_t<EnvT, exec::get_tuning_t, stdexec::env<>>;
+    using reduce_tuning_t =
+      stdexec::__query_or_t<tuning_t, detail::reduce::get_reduce_tuning_query_t, detail::reduce::default_tuning>;
+    using policy_t = typename reduce_tuning_t::template type<accum_t, offset_t, ReductionOpT>;
     using dispatch_t =
-      DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T, accum_t, transform_t, tuning_t>;
+      DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T, accum_t, transform_t, policy_t>;
 
     static_assert(!stdexec::__queryable_with<EnvT, exec::determinism::get_determinism_t>,
                   "Determinism should be used inside requires to have an effect.");

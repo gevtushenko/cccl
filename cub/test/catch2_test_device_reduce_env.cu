@@ -53,14 +53,121 @@ namespace stdexec = cuda::std::execution;
 // We need a test of simple use to check if default environment works.
 // ifdef it out not to spend time compiling and runing it twice.
 #if TEST_LAUNCH == 0
+struct block_size_check_t
+{
+  int* ptr;
+
+  __device__ int operator()(int a, int b)
+  {
+    *ptr = blockDim.x;
+    return a + b;
+  }
+};
+
+struct block_size_retreiver_t
+{
+  int* ptr;
+
+  template <class ActivePolicyT>
+  cudaError_t Invoke()
+  {
+    *ptr = ActivePolicyT::SingleTilePolicy::BLOCK_THREADS;
+    return cudaSuccess;
+  }
+};
+
 TEST_CASE("Device reduce works with default environment", "[reduce][device]")
 {
-  auto num_items = GENERATE(1 << 4, 1 << 24);
+  using num_items_t = int;
+  using value_t     = int;
+  using offset_t    = cub::detail::choose_offset_t<num_items_t>;
+  using policy_t    = cub::detail::reduce::default_tuning::type<value_t, offset_t, block_size_check_t>::MaxPolicy;
+
+  int current_device{};
+  REQUIRE(cudaSuccess == cudaGetDevice(&current_device));
+
+  int ptx_version{};
+  REQUIRE(cudaSuccess == cub::PtxVersion(ptx_version, current_device));
+
+  int target_block_size{};
+  block_size_retreiver_t block_size_retreiver{&target_block_size};
+  REQUIRE(cudaSuccess == policy_t::Invoke(ptx_version, block_size_retreiver));
+
+  num_items_t num_items = 1;
+  c2h::device_vector<int> d_block_size(1);
+  block_size_check_t block_size_check{thrust::raw_pointer_cast(d_block_size.data())};
+  auto d_in  = thrust::make_constant_iterator(value_t{1});
+  auto d_out = thrust::device_vector<value_t>(1);
+
+  REQUIRE(cudaSuccess == cub::DeviceReduce::Reduce(d_in, d_out.begin(), num_items, block_size_check, value_t{0}));
+  REQUIRE(d_out[0] == num_items);
+
+  // Make sure we use default tuning
+  REQUIRE(d_block_size[0] == target_block_size);
+}
+
+template <int BlockThreads>
+struct reduce_tuning : cub::detail::reduce::reduce_tuning<reduce_tuning<BlockThreads>>
+{
+  template <class /* AccumT */, class /* Offset */, class /* OpT */>
+  struct type
+  {
+    struct Policy500 : cub::ChainedPolicy<500, Policy500, Policy500>
+    {
+      struct ReducePolicy
+      {
+        static constexpr int VECTOR_LOAD_LENGTH = 1;
+
+        static constexpr cub::BlockReduceAlgorithm BLOCK_ALGORITHM = cub::BLOCK_REDUCE_WARP_REDUCTIONS;
+
+        static constexpr cub::CacheLoadModifier LOAD_MODIFIER = cub::LOAD_DEFAULT;
+
+        static constexpr int ITEMS_PER_THREAD = 1;
+        static constexpr int BLOCK_THREADS    = BlockThreads;
+      };
+
+      using SingleTilePolicy      = ReducePolicy;
+      using SegmentedReducePolicy = ReducePolicy;
+    };
+
+    using MaxPolicy = Policy500;
+  };
+};
+
+struct get_scan_tuning_query_t
+{};
+
+struct scan_tuning
+{
+  [[nodiscard]] _CCCL_TRIVIAL_API constexpr auto query(const get_scan_tuning_query_t&) const noexcept
+  {
+    return *this;
+  }
+
+  // Make sure this is not used
+  template <class /* AccumT */, class /* Offset */, class /* OpT */>
+  struct type
+  {};
+};
+
+using block_sizes = c2h::type_list<cuda::std::integral_constant<int, 32>, cuda::std::integral_constant<int, 64>>;
+
+C2H_TEST("Device reduce can be tuned", "[reduce][device]", block_sizes)
+{
+  constexpr int target_block_size = c2h::get<0, TestType>::value;
+  c2h::device_vector<int> d_block_size(1);
+  block_size_check_t block_size_check{thrust::raw_pointer_cast(d_block_size.data())};
+
+  auto num_items = 1;
   auto d_in      = thrust::make_constant_iterator(1);
   auto d_out     = thrust::device_vector<int>(1);
 
-  REQUIRE(cudaSuccess == cub::DeviceReduce::Reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, 0));
+  // We are expecting that `scan_tuning` is ignored
+  auto env = cuda::execution::tune(reduce_tuning<target_block_size>{}, scan_tuning{});
+
+  REQUIRE(cudaSuccess == cub::DeviceReduce::Reduce(d_in, d_out.begin(), num_items, block_size_check, 0, env));
   REQUIRE(d_out[0] == num_items);
+  REQUIRE(d_block_size[0] == target_block_size);
 }
 #endif
 
