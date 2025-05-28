@@ -288,7 +288,7 @@ struct DeviceReduce
       DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T, accum_t, transform_t, tuning_t>;
 
     static_assert(!stdexec::__queryable_with<EnvT, exec::determinism::get_determinism_t>,
-                  "Determinism should be used inside cuda::execution::requires(d) to have an effect.");
+                  "Determinism should be used inside requires to have an effect.");
     using requirements_t = stdexec::__query_or_t<EnvT, exec::get_requirements_t, stdexec::env<>>;
     using determinism_t =
       stdexec::__query_or_t<requirements_t, //
