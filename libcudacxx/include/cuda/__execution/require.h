@@ -32,12 +32,32 @@ _LIBCUDACXX_BEGIN_NAMESPACE_CUDA_EXECUTION
 class __requirement
 {};
 
+struct get_requirements_t
+{
+  _CCCL_EXEC_CHECK_DISABLE
+  _CCCL_TEMPLATE(class _Env)
+  _CCCL_REQUIRES(_CUDA_STD_EXEC::__queryable_with<_Env, get_requirements_t>)
+  [[nodiscard]] _CCCL_TRIVIAL_API constexpr auto operator()(const _Env& __env) const noexcept
+  {
+    static_assert(noexcept(__env.query(*this)), "");
+    return __env.query(*this);
+  }
+
+  [[nodiscard]] _CCCL_TRIVIAL_API static constexpr auto query(_CUDA_STD_EXEC::forwarding_query_t) noexcept -> bool
+  {
+    return true;
+  }
+};
+
+_CCCL_GLOBAL_CONSTANT auto get_requirements = get_requirements_t{};
+
 template <class... _Requirements>
 auto require(_Requirements... _requirements)
 {
   static_assert(_CUDA_VSTD::conjunction_v<_CUDA_VSTD::is_base_of<__requirement, _Requirements>...>,
                 "Only requirements can be passed to require");
-  return _CUDA_STD_EXEC::env{_requirements...};
+
+  return _CUDA_STD_EXEC::prop{get_requirements_t{}, _CUDA_STD_EXEC::env{_requirements...}};
 }
 
 _LIBCUDACXX_END_NAMESPACE_CUDA_EXECUTION
