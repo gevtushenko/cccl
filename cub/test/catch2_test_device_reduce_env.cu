@@ -239,7 +239,6 @@ C2H_TEST("Device reduce uses environment", "[reduce][device]", requirements)
                           allowed_kernels(kernels), // allowed kernels for the given determinism
                           expected_allocation_size(expected_bytes_allocated)}; // temp storage size
 
-  // TODO(gevtushenko): how to check if given requirement is met?
   device_reduce(d_in, d_out.begin(), num_items, cuda::std::plus<>{}, init, env);
 
   REQUIRE(d_out[0] == num_items);
