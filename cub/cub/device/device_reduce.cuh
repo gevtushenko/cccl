@@ -305,7 +305,7 @@ struct DeviceReduce
     // TODO(gevtushenko): dispatch to RFA and atomic reduce once merged
     static_assert(::cuda::std::is_same_v<determinism_t, exec::determinism::not_guaranteed_t>
                     || ::cuda::std::is_same_v<determinism_t, exec::determinism::run_to_run_t>,
-                  "Only not_guaranteed or run_to_run determinism are supported");
+                  "Only not_guaranteed and run_to_run determinism are supported");
 
     // Query the required temporary storage size
     cudaError_t error = CubDebug(dispatch_t::Dispatch(

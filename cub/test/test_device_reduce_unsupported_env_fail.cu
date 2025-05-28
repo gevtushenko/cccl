@@ -32,8 +32,8 @@ int main()
   namespace stdexec = cuda::std::execution;
 
   int* ptr{};
-  auto env = stdexec::env{cuda::execution::determinism::run_to_run};
+  auto env = cuda::execution::require(cuda::execution::determinism::gpu_to_gpu);
 
-  // expected-error {{"Determinism should be used inside requires to have an effect."}}
+  // expected-error {{"Only not_guaranteed and run_to_run determinism are supported"}}
   cub::DeviceReduce::Reduce(ptr, ptr, 0, cuda::std::plus<>{}, 0, env);
 }
