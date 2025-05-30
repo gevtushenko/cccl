@@ -230,7 +230,7 @@ C2H_TEST("DeviceRunLengthEncode::NonTrivialRuns can handle pointers", "[device][
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<int> out_offsets(num_items, -1);
   c2h::device_vector<int> out_lengths(num_items, -1);

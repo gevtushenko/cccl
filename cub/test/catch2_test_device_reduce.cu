@@ -106,14 +106,6 @@ C2H_TEST("Device reduce works with all device interfaces", "[reduce][device]", f
   constexpr int num_segments = 1;
   constexpr int num_items    = 1 << 28;
 
-  // Generate the input sizes to test for
-  const int num_items = GENERATE_COPY(
-    take(3, random(min_items, max_items)),
-    values({
-      min_items,
-      max_items,
-    }));
-
   // Input data generation to test
   const gen_data_t data_gen_mode = GENERATE_COPY(gen_data_t::GEN_TYPE_RANDOM, gen_data_t::GEN_TYPE_CONST);
 

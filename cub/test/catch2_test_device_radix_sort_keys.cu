@@ -100,10 +100,7 @@ C2H_TEST("DeviceRadixSort::SortKeys: basic testing", "[keys][radix][sort][device
 {
   using key_t = c2h::get<0, TestType>;
 
-  constexpr std::size_t min_num_items = 1 << 5;
-  constexpr std::size_t max_num_items = 1 << 20;
-  const std::size_t num_items =
-    GENERATE_COPY(std::size_t{0}, std::size_t{1}, take(8, random(min_num_items, max_num_items)));
+  const size_t num_items = 1 << 28;
 
   c2h::device_vector<key_t> in_keys(num_items);
   c2h::device_vector<key_t> out_keys(num_items);

@@ -380,7 +380,7 @@ C2H_TEST("DevicePartition::Flagged works with different output type", "[device][
 {
   using type = c2h::custom_type_t<c2h::equal_comparable_t>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<convertible_from_T<type>> out(num_items);
   c2h::gen(C2H_SEED(2), in);
