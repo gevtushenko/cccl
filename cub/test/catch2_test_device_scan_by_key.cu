@@ -87,17 +87,7 @@ C2H_TEST("Device scan works with all device interfaces", "[by_key][scan][device]
   using offset_t = std::uint32_t;
   using eq_op_t  = typename params::type_pair_t::eq_op_t;
 
-  constexpr offset_t min_items = 1;
-  constexpr offset_t max_items = 1000000;
-
-  // Generate the input sizes to test for
-  // Use c2h::adjust_seed_count to reduce runtime on sanitizers.
-  const offset_t num_items = GENERATE_COPY(
-    take(c2h::adjust_seed_count(2), random(min_items, max_items)),
-    values({
-      min_items,
-      max_items,
-    }));
+  const offset_t num_items = 1 << 28;
   INFO("Test num_items: " << num_items);
 
   // Range of segment sizes to generate (a segment is a series of consecutive equal keys)

@@ -227,8 +227,7 @@ C2H_TEST("DeviceMergeSort::SortKeysCopy works",
 
   // Prepare input
   // Use c2h::adjust_seed_count to reduce runtime on sanitizers.
-  const offset_t num_items =
-    GENERATE_COPY(take(c2h::adjust_seed_count(2), random(1, 1000000)), values({500, 1000000, 2000000}));
+  const offset_t num_items = 1 << 28;
   auto key_ranks = make_shuffled_key_ranks_vector(num_items, C2H_SEED(2));
   c2h::device_vector<key_t> keys_in(num_items);
   thrust::transform(

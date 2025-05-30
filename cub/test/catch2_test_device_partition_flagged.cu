@@ -128,7 +128,7 @@ C2H_TEST("DevicePartition::Flagged handles all matched", "[device][partition_fla
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -149,7 +149,7 @@ C2H_TEST("DevicePartition::Flagged handles no matched", "[device][partition_flag
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -173,7 +173,7 @@ C2H_TEST("DevicePartition::Flagged does not change input", "[device][partition_f
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -200,7 +200,7 @@ C2H_TEST("DevicePartition::Flagged is stable", "[device][partition_flagged]")
 {
   using type = c2h::custom_type_t<c2h::equal_comparable_t>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -225,7 +225,7 @@ C2H_TEST("DevicePartition::Flagged works with iterators", "[device][partition_fl
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -250,7 +250,7 @@ C2H_TEST("DevicePartition::Flagged works with pointers", "[device][partition_fla
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -303,7 +303,7 @@ C2H_TEST("DevicePartition::Flagged works with flags that are convertible to bool
 {
   using type = c2h::custom_type_t<c2h::equal_comparable_t>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -329,7 +329,7 @@ C2H_TEST("DevicePartition::Flagged works with flags that alias input", "[device]
 {
   using type = int;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> out(num_items);
 
   c2h::device_vector<int> flags(num_items);

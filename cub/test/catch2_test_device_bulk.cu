@@ -60,15 +60,7 @@ C2H_TEST("Device bulk works", "[bulk][device]", offset_type)
 {
   using offset_t = c2h::get<0, TestType>;
 
-  constexpr int max_items = 5000000;
-  constexpr int min_items = 1;
-
-  const auto num_items = static_cast<offset_t>(GENERATE_COPY(
-    take(3, random(min_items, max_items)),
-    values({
-      min_items,
-      max_items,
-    })));
+  const auto num_items = static_cast<offset_t>(1 << 28);
 
   c2h::device_vector<int> counts(num_items);
   int* d_counts = thrust::raw_pointer_cast(counts.data());

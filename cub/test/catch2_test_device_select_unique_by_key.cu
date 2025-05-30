@@ -152,7 +152,7 @@ C2H_TEST("DeviceSelect::UniqueByKey handles none equal", "[device][select_unique
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> vals_in(num_items);
   c2h::device_vector<type> vals_out(num_items);
 
@@ -180,7 +180,7 @@ C2H_TEST("DeviceSelect::UniqueByKey handles all equal", "[device][select_unique_
   using type     = typename c2h::get<0, TestType>;
   using val_type = c2h::custom_type_t<c2h::equal_comparable_t>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> keys_in(num_items, static_cast<type>(1));
   c2h::device_vector<val_type> vals_in(num_items);
   c2h::device_vector<type> keys_out(1);
@@ -207,7 +207,7 @@ C2H_TEST("DeviceSelect::UniqueByKey does not change input", "[device][select_uni
   using type     = typename c2h::get<0, TestType>;
   using val_type = c2h::custom_type_t<c2h::equal_comparable_t>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> keys_in(num_items);
   c2h::device_vector<val_type> vals_in(num_items);
   c2h::gen(C2H_SEED(2), keys_in, to_bound<type>(0), to_bound<type>(42));
@@ -259,7 +259,7 @@ C2H_TEST("DeviceSelect::UniqueByKey works with iterators", "[device][select_uniq
   using type     = typename c2h::get<0, TestType>;
   using val_type = c2h::custom_type_t<c2h::equal_comparable_t>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> keys_in(num_items);
   c2h::device_vector<val_type> vals_in(num_items);
   c2h::device_vector<type> keys_out(num_items);

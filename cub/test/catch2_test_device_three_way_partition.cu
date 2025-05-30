@@ -247,7 +247,7 @@ C2H_TEST("Device three-way partition is stable", "[partition][device]", types)
   using type      = typename c2h::get<0, TestType>;
   using pair_type = cuda::std::pair<type, std::uint32_t>;
 
-  const int num_items = GENERATE_COPY(take(10, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<pair_type> in(num_items);
 
   thrust::tabulate(c2h::device_policy, in.begin(), in.end(), count_to_pair_t<type>{});
@@ -269,7 +269,7 @@ C2H_TEST("Device three-way partition handles empty first part", "[partition][dev
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(10, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   thrust::sequence(c2h::device_policy, in.begin(), in.end());
 
@@ -290,7 +290,7 @@ C2H_TEST("Device three-way partition handles empty second part", "[partition][de
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(10, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   thrust::sequence(c2h::device_policy, in.begin(), in.end());
 

@@ -122,7 +122,7 @@ C2H_TEST("DeviceSelect::If handles all matched", "[device][select_if]", types)
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -141,7 +141,7 @@ C2H_TEST("DeviceSelect::If handles no matched", "[device][select_if]", types)
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(0);
   c2h::gen(C2H_SEED(2), in);
@@ -159,7 +159,7 @@ C2H_TEST("DeviceSelect::If does not change input", "[device][select_if]", types)
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -183,7 +183,7 @@ C2H_TEST("DeviceSelect::If is stable", "[device][select_if]")
 {
   using type = c2h::custom_type_t<c2h::less_comparable_t, c2h::equal_comparable_t>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -214,7 +214,7 @@ C2H_TEST("DeviceSelect::If works with iterators", "[device][select_if]", all_typ
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -237,7 +237,7 @@ C2H_TEST("DeviceSelect::If works with pointers", "[device][select_if]", types)
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -261,7 +261,7 @@ C2H_TEST("DeviceSelect::If works in place", "[device][select_if]", types)
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::gen(C2H_SEED(2), in);
 

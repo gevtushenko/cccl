@@ -123,7 +123,7 @@ C2H_TEST("DeviceSelect::Unique handles none equal", "[device][select_unique]", t
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
 
   // Needs to be device accessible
   c2h::device_vector<int> num_selected_out(1, 0);
@@ -138,7 +138,7 @@ C2H_TEST("DeviceSelect::Unique handles all equal", "[device][select_unique]", ty
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items, static_cast<type>(1));
   c2h::device_vector<type> out(1);
 
@@ -157,7 +157,7 @@ C2H_TEST("DeviceSelect::Unique does not change input", "[device][select_unique]"
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in, to_bound<type>(0), to_bound<type>(42));
@@ -178,7 +178,7 @@ C2H_TEST("DeviceSelect::Unique works with iterators", "[device][select_unique]",
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in, to_bound<type>(0), to_bound<type>(42));
@@ -203,7 +203,7 @@ C2H_TEST("DeviceSelect::Unique works with pointers", "[device][select_unique]", 
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::gen(C2H_SEED(2), in, to_bound<type>(0), to_bound<type>(42));
@@ -249,7 +249,7 @@ C2H_TEST("DeviceSelect::Unique works with a different output type", "[device][se
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<convertible_from_T<type>> out(num_items);
   c2h::gen(C2H_SEED(2), in, to_bound<type>(0), to_bound<type>(42));

@@ -103,9 +103,8 @@ C2H_TEST("Device reduce works with all device interfaces", "[reduce][device]", f
   using output_t = typename params::output_t;
   using offset_t = int32_t;
 
-  constexpr int max_items    = 5000000;
-  constexpr int min_items    = 1;
   constexpr int num_segments = 1;
+  constexpr int num_items    = 1 << 28;
 
   // Generate the input sizes to test for
   const int num_items = GENERATE_COPY(

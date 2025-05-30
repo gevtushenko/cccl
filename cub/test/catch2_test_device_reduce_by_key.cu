@@ -75,16 +75,7 @@ C2H_TEST("Device reduce-by-key works", "[by_key][reduce][device]", full_type_lis
   using key_t    = typename params::type_pair_t::key_t;
   using offset_t = uint32_t;
 
-  constexpr offset_t min_items = 1;
-  constexpr offset_t max_items = 1000000;
-
-  // Number of items
-  const offset_t num_items = GENERATE_COPY(
-    take(2, random(min_items, max_items)),
-    values({
-      min_items,
-      max_items,
-    }));
+  const offset_t num_items = 1 << 28;
   INFO("Test num_items: " << num_items);
 
   // Range of segment sizes to generate (a segment is a series of consecutive equal keys)

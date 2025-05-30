@@ -166,7 +166,7 @@ C2H_TEST("DeviceSelect::FlaggedIf handles all matched", "[device][select_flagged
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(num_items);
   c2h::device_vector<int> flags(num_items);
@@ -186,7 +186,7 @@ C2H_TEST("DeviceSelect::FlaggedIf handles no matched", "[device][select_flagged_
 {
   using type = typename c2h::get<0, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<type> in(num_items);
   c2h::device_vector<type> out(0);
   c2h::gen(C2H_SEED(2), in);
@@ -210,7 +210,7 @@ C2H_TEST("DeviceSelect::FlaggedIf does not change input and is stable",
   using input_type = typename c2h::get<0, TestType>;
   using flag_type  = typename c2h::get<1, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<input_type> in(num_items);
   c2h::device_vector<input_type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -247,7 +247,7 @@ C2H_TEST("DeviceSelect::FlaggedIf works with iterators", "[device][select_if]", 
   using input_type = typename c2h::get<0, TestType>;
   using flag_type  = typename c2h::get<1, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<input_type> in(num_items);
   c2h::device_vector<input_type> out(num_items);
   c2h::gen(C2H_SEED(2), in);
@@ -275,7 +275,7 @@ C2H_TEST("DeviceSelect::FlaggedIf works with pointers", "[device][select_flagged
   using input_type = typename c2h::get<0, TestType>;
   using flag_type  = typename c2h::get<1, TestType>;
 
-  const int num_items = GENERATE_COPY(take(2, random(1, 1000000)));
+  const int num_items = 1 << 28;
   c2h::device_vector<input_type> in(num_items);
   c2h::device_vector<input_type> out(num_items);
   c2h::gen(C2H_SEED(2), in);

@@ -104,8 +104,7 @@ C2H_TEST("DeviceMergeSort::SortKeys works with iterators", "[merge][sort][device
   using key_t    = std::uint32_t;
   using offset_t = std::int32_t;
 
-  // Prepare input
-  const offset_t num_items = GENERATE_COPY(take(2, random(1, 1000000)), values({500, 1000000}));
+  const offset_t num_items = 1 << 28;
   c2h::device_vector<key_t> keys_in_out(num_items);
   thrust::sequence(c2h::device_policy, keys_in_out.begin(), keys_in_out.end());
   auto keys_in_it = thrust::make_reverse_iterator(keys_in_out.end());
