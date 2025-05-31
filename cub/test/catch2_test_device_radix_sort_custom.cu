@@ -173,7 +173,9 @@ static std::pair<c2h::device_vector<key>, c2h::device_vector<value>> reference_s
 
 C2H_TEST("Device radix sort works with parts of custom i128_t", "[radix][sort][device]")
 {
-  const int num_items = 1 << 28;
+  constexpr int max_items = 1 << 18;
+  // Use c2h::adjust_seed_count to reduce runtime on sanitizers.
+  const int num_items = GENERATE_COPY(take(c2h::adjust_seed_count(4), random(max_items / 2, max_items)));
 
   c2h::device_vector<key> in_keys(num_items);
   c2h::device_vector<key> out_keys(num_items);
@@ -188,7 +190,9 @@ C2H_TEST("Device radix sort works with parts of custom i128_t", "[radix][sort][d
 
 C2H_TEST("Device radix descending sort works with custom i128_t", "[radix][sort][device]")
 {
-  const int num_items = 1 << 28;
+  constexpr int max_items = 1 << 18;
+  // Use c2h::adjust_seed_count to reduce runtime on sanitizers.
+  const int num_items = GENERATE_COPY(take(c2h::adjust_seed_count(4), random(max_items / 2, max_items)));
 
   c2h::device_vector<key> in_keys(num_items);
   c2h::device_vector<key> out_keys(num_items);
