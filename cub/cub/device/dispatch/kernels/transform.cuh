@@ -21,14 +21,14 @@
 
 #if _CCCL_DEVICE_COMPILATION() && _CCCL_PTX_ARCH() >= 900 && !_CCCL_CUDA_COMPILER(NVHPC)
 #  include <cuda/pipeline>
-
-#  include <cooperative_groups.h>
-
-#  include <cooperative_groups/memcpy_async.h>
 #endif
 #include <cuda/ptx>
 #include <cuda/std/bit>
 #include <cuda/std/expected>
+
+#include <cooperative_groups.h>
+
+#include <cooperative_groups/memcpy_async.h>
 
 CUB_NAMESPACE_BEGIN
 
