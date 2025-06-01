@@ -209,7 +209,6 @@ struct dispatch_t<StableAddress,
         int max_occupancy = 0;
         const auto error  = CubDebug(
           launcher_factory.MaxSmOccupancy(max_occupancy, kernel_source.TransformKernel(), block_dim, smem_size));
-        fprintf(stderr, "afterrrrr: %d\n", (int) error);
         if (error != cudaSuccess)
         {
           return ::cuda::std::unexpected<cudaError_t /* nvcc 12.0 with GCC 7 fails CTAD here */>(error);
