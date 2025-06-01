@@ -21,6 +21,10 @@
 
 #if _CCCL_DEVICE_COMPILATION() && _CCCL_PTX_ARCH() >= 900 && !_CCCL_CUDA_COMPILER(NVHPC)
 #  include <cuda/pipeline>
+
+#  include <cooperative_groups.h>
+
+#  include <cooperative_groups/memcpy_async.h>
 #endif
 #include <cuda/ptx>
 #include <cuda/std/bit>
@@ -160,7 +164,7 @@ struct aligned_base_ptr
 {
   using value_type = T;
 
-  const char* ptr; // aligned pointer before the original pointer (16-byte or 128-byte). May not be aligned toUBLKCP.*0
+  const char* ptr; // aligned pointer before the original pointer (16-byte or 128-byte). May not be aligned to
                    // alignof(T). E.g.: array of int3 starting at address 4, ptr == 0
   int head_padding; // byte offset between ptr and the original pointer. Value inside [0;15] or [0;127].
 
@@ -278,37 +282,27 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
   }
   else
   {
-    // Hide the use of facilities from <cuda/pipeline> when compiling for pre-sm90 arches.
-    // The header guards for pre-sm70, but may as well hide it unless the kernel is actually useful.
-    NV_IF_TARGET(
-      NV_PROVIDES_SM_90,
-      (
-        // use all threads to schedule an async_memcpy
-        int smem_offset = 0; auto pipe = cuda::make_pipeline();
+    // use all threads to schedule an async_memcpy
+    int smem_offset = 0;
 
-        auto bulk_copy_tile_fallback =
-          [&](auto aligned_ptr) {
-            using T      = typename decltype(aligned_ptr)::value_type;
-            const T* src = aligned_ptr.ptr_to_elements() + offset;
-            T* dst       = reinterpret_cast<T*>(smem + smem_offset + aligned_ptr.head_padding);
-            _CCCL_ASSERT(reinterpret_cast<uintptr_t>(src) % alignof(T) == 0, "");
-            _CCCL_ASSERT(reinterpret_cast<uintptr_t>(dst) % alignof(T) == 0, "");
+    auto bulk_copy_tile_fallback = [&](auto aligned_ptr) {
+      using T      = typename decltype(aligned_ptr)::value_type;
+      const T* src = aligned_ptr.ptr_to_elements() + offset;
+      T* dst       = reinterpret_cast<T*>(smem + smem_offset + aligned_ptr.head_padding);
+      _CCCL_ASSERT(reinterpret_cast<uintptr_t>(src) % alignof(T) == 0, "");
+      _CCCL_ASSERT(reinterpret_cast<uintptr_t>(dst) % alignof(T) == 0, "");
 
-            const int bytes_to_copy = static_cast<int>(sizeof(T)) * tile_size;
-            cuda::memcpy_async(this_thread_block(), dst, src, bytes_to_copy, pipe);
+      const int bytes_to_copy = static_cast<int>(sizeof(T)) * tile_size;
+      cooperative_groups::memcpy_async(cooperative_groups::this_thread_block(), dst, src, bytes_to_copy);
 
-            // add bulk_copy_alignment to make space for the next tile's head padding
-            smem_offset += static_cast<int>(sizeof(T)) * tile_stride + bulk_copy_alignment;
-          };
+      // add bulk_copy_alignment to make space for the next tile's head padding
+      smem_offset += static_cast<int>(sizeof(T)) * tile_stride + bulk_copy_alignment;
+    };
 
-        pipe.producer_acquire();
-        // Order of evaluation is left-to-right
-        (..., bulk_copy_tile_fallback(aligned_ptrs));
-        pipe.producer_commit();
+    // Order of evaluation is left-to-right
+    (..., bulk_copy_tile_fallback(aligned_ptrs));
 
-        pipe.consumer_wait();
-        __syncthreads();
-        pipe.consumer_release();))
+    cooperative_groups::wait(cooperative_groups::this_thread_block());
   }
 
   // move the whole index and iterator to the block/thread index, to reduce arithmetic in the loops below
