@@ -247,6 +247,20 @@ struct dispatch_t<StableAddress,
       config->elem_per_thread);
   }
 
+  template <typename It, typename = void>
+  struct is_valid_aligned_base_ptr_arg_impl : ::cuda::std::false_type
+  {};
+
+  template <typename It>
+  struct is_valid_aligned_base_ptr_arg_impl<
+    It,
+    ::cuda::std::void_t<decltype(::cuda::std::declval<KernelSource>().MakeAlignedBasePtrKernelArg(
+      THRUST_NS_QUALIFIER::try_unwrap_contiguous_iterator(::cuda::std::declval<It>())))>> : ::cuda::std::true_type
+  {};
+
+  template <typename It>
+  static constexpr auto is_valid_aligned_base_ptr_arg = is_valid_aligned_base_ptr_arg_impl<It>::value;
+
   template <typename ActivePolicy, size_t... Is>
   CUB_RUNTIME_FUNCTION _CCCL_FORCEINLINE cudaError_t
   invoke_ublkcp_algorithm(::cuda::std::index_sequence<Is...>, ActivePolicy policy)
@@ -258,7 +272,7 @@ struct dispatch_t<StableAddress,
     }
     // Note: this check is moved to runtime to allow for c.parallel's passing of a runtime value for the chosen
     // algorithm.
-    if constexpr ((THRUST_NS_QUALIFIER::is_contiguous_iterator_v<::cuda::std::tuple_element_t<Is, decltype(in)>> && ...))
+    if constexpr ((is_valid_aligned_base_ptr_arg<::cuda::std::tuple_element_t<Is, decltype(in)>> && ...))
     {
       auto [launcher, kernel, elem_per_thread] = *ret;
       return launcher.doit(
