@@ -255,7 +255,7 @@ struct dispatch_t<StableAddress,
   struct is_valid_aligned_base_ptr_arg_impl<
     It,
     ::cuda::std::void_t<decltype(::cuda::std::declval<KernelSource>().MakeAlignedBasePtrKernelArg(
-      THRUST_NS_QUALIFIER::try_unwrap_contiguous_iterator(::cuda::std::declval<It>())))>> : ::cuda::std::true_type
+      THRUST_NS_QUALIFIER::try_unwrap_contiguous_iterator(::cuda::std::declval<It>()), 0))>> : ::cuda::std::true_type
   {};
 
   template <typename It>
