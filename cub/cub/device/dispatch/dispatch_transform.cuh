@@ -110,28 +110,6 @@ enum class requires_stable_address
 template <typename T>
 using cuda_expected = ::cuda::std::expected<T, cudaError_t>;
 
-// TODO(bgruber): this is very similar to thrust::cuda_cub::core::get_max_shared_memory_per_block. We should unify this.
-_CCCL_HOST_DEVICE inline cuda_expected<int> get_max_shared_memory()
-{
-  //  gevtushenko promised me that I can assume that the stream passed to the CUB API entry point (where the kernels
-  //  will later be launched on) belongs to the currently active device. So we can just query the active device here.
-  int device = 0;
-  auto error = CubDebug(cudaGetDevice(&device));
-  if (error != cudaSuccess)
-  {
-    return error;
-  }
-
-  int max_smem = 0;
-  error        = CubDebug(cudaDeviceGetAttribute(&max_smem, cudaDevAttrMaxSharedMemoryPerBlock, device));
-  if (error != cudaSuccess)
-  {
-    return error;
-  }
-
-  return max_smem;
-}
-
 struct elem_counts
 {
   int elem_per_thread;
@@ -200,10 +178,11 @@ struct dispatch_t<StableAddress,
                                                                                       // of it
 
     auto determine_element_counts = [&]() -> cuda_expected<elem_counts> {
-      const auto max_smem = get_max_shared_memory();
-      if (!max_smem)
+      int max_smem = 0;
+      auto error   = launcher_factory.GetMaxSharedMemory();
+      if (error != cudaSuccess)
       {
-        return ::cuda::std::unexpected<cudaError_t /* nvcc 12.0 fails CTAD here */>(max_smem.error());
+        return ::cuda::std::unexpected<cudaError_t /* nvcc 12.0 fails CTAD here */>(error);
       }
 
       elem_counts last_counts{};
@@ -215,7 +194,7 @@ struct dispatch_t<StableAddress,
       {
         const int tile_size = block_dim * elem_per_thread;
         const int smem_size = bulk_copy_smem_for_tile_size(kernel_source.ItValueSizes(), tile_size, bulk_copy_align);
-        if (smem_size > *max_smem)
+        if (smem_size > max_smem)
         {
           // assert should be prevented by smem check in policy
           _CCCL_ASSERT_HOST(last_counts.elem_per_thread > 0, "min_items_per_thread exceeds available shared memory");
