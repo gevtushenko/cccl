@@ -179,7 +179,7 @@ struct dispatch_t<StableAddress,
 
     auto determine_element_counts = [&]() -> cuda_expected<elem_counts> {
       int max_smem = 0;
-      auto error   = launcher_factory.GetMaxSharedMemory();
+      auto error   = launcher_factory.MaxSharedMemory(max_smem);
       if (error != cudaSuccess)
       {
         return ::cuda::std::unexpected<cudaError_t /* nvcc 12.0 fails CTAD here */>(error);
