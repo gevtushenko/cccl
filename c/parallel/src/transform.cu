@@ -134,7 +134,7 @@ struct transform_kernel_source
     return build.transform_kernel;
   }
 
-  int LoadedBytesPerIteration()
+  int LoadedBytesPerIteration() const
   {
     return build.loaded_bytes_per_iteration;
   }
@@ -145,12 +145,12 @@ struct transform_kernel_source
   }
 
   template <typename It>
-  constexpr It MakeIteratorKernelArg(It it)
+  constexpr It MakeIteratorKernelArg(It it) const
   {
     return it;
   }
 
-  cub::detail::transform::kernel_arg<char*> MakeAlignedBasePtrKernelArg(indirect_arg_t it, int align)
+  cub::detail::transform::kernel_arg<char*> MakeAlignedBasePtrKernelArg(indirect_arg_t it, int align) const
   {
     return cub::detail::transform::make_aligned_base_ptr_kernel_arg(*static_cast<char**>(&it), align);
   }
