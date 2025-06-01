@@ -269,12 +269,13 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 
       // TODO(ahendriksen): this could only have ptx::sem_relaxed, but this is not available yet
       ptx::mbarrier_arrive_expect_tx(ptx::sem_release, ptx::scope_cta, ptx::space_shared, &bar, total_copied);
+
+      while (!ptx::mbarrier_try_wait_parity(&bar, 0))
+        ;
     }
 
     // all threads wait for bulk copy
     __syncthreads();
-    while (!ptx::mbarrier_try_wait_parity(&bar, 0))
-      ;
   }
   else
   {
