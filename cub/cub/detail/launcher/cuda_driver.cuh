@@ -96,11 +96,11 @@ struct CudaDriverLauncherFactory
     auto status = static_cast<cudaError_t>(cuKernelGetFunction(&kernel_fn, kernel));
     if (status != cudaSuccess)
     {
-      printf("hereeee\n");
+      fprintf(stderr, "hereeee\n");
       return status;
     }
 
-    printf("thereeeee\n");
+    fprintf(stderr, "thereeeee\n");
     return static_cast<cudaError_t>(
       cuOccupancyMaxActiveBlocksPerMultiprocessor(&sm_occupancy, kernel_fn, block_size, dynamic_smem_bytes));
   }
