@@ -50,6 +50,12 @@
 
 #include <thrust/iterator/tabulate_output_iterator.h>
 
+#include <cuda/__execution/determinism.h>
+#include <cuda/__execution/require.h>
+#include <cuda/__execution/tune.h>
+#include <cuda/__memory_resource/get_memory_resource.h>
+#include <cuda/__stream/get_stream.h>
+#include <cuda/std/__execution/env.h>
 #include <cuda/std/limits>
 
 CUB_NAMESPACE_BEGIN
@@ -58,6 +64,25 @@ namespace detail
 {
 namespace reduce
 {
+
+struct get_reduce_tuning_query_t
+{};
+
+template <class Derived>
+struct reduce_tuning
+{
+  [[nodiscard]] _CCCL_TRIVIAL_API constexpr auto query(const get_reduce_tuning_query_t&) const noexcept -> Derived
+  {
+    return static_cast<const Derived&>(*this);
+  }
+};
+
+struct default_tuning : reduce_tuning<default_tuning>
+{
+  template <class AccumT, class Offset, class OpT>
+  using type = policy_hub<AccumT, Offset, OpT>;
+};
+
 template <typename ExtremumOutIteratorT, typename IndexOutIteratorT>
 struct unzip_and_write_arg_extremum_op
 {
@@ -72,6 +97,41 @@ struct unzip_and_write_arg_extremum_op
   }
 };
 } // namespace reduce
+
+// TODO(gevtushenko): move cudax `device_memory_resource` to `cuda::__device_memory_resource` and use it here
+struct device_memory_resource
+{
+  void* allocate(size_t bytes, size_t /* alignment */)
+  {
+    void* ptr{nullptr};
+    _CCCL_TRY_CUDA_API(::cudaMalloc, "allocate failed to allocate with cudaMalloc", &ptr, bytes);
+    return ptr;
+  }
+
+  void deallocate(void* ptr, size_t /* bytes */)
+  {
+    _CCCL_ASSERT_CUDA_API(::cudaFree, "deallocate failed", ptr);
+  }
+
+  void* allocate_async(size_t bytes, size_t /* alignment */, ::cuda::stream_ref stream)
+  {
+    return allocate_async(bytes, stream);
+  }
+
+  void* allocate_async(size_t bytes, ::cuda::stream_ref stream)
+  {
+    void* ptr{nullptr};
+    _CCCL_TRY_CUDA_API(
+      ::cudaMallocAsync, "allocate_async failed to allocate with cudaMallocAsync", &ptr, bytes, stream.get());
+    return ptr;
+  }
+
+  void deallocate_async(void* ptr, size_t /* bytes */, const ::cuda::stream_ref stream)
+  {
+    _CCCL_ASSERT_CUDA_API(::cudaFreeAsync, "deallocate_async failed", ptr, stream.get());
+  }
+};
+
 } // namespace detail
 
 //! @rst
@@ -223,6 +283,100 @@ struct DeviceReduce
 
     return DispatchReduce<InputIteratorT, OutputIteratorT, OffsetT, ReductionOpT, T>::Dispatch(
       d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<OffsetT>(num_items), reduction_op, init, stream);
+  }
+
+  template <typename InputIteratorT,
+            typename OutputIteratorT,
+            typename ReductionOpT,
+            typename T,
+            typename NumItemsT,
+            typename EnvT = ::cuda::std::execution::env<>>
+  CUB_RUNTIME_FUNCTION static cudaError_t Reduce(
+    InputIteratorT d_in, OutputIteratorT d_out, NumItemsT num_items, ReductionOpT reduction_op, T init, EnvT env = {})
+  {
+    _CCCL_NVTX_RANGE_SCOPE("cub::DeviceReduce::Reduce");
+
+    namespace stdexec = ::cuda::std::execution;
+    namespace exec    = ::cuda::execution;
+
+    using offset_t    = detail::choose_offset_t<NumItemsT>;
+    using accum_t     = ::cuda::std::__accumulator_t<ReductionOpT, detail::it_value_t<InputIteratorT>, T>;
+    using transform_t = ::cuda::std::__identity;
+
+    using tuning_t = stdexec::__query_result_or_t<EnvT, exec::get_tuning_t, stdexec::env<>>;
+    using reduce_tuning_t =
+      stdexec::__query_result_or_t<tuning_t, detail::reduce::get_reduce_tuning_query_t, detail::reduce::default_tuning>;
+    using policy_t = typename reduce_tuning_t::template type<accum_t, offset_t, ReductionOpT>;
+    using dispatch_t =
+      DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T, accum_t, transform_t, policy_t>;
+
+    static_assert(!stdexec::__queryable_with<EnvT, exec::determinism::get_determinism_t>,
+                  "Determinism should be used inside requires to have an effect.");
+    using requirements_t = stdexec::__query_result_or_t<EnvT, exec::get_requirements_t, stdexec::env<>>;
+    using determinism_t =
+      stdexec::__query_result_or_t<requirements_t, //
+                                   exec::determinism::get_determinism_t,
+                                   exec::determinism::run_to_run_t>;
+
+    // Query relevant properties from the environment
+    auto stream = stdexec::__query_or(env, ::cuda::get_stream, ::cuda::stream_ref{});
+    auto mr     = stdexec::__query_or(env, ::cuda::mr::__get_memory_resource, detail::device_memory_resource{});
+
+    void* d_temp_storage      = nullptr;
+    size_t temp_storage_bytes = 0;
+
+    // TODO(gevtushenko): dispatch to RFA and atomic reduce once merged
+    static_assert(::cuda::std::is_same_v<determinism_t, exec::determinism::not_guaranteed_t>
+                    || ::cuda::std::is_same_v<determinism_t, exec::determinism::run_to_run_t>,
+                  "Only not_guaranteed and run_to_run determinism are supported");
+
+    // Query the required temporary storage size
+    cudaError_t error = CubDebug(dispatch_t::Dispatch(
+      d_temp_storage,
+      temp_storage_bytes,
+      d_in,
+      d_out,
+      static_cast<offset_t>(num_items),
+      reduction_op,
+      init,
+      stream.get()));
+    if (error != cudaSuccess)
+    {
+      return error;
+    }
+
+    NV_IF_ELSE_TARGET(
+      NV_IS_HOST,
+      (
+        try { d_temp_storage = mr.allocate_async(temp_storage_bytes, stream); } catch (...) {
+          return cudaErrorMemoryAllocation;
+        }),
+      (d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);));
+
+    // Run the algorithm
+    error = CubDebug(dispatch_t::Dispatch(
+      d_temp_storage,
+      temp_storage_bytes,
+      d_in,
+      d_out,
+      static_cast<offset_t>(num_items),
+      reduction_op,
+      init,
+      stream.get()));
+    if (error != cudaSuccess)
+    {
+      return error;
+    }
+
+    NV_IF_ELSE_TARGET(
+      NV_IS_HOST,
+      (
+        try { mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream); } catch (...) {
+          return cudaErrorMemoryAllocation;
+        }),
+      (mr.deallocate_async(d_temp_storage, temp_storage_bytes, stream);));
+
+    return cudaSuccess;
   }
 
   //! @rst
