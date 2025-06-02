@@ -152,7 +152,7 @@ struct TransformPolicyWrapper<
 #if defined(CUB_ENABLE_POLICY_PTX_JSON)
   _CCCL_DEVICE static constexpr auto EncodedPolicy()
   {
-    using namespace ptx::json;
+    using namespace ptx_json;
     return object<key<"min_bif">()     = value<StaticPolicyT::min_bif>(),
                   key<"algorithm">()   = value<static_csast<int>(StaticPolicyT::algorithm)>,
                   key<"algo_policy">() = AlgorithmPolicy().EncodedPolicy()>();
