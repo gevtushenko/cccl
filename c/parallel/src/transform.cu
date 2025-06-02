@@ -485,7 +485,7 @@ struct __align__({5}) output_storage_t {{
       op_src); // 9
 
     nlohmann::json runtime_policy = get_policy(
-      std::format("cub::detail::transform::MakePolicyWrapper(cub::detail::transform::policy_hub<false, "
+      std::format("cub::detail::transform::MakeTransformPolicyWrapper(cub::detail::transform::policy_hub<false, "
                   "::cuda::std::tuple<{0}, {1}>>::max_policy::ActivePolicy{{}})",
                   transform::get_iterator_name<input_storage_t>(input1_it, transform::input1_iterator_name),
                   transform::get_iterator_name<input_storage_t>(input2_it, transform::input2_iterator_name)),
