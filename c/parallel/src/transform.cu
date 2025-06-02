@@ -277,7 +277,9 @@ struct __align__({3}) output_storage_t {{
 #include <cub/device/dispatch/kernels/transform.cuh>
 {0}
 struct device_transform_policy {{
-  {1}
+  struct ActivePolicy {{
+    {1}
+  }};
 }};
 )XXX",
       src,
@@ -508,7 +510,9 @@ struct __align__({5}) output_storage_t {{
 #include <cub/device/dispatch/kernels/transform.cuh>
 {0}
 struct device_transform_policy {{
-  {1}
+  struct ActivePolicy {{
+    {1}
+  }};
 }};
 )XXX",
       src,
