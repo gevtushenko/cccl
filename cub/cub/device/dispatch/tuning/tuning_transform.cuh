@@ -154,7 +154,7 @@ struct TransformPolicyWrapper<
   {
     using namespace ptx_json;
     return object<key<"min_bif">()     = value<StaticPolicyT::min_bif>(),
-                  key<"algorithm">()   = value<static_cast<int>(StaticPolicyT::algorithm)>,
+                  key<"algorithm">()   = value<static_cast<int>(StaticPolicyT::algorithm)>(),
                   key<"algo_policy">() = AlgorithmPolicy().EncodedPolicy()>();
   }
 #endif // CUB_ENABLE_POLICY_PTX_JSON
