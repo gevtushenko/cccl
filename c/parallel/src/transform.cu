@@ -278,11 +278,15 @@ struct __align__({3}) output_storage_t {{
 {0}
 struct device_transform_policy {{
   struct ActivePolicy {{
-    {1}
+    static constexpr auto algorithm = static_cast<cub::detail::transform::Algorithm>({1});
+    static constexpr int min_bif = {2};
+    {3}
   }};
 }};
 )XXX",
       src,
+      static_cast<int>(algorithm),
+      min_bif,
       transform_policy_src);
 
 #if false // CCCL_DEBUGGING_SWITCH
@@ -511,11 +515,15 @@ struct __align__({5}) output_storage_t {{
 {0}
 struct device_transform_policy {{
   struct ActivePolicy {{
-    {1}
+    static constexpr auto algorithm = static_cast<cub::detail::transform::Algorithm>({1});
+    static constexpr int min_bif = {2};
+    {3}
   }};
 }};
 )XXX",
       src,
+      static_cast<int>(algorithm),
+      min_bif,
       transform_policy_src);
 
 #if false // CCCL_DEBUGGING_SWITCH
