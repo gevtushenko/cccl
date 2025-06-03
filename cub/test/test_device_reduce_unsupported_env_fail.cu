@@ -27,13 +27,15 @@
 
 #include <cub/device/device_reduce.cuh>
 
+#include <cuda/std/complex>
+
 int main()
 {
   namespace stdexec = cuda::std::execution;
 
-  int* ptr{};
+  cuda::std::complex<float>* ptr{};
   auto env = cuda::execution::require(cuda::execution::determinism::gpu_to_gpu);
 
-  // expected-error {{"Only not_guaranteed and run_to_run determinism are supported"}}
+  // expected-error {{"gpu-to-gpu deterministic reduction supports only float and double sum."}}
   cub::DeviceReduce::Reduce(ptr, ptr, 0, cuda::std::plus<>{}, 0, env);
 }
