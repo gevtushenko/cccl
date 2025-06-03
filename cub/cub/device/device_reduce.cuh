@@ -270,7 +270,7 @@ private:
 
     static_assert(is_supported, "gpu-to-gpu deterministic reduction supports only float and double sum.");
 
-    return rfa_reduce_impl(
+    return rfa_reduce_impl<TuningEnvT>(
       d_temp_storage,
       temp_storage_bytes,
       d_in,
