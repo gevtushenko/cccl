@@ -38,6 +38,8 @@
 
 C2H_TEST("cub::DeviceReduce::Reduce accepts determinism requirements", "[reduce][env]")
 {
+  // TODO(gevtushenko): replace `run_to_run` with `gpu_to_gpu` once RFA unwraps contiguous iterators
+
   // example-begin reduce-env-determinism
   namespace stdexec = cuda::std::execution;
 
