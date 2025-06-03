@@ -174,10 +174,10 @@ _CCCL_HOST_DEVICE _CCCL_FORCEINLINE constexpr auto round_up_to_po2_multiple(Inte
   return (x + mult - 1) & ~(mult - 1);
 }
 
-template <typename... Its>
-_CCCL_HOST_DEVICE constexpr auto loaded_bytes_per_iteration() -> int
+_CCCL_HOST_DEVICE constexpr auto loaded_bytes_per_iteration(::cuda::std::span<const ::cuda::std::size_t> it_value_sizes)
+  -> int
 {
-  return (int{sizeof(it_value_t<Its>)} + ... + 0);
+  return ::cuda::std::reduce(it_value_sizes.begin(), it_value_sizes.end());
 }
 
 constexpr int bulk_copy_size_multiple = 16;

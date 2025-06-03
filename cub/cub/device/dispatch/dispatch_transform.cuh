@@ -77,11 +77,6 @@ struct TransformKernelSource<Offset,
                      RandomAccessIteratorOut,
                      THRUST_NS_QUALIFIER::try_unwrap_contiguous_iterator_t<RandomAccessIteratorsIn>...>);
 
-  CUB_RUNTIME_FUNCTION static constexpr int LoadedBytesPerIteration()
-  {
-    return loaded_bytes_per_iteration<RandomAccessIteratorsIn...>();
-  };
-
   CUB_RUNTIME_FUNCTION static constexpr auto ItValueSizes()
   {
     return ::cuda::std::array<::cuda::std::size_t, sizeof...(RandomAccessIteratorsIn)>{
@@ -216,7 +211,8 @@ struct dispatch_t<StableAddress,
           return ::cuda::std::unexpected<cudaError_t /* nvcc 12.0 with GCC 7 fails CTAD here */>(error);
         }
 
-        const int bytes_in_flight_SM = max_occupancy * tile_size * kernel_source.LoadedBytesPerIteration();
+        const int bytes_in_flight_SM =
+          max_occupancy * tile_size * loaded_bytes_per_iteration(kernel_source.ItValueSizes());
         if (policy.MinBif() <= bytes_in_flight_SM)
         {
           return elem_counts{elem_per_thread, tile_size, smem_size};
@@ -361,7 +357,7 @@ struct dispatch_t<StableAddress,
       return config.error();
     }
 
-    auto loaded_bytes_per_iter = kernel_source.LoadedBytesPerIteration();
+    auto loaded_bytes_per_iter = loaded_bytes_per_iteration(kernel_source.ItValueSizes());
     // choose items per thread to reach minimum bytes in flight
     const int items_per_thread =
       loaded_bytes_per_iter == 0
