@@ -405,6 +405,68 @@ public:
       d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<OffsetT>(num_items), reduction_op, init, stream);
   }
 
+  //! @rst
+  //! Computes a device-wide reduction using the specified binary ``reduction_op`` functor and initial value ``init``.
+  //!
+  //! - Does not support binary reduction operators that are non-commutative.
+  //! - Provides "run-to-run" determinism for pseudo-associative reduction
+  //!   (e.g., addition of floating point types) on the same GPU device.
+  //!   However, results for pseudo-associative reduction may be inconsistent
+  //!   from one device to a another device of a different compute-capability
+  //!   because CUB can employ different tile-sizing for different architectures.
+  //! - The range ``[d_in, d_in + num_items)`` shall not overlap ``d_out``.
+  //!
+  //! Snippet
+  //! +++++++++++++++++++++++++++++++++++++++++++++
+  //!
+  //! The code snippet below illustrates a user-defined min-reduction of a
+  //! device vector of ``int`` data elements.
+  //!
+  //! .. literalinclude:: ../../../cub/test/catch2_test_device_reduce_env_api.cu
+  //!     :language: c++
+  //!     :dedent:
+  //!     :start-after: example-begin reduce-env-determinism
+  //!     :end-before: example-end reduce-env-determinism
+  //!
+  //! @endrst
+  //!
+  //! @tparam InputIteratorT
+  //!   **[inferred]** Random-access input iterator type for reading input items @iterator
+  //!
+  //! @tparam OutputIteratorT
+  //!   **[inferred]** Output iterator type for recording the reduced aggregate @iterator
+  //!
+  //! @tparam ReductionOpT
+  //!   **[inferred]** Binary reduction functor type having member `T operator()(const T &a, const T &b)`
+  //!
+  //! @tparam T
+  //!   **[inferred]** Data element type that is convertible to the `value` type of `InputIteratorT`
+  //!
+  //! @tparam NumItemsT
+  //!   **[inferred]** Type of num_items
+  //!
+  //! @tparam EnvT
+  //!   **[inferred]** Execution environment type. Default is `cuda::std::execution::env<>`.
+  //!
+  //! @param[in] d_in
+  //!   Pointer to the input sequence of data items
+  //!
+  //! @param[out] d_out
+  //!   Pointer to the output aggregate
+  //!
+  //! @param[in] num_items
+  //!   Total number of input items (i.e., length of `d_in`)
+  //!
+  //! @param[in] reduction_op
+  //!   Binary reduction functor
+  //!
+  //! @param[in] init
+  //!   Initial value of the reduction
+  //!
+  //! @param[in] env
+  //!   @rst
+  //!   **[optional]** Execution environment. Default is `cuda::std::execution::env{}`.
+  //!   @endrst
   template <typename InputIteratorT,
             typename OutputIteratorT,
             typename ReductionOpT,
@@ -419,16 +481,9 @@ public:
     namespace stdexec = ::cuda::std::execution;
     namespace exec    = ::cuda::execution;
 
-    using offset_t    = detail::choose_offset_t<NumItemsT>;
     using accum_t     = ::cuda::std::__accumulator_t<ReductionOpT, detail::it_value_t<InputIteratorT>, T>;
     using transform_t = ::cuda::std::__identity;
-
-    using tuning_t = stdexec::__query_result_or_t<EnvT, exec::get_tuning_t, stdexec::env<>>;
-    using reduce_tuning_t =
-      stdexec::__query_result_or_t<tuning_t, detail::reduce::get_reduce_tuning_query_t, detail::reduce::default_tuning>;
-    using policy_t = typename reduce_tuning_t::template type<accum_t, offset_t, ReductionOpT>;
-    using dispatch_t =
-      DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T, accum_t, transform_t, policy_t>;
+    using tuning_t    = stdexec::__query_result_or_t<EnvT, exec::get_tuning_t, stdexec::env<>>;
 
     static_assert(!stdexec::__queryable_with<EnvT, exec::determinism::get_determinism_t>,
                   "Determinism should be used inside requires to have an effect.");
@@ -447,15 +502,7 @@ public:
 
     // Query the required temporary storage size
     cudaError_t error = reduce_impl<tuning_t>(
-      d_temp_storage,
-      temp_storage_bytes,
-      d_in,
-      d_out,
-      static_cast<offset_t>(num_items),
-      reduction_op,
-      init,
-      determinism_t{},
-      stream.get());
+      d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, determinism_t{}, stream.get());
     if (error != cudaSuccess)
     {
       return error;
@@ -471,15 +518,7 @@ public:
 
     // Run the algorithm
     error = reduce_impl<tuning_t>(
-      d_temp_storage,
-      temp_storage_bytes,
-      d_in,
-      d_out,
-      static_cast<offset_t>(num_items),
-      reduction_op,
-      init,
-      determinism_t{},
-      stream.get());
+      d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, reduction_op, init, determinism_t{}, stream.get());
     if (error != cudaSuccess)
     {
       return error;
