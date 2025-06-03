@@ -45,6 +45,7 @@
 #include <cub/detail/choose_offset.cuh>
 #include <cub/device/dispatch/dispatch_reduce.cuh>
 #include <cub/device/dispatch/dispatch_reduce_by_key.cuh>
+#include <cub/device/dispatch/dispatch_reduce_deterministic.cuh>
 #include <cub/device/dispatch/dispatch_streaming_reduce.cuh>
 #include <cub/util_type.cuh>
 
@@ -81,6 +82,12 @@ struct default_tuning : reduce_tuning<default_tuning>
 {
   template <class AccumT, class Offset, class OpT>
   using type = policy_hub<AccumT, Offset, OpT>;
+};
+
+struct default_rfa_tuning : reduce_tuning<default_tuning>
+{
+  template <class AccumT, class Offset, class OpT>
+  using type = detail::rfa::policy_hub<AccumT, Offset, OpT>;
 };
 
 template <typename ExtremumOutIteratorT, typename IndexOutIteratorT>
@@ -162,6 +169,119 @@ struct device_memory_resource
 //! @endrst
 struct DeviceReduce
 {
+private:
+  // TODO(gevtushenko): dispatch to atomic reduce once merged
+  template <typename TuningEnvT,
+            typename InputIteratorT,
+            typename OutputIteratorT,
+            typename ReductionOpT,
+            typename T,
+            typename NumItemsT,
+            ::cuda::execution::determinism::__determinism_t Determinism>
+  CUB_RUNTIME_FUNCTION static cudaError_t reduce_impl(
+    void* d_temp_storage,
+    size_t& temp_storage_bytes,
+    InputIteratorT d_in,
+    OutputIteratorT d_out,
+    NumItemsT num_items,
+    ReductionOpT reduction_op,
+    T init,
+    ::cuda::execution::determinism::__determinism_holder_t<Determinism>,
+    cudaStream_t stream)
+  {
+    using offset_t        = detail::choose_offset_t<NumItemsT>;
+    using accum_t         = ::cuda::std::__accumulator_t<ReductionOpT, detail::it_value_t<InputIteratorT>, T>;
+    using transform_t     = ::cuda::std::__identity;
+    using reduce_tuning_t = ::cuda::std::execution::
+      __query_result_or_t<TuningEnvT, detail::reduce::get_reduce_tuning_query_t, detail::reduce::default_tuning>;
+    using policy_t = typename reduce_tuning_t::template type<accum_t, offset_t, ReductionOpT>;
+    using dispatch_t =
+      DispatchReduce<InputIteratorT, OutputIteratorT, offset_t, ReductionOpT, T, accum_t, transform_t, policy_t>;
+
+    return dispatch_t::Dispatch(
+      d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<offset_t>(num_items), reduction_op, init, stream);
+  }
+
+  template <template <class AccumT, class OffsetT, class ReductionOpT> class PolicyT,
+            typename InputIteratorT,
+            typename OutputIteratorT,
+            typename T,
+            typename NumItemsT>
+  CUB_RUNTIME_FUNCTION static cudaError_t rfa_reduce_impl(
+    void* d_temp_storage,
+    size_t& temp_storage_bytes,
+    InputIteratorT d_in,
+    OutputIteratorT d_out,
+    NumItemsT num_items,
+    T init,
+    cudaStream_t stream,
+    _CUDA_VSTD::false_type /* is_supported */);
+
+  template <typename TuningEnvT, typename InputIteratorT, typename OutputIteratorT, typename T, typename NumItemsT>
+  CUB_RUNTIME_FUNCTION static cudaError_t rfa_reduce_impl(
+    void* d_temp_storage,
+    size_t& temp_storage_bytes,
+    InputIteratorT d_in,
+    OutputIteratorT d_out,
+    NumItemsT num_items,
+    T init,
+    cudaStream_t stream,
+    _CUDA_VSTD::true_type /* is_supported */)
+  {
+    using reduction_op_t  = ::cuda::std::plus<>;
+    using offset_t        = detail::choose_offset_t<NumItemsT>;
+    using accum_t         = ::cuda::std::__accumulator_t<reduction_op_t, detail::it_value_t<InputIteratorT>, T>;
+    using transform_t     = ::cuda::std::__identity;
+    using reduce_tuning_t = ::cuda::std::execution::
+      __query_result_or_t<TuningEnvT, detail::reduce::get_reduce_tuning_query_t, detail::reduce::default_rfa_tuning>;
+    using policy_t = typename reduce_tuning_t::template type<accum_t, offset_t, reduction_op_t>;
+    using dispatch_t =
+      detail::DispatchReduceDeterministic<InputIteratorT, OutputIteratorT, offset_t, T, accum_t, transform_t, policy_t>;
+
+    return dispatch_t::Dispatch(
+      d_temp_storage, temp_storage_bytes, d_in, d_out, static_cast<offset_t>(num_items), init, stream);
+  }
+
+  template <typename TuningEnvT,
+            typename InputIteratorT,
+            typename OutputIteratorT,
+            typename ReductionOpT,
+            typename T,
+            typename NumItemsT>
+  CUB_RUNTIME_FUNCTION static cudaError_t reduce_impl(
+    void* d_temp_storage,
+    size_t& temp_storage_bytes,
+    InputIteratorT d_in,
+    OutputIteratorT d_out,
+    NumItemsT num_items,
+    ReductionOpT,
+    T init,
+    ::cuda::execution::determinism::gpu_to_gpu_t,
+    cudaStream_t stream)
+  {
+    using offset_t    = detail::choose_offset_t<NumItemsT>;
+    using accum_t     = ::cuda::std::__accumulator_t<ReductionOpT, detail::it_value_t<InputIteratorT>, T>;
+    using transform_t = ::cuda::std::__identity;
+
+    // RFA is only supported for float and double accumulators
+    constexpr bool is_float_or_double = _CUDA_VSTD::is_same_v<accum_t, float> || _CUDA_VSTD::is_same_v<accum_t, double>;
+    constexpr bool is_sum             = _CUDA_VSTD::is_same_v<ReductionOpT, ::cuda::std::plus<>>;
+    constexpr bool is_supported       = is_float_or_double && is_sum;
+
+    static_assert(is_supported, "gpu-to-gpu deterministic reduction supports only float and double sum.");
+
+    return rfa_reduce_impl(
+      d_temp_storage,
+      temp_storage_bytes,
+      d_in,
+      d_out,
+      num_items,
+      init,
+      stream,
+      _CUDA_VSTD::bool_constant<is_supported>{});
+  }
+
+public:
   //! @rst
   //! Computes a device-wide reduction using the specified binary ``reduction_op`` functor and initial value ``init``.
   //!
@@ -325,13 +445,8 @@ struct DeviceReduce
     void* d_temp_storage      = nullptr;
     size_t temp_storage_bytes = 0;
 
-    // TODO(gevtushenko): dispatch to RFA and atomic reduce once merged
-    static_assert(::cuda::std::is_same_v<determinism_t, exec::determinism::not_guaranteed_t>
-                    || ::cuda::std::is_same_v<determinism_t, exec::determinism::run_to_run_t>,
-                  "Only not_guaranteed and run_to_run determinism are supported");
-
     // Query the required temporary storage size
-    cudaError_t error = CubDebug(dispatch_t::Dispatch(
+    cudaError_t error = reduce_impl<tuning_t>(
       d_temp_storage,
       temp_storage_bytes,
       d_in,
@@ -339,7 +454,8 @@ struct DeviceReduce
       static_cast<offset_t>(num_items),
       reduction_op,
       init,
-      stream.get()));
+      determinism_t{},
+      stream.get());
     if (error != cudaSuccess)
     {
       return error;
@@ -354,7 +470,7 @@ struct DeviceReduce
       (d_temp_storage = mr.allocate_async(temp_storage_bytes, stream);));
 
     // Run the algorithm
-    error = CubDebug(dispatch_t::Dispatch(
+    error = reduce_impl<tuning_t>(
       d_temp_storage,
       temp_storage_bytes,
       d_in,
@@ -362,7 +478,8 @@ struct DeviceReduce
       static_cast<offset_t>(num_items),
       reduction_op,
       init,
-      stream.get()));
+      determinism_t{},
+      stream.get());
     if (error != cudaSuccess)
     {
       return error;
