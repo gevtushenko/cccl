@@ -409,11 +409,13 @@ public:
   //! Computes a device-wide reduction using the specified binary ``reduction_op`` functor and initial value ``init``.
   //!
   //! - Does not support binary reduction operators that are non-commutative.
-  //! - Provides "run-to-run" determinism for pseudo-associative reduction
+  //! - By default, provides "run-to-run" determinism for pseudo-associative reduction
   //!   (e.g., addition of floating point types) on the same GPU device.
   //!   However, results for pseudo-associative reduction may be inconsistent
   //!   from one device to a another device of a different compute-capability
   //!   because CUB can employ different tile-sizing for different architectures.
+  //!   To request "gpu-to-gpu" determinism, pass `cuda::execution::require(cuda::execution::determinism::gpu_to_gpu)`
+  //!   as the `env` parameter.
   //! - The range ``[d_in, d_in + num_items)`` shall not overlap ``d_out``.
   //!
   //! Snippet
