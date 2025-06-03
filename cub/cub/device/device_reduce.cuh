@@ -481,10 +481,6 @@ public:
     namespace stdexec = ::cuda::std::execution;
     namespace exec    = ::cuda::execution;
 
-    using accum_t     = ::cuda::std::__accumulator_t<ReductionOpT, detail::it_value_t<InputIteratorT>, T>;
-    using transform_t = ::cuda::std::__identity;
-    using tuning_t    = stdexec::__query_result_or_t<EnvT, exec::get_tuning_t, stdexec::env<>>;
-
     static_assert(!stdexec::__queryable_with<EnvT, exec::determinism::get_determinism_t>,
                   "Determinism should be used inside requires to have an effect.");
     using requirements_t = stdexec::__query_result_or_t<EnvT, exec::get_requirements_t, stdexec::env<>>;
@@ -499,6 +495,8 @@ public:
 
     void* d_temp_storage      = nullptr;
     size_t temp_storage_bytes = 0;
+
+    using tuning_t = stdexec::__query_result_or_t<EnvT, exec::get_tuning_t, stdexec::env<>>;
 
     // Query the required temporary storage size
     cudaError_t error = reduce_impl<tuning_t>(
