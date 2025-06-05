@@ -268,6 +268,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
       (..., bulk_copy_tile(aligned_ptrs));
       if (threadIdx.x == 0 && blockIdx.x == 8)
       {
+        printf("!!! %p\n", &smem_offset);
         printf("!!! %d\n", smem_offset);
       }
 
