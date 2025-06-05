@@ -223,12 +223,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
   constexpr int bulk_copy_alignment = BulkCopyPolicy::algo_policy::bulk_copy_alignment;
 
   __shared__ uint64_t bar;
-  struct test
-  {
-    alignas(bulk_copy_alignment) char data[bulk_copy_alignment];
-  };
-  extern __shared__ test smem_storage[];
-  char* smem = &smem_storage[0].data;
+  extern __shared__ char __align__(bulk_copy_alignment) smem[];
 
   namespace ptx = ::cuda::ptx;
 
@@ -255,6 +250,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 
         const char* src = aligned_ptr.ptr + offset * sizeof(T);
         char* dst       = smem + smem_offset;
+        _CCCL_ASSERT(reinterpret_cast<uintptr_t>(smem) % bulk_copy_alignment == 0, "");
         _CCCL_ASSERT(reinterpret_cast<uintptr_t>(src) % bulk_copy_alignment == 0, "");
         _CCCL_ASSERT(reinterpret_cast<uintptr_t>(dst) % bulk_copy_alignment == 0, "");
 
