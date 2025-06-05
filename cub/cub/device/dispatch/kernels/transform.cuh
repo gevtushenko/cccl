@@ -266,10 +266,6 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 
       // Order of evaluation is left-to-right
       (..., bulk_copy_tile(aligned_ptrs));
-      if (threadIdx.x == 0 && blockIdx.x == 8)
-      {
-        assert(smem_offset == 1152);
-      }
 
       // TODO(ahendriksen): this could only have ptx::sem_relaxed, but this is not available yet
       ptx::mbarrier_arrive_expect_tx(ptx::sem_release, ptx::scope_cta, ptx::space_shared, &bar, total_copied);
