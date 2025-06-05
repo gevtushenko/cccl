@@ -190,8 +190,7 @@ struct dispatch_t<StableAddress,
            ++elem_per_thread)
       {
         const int tile_size = block_dim * elem_per_thread;
-        const int smem_size =
-          2 * bulk_copy_smem_for_tile_size(kernel_source.ItValueSizes(), tile_size, bulk_copy_align);
+        const int smem_size = bulk_copy_smem_for_tile_size(kernel_source.ItValueSizes(), tile_size, bulk_copy_align);
         if (smem_size > max_smem)
         {
           // assert should be prevented by smem check in policy
