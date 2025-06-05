@@ -261,7 +261,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
         total_copied += bytes_to_copy;
 
         // add bulk_copy_alignment to make space for the next tile's head padding
-        smem_offset += round_up_to_po2_multiple(static_cast<int>(sizeof(T)), tile_stride + bulk_copy_alignment);
+        smem_offset += round_up_to_po2_multiple(static_cast<int>(sizeof(T)) * tile_stride, bulk_copy_alignment);
       };
 
       // Order of evaluation is left-to-right
