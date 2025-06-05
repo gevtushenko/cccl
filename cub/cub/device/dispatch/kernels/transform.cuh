@@ -268,8 +268,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
       (..., bulk_copy_tile(aligned_ptrs));
       if (threadIdx.x == 0 && blockIdx.x == 8)
       {
-        printf("!!! %p\n", &smem_offset);
-        printf("!!! %d\n", smem_offset);
+        assert(smem_offset == 1152);
       }
 
       // TODO(ahendriksen): this could only have ptx::sem_relaxed, but this is not available yet
