@@ -260,6 +260,8 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
         const int bytes_to_copy = round_up_to_po2_multiple(
           aligned_ptr.head_padding + static_cast<int>(sizeof(T)) * tile_stride, bulk_copy_size_multiple);
 
+        _CCCL_ASSERT(__isShared(dst), "");
+        _CCCL_ASSERT(__isGlobal(src), "");
         ::cuda::ptx::cp_async_bulk(::cuda::ptx::space_cluster, ::cuda::ptx::space_global, dst, src, bytes_to_copy, &bar);
         total_copied += bytes_to_copy;
 
