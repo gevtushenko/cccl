@@ -223,7 +223,9 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
   constexpr int bulk_copy_alignment = BulkCopyPolicy::algo_policy::bulk_copy_alignment;
 
   __shared__ uint64_t bar;
-  extern __shared__ char __align__(bulk_copy_alignment) smem[];
+  extern __shared__ char __align__(bulk_copy_alignment) smem_storage[];
+  char* smem = reinterpret_cast<char*>(
+    round_up_to_po2_multiple(reinterpret_cast<uintptr_t>(smem_storage), (uintptr_t) bulk_copy_alignment));
   _CCCL_ASSERT(reinterpret_cast<uintptr_t>(smem) % bulk_copy_alignment == 0, "");
 
   namespace ptx = ::cuda::ptx;

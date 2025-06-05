@@ -190,7 +190,7 @@ _CCCL_HOST_DEVICE constexpr auto bulk_copy_alignment(int ptx_version) -> int
 _CCCL_HOST_DEVICE constexpr auto bulk_copy_smem_for_tile_size(
   ::cuda::std::span<const ::cuda::std::size_t> it_value_sizes, int tile_size, int bulk_copy_align) -> int
 {
-  return round_up_to_po2_multiple(int{sizeof(int64_t)}, bulk_copy_align) /* bar */
+  return bulk_copy_align /* bar */
        + ::cuda::std::accumulate(
            it_value_sizes.begin(), it_value_sizes.end(), 0, [&](int accum, ::cuda::std::size_t size) {
              return accum
