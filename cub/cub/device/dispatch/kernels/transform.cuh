@@ -261,8 +261,6 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
         const int bytes_to_copy = round_up_to_po2_multiple(
           aligned_ptr.head_padding + static_cast<int>(sizeof(T)) * tile_stride, bulk_copy_size_multiple);
         _CCCL_ASSERT(__isShared(dst + bytes_to_copy - 1), "");
-        _CCCL_ASSERT(bytes_to_copy % bulk_copy_size_multiple == 0, "");
-        //_CCCL_ASSERT(false, "");
 
         ::cuda::ptx::cp_async_bulk(::cuda::ptx::space_shared, ::cuda::ptx::space_global, dst, src, bytes_to_copy, &bar);
         total_copied += bytes_to_copy;
@@ -273,7 +271,6 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 
       // Order of evaluation is left-to-right
       (..., bulk_copy_tile(aligned_ptrs));
-      _CCCL_ASSERT(total_copied % bulk_copy_size_multiple == 0, "");
 
       // TODO(ahendriksen): this could only have ptx::sem_relaxed, but this is not available yet
       ptx::mbarrier_arrive_expect_tx(ptx::sem_release, ptx::scope_cta, ptx::space_shared, &bar, total_copied);
