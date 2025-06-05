@@ -191,8 +191,9 @@ _CCCL_HOST_DEVICE constexpr auto bulk_copy_smem_for_tile_size(
   ::cuda::std::span<const ::cuda::std::size_t> it_value_sizes, int tile_size, int bulk_copy_align) -> int
 {
   return round_up_to_po2_multiple(int{sizeof(int64_t)}, bulk_copy_align) /* bar */
-       + round_up_to_po2_multiple(tile_size * (int) ::cuda::std::reduce(it_value_sizes.begin(), it_value_sizes.end()),
-                                  bulk_copy_align);
+       + ::cuda::std::reduce(it_value_sizes.begin(), it_value_sizes.end(), 0, [&](int accum, ::cuda::std::size_t size) {
+           return accum + round_up_to_po2_multiple(tile_size * (int) size, bulk_copy_align);
+         });
 }
 
 _CCCL_HOST_DEVICE constexpr int arch_to_min_bytes_in_flight(int sm_arch)

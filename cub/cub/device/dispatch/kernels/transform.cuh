@@ -226,6 +226,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
   extern __shared__ char __align__(bulk_copy_alignment) smem_storage[];
   char* smem = reinterpret_cast<char*>(
     round_up_to_po2_multiple(reinterpret_cast<uintptr_t>(smem_storage), (uintptr_t) bulk_copy_alignment));
+  _CCCL_ASSERT(reinterpret_cast<uintptr_t>(smem) % bulk_copy_alignment == 0, "");
 
   namespace ptx = ::cuda::ptx;
 
@@ -252,7 +253,6 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 
         const char* src = aligned_ptr.ptr + offset * sizeof(T);
         char* dst       = smem + smem_offset;
-        _CCCL_ASSERT(reinterpret_cast<uintptr_t>(smem) % bulk_copy_alignment == 0, "");
         _CCCL_ASSERT(reinterpret_cast<uintptr_t>(src) % bulk_copy_alignment == 0, "");
         _CCCL_ASSERT(reinterpret_cast<uintptr_t>(dst) % bulk_copy_alignment == 0, "");
 
