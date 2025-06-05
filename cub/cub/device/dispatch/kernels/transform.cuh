@@ -224,6 +224,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 
   __shared__ uint64_t bar;
   extern __shared__ char __align__(bulk_copy_alignment) smem[];
+  _CCCL_ASSERT(reinterpret_cast<uintptr_t>(smem) % bulk_copy_alignment == 0, "");
 
   namespace ptx = ::cuda::ptx;
 
