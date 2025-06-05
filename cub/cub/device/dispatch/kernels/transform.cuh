@@ -259,8 +259,8 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
         // TODO(bgruber): we could precompute bytes_to_copy on the host
         const int bytes_to_copy = round_up_to_po2_multiple(
           aligned_ptr.head_padding + static_cast<int>(sizeof(T)) * tile_stride, bulk_copy_size_multiple);
-        _CCCL_ASSERT(__isShared(dst + bytes_to_copy - 1), "");
         _CCCL_ASSERT(__isShared(dst), "");
+        _CCCL_ASSERT(__isShared(dst + bytes_to_copy - 1), "");
 
         ::cuda::ptx::cp_async_bulk(::cuda::ptx::space_shared, ::cuda::ptx::space_global, dst, src, bytes_to_copy, &bar);
         total_copied += bytes_to_copy;
