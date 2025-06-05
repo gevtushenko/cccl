@@ -266,6 +266,8 @@ struct __align__({3}) output_storage_t {{
       }
       _CCCL_UNREACHABLE();
     }();
+    printf("\n%s\n", transform_policy_src.c_str());
+    fflush(stdout);
 
     std::string final_src = std::format(
       R"XXX(
