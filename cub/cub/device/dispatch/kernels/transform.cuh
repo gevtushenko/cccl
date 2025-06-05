@@ -251,8 +251,8 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
         const char* src = aligned_ptr.ptr + offset * sizeof(T);
         char* dst       = smem + smem_offset;
         _CCCL_ASSERT(reinterpret_cast<uintptr_t>(src) % bulk_copy_alignment == 0, "");
+        _CCCL_ASSERT(smem_offset == 0 && reinterpret_cast<uintptr_t>(dst) % bulk_copy_alignment == 0, "");
         _CCCL_ASSERT(smem_offset != 0 && reinterpret_cast<uintptr_t>(dst) % bulk_copy_alignment == 0, "");
-        _CCCL_ASSERT(reinterpret_cast<uintptr_t>(dst) % bulk_copy_alignment == 0, "");
 
         // TODO(bgruber): we could precompute bytes_to_copy on the host
         const int bytes_to_copy = round_up_to_po2_multiple(
