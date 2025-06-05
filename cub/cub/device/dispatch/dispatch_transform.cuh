@@ -200,12 +200,12 @@ struct dispatch_t<StableAddress,
 
         if (tile_size >= num_items)
         {
-          return elem_counts{elem_per_thread, tile_size, smem_size};
+          return elem_counts{elem_per_thread, tile_size, max_smem};
         }
 
         int max_occupancy = 0;
         const auto error  = CubDebug(
-          launcher_factory.MaxSmOccupancy(max_occupancy, kernel_source.TransformKernel(), block_dim, smem_size));
+          launcher_factory.MaxSmOccupancy(max_occupancy, kernel_source.TransformKernel(), block_dim, max_smem));
         if (error != cudaSuccess)
         {
           return ::cuda::std::unexpected<cudaError_t /* nvcc 12.0 with GCC 7 fails CTAD here */>(error);
@@ -215,10 +215,10 @@ struct dispatch_t<StableAddress,
           max_occupancy * tile_size * loaded_bytes_per_iteration(kernel_source.ItValueSizes());
         if (policy.MinBif() <= bytes_in_flight_SM)
         {
-          return elem_counts{elem_per_thread, tile_size, smem_size};
+          return elem_counts{elem_per_thread, tile_size, max_smem};
         }
 
-        last_counts = elem_counts{elem_per_thread, tile_size, smem_size};
+        last_counts = elem_counts{elem_per_thread, tile_size, max_smem};
       }
       return last_counts;
     };
