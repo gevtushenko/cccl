@@ -190,7 +190,8 @@ struct dispatch_t<StableAddress,
            ++elem_per_thread)
       {
         const int tile_size = block_dim * elem_per_thread;
-        const int smem_size = bulk_copy_smem_for_tile_size(kernel_source.ItValueSizes(), tile_size, bulk_copy_align);
+        const int smem_size =
+          2 * bulk_copy_smem_for_tile_size(kernel_source.ItValueSizes(), tile_size, bulk_copy_align);
         if (smem_size > max_smem)
         {
           // assert should be prevented by smem check in policy
@@ -200,12 +201,12 @@ struct dispatch_t<StableAddress,
 
         if (tile_size >= num_items)
         {
-          return elem_counts{elem_per_thread, tile_size, max_smem};
+          return elem_counts{elem_per_thread, tile_size, smem_size};
         }
 
         int max_occupancy = 0;
         const auto error  = CubDebug(
-          launcher_factory.MaxSmOccupancy(max_occupancy, kernel_source.TransformKernel(), block_dim, max_smem));
+          launcher_factory.MaxSmOccupancy(max_occupancy, kernel_source.TransformKernel(), block_dim, smem_size));
         if (error != cudaSuccess)
         {
           return ::cuda::std::unexpected<cudaError_t /* nvcc 12.0 with GCC 7 fails CTAD here */>(error);
@@ -215,10 +216,10 @@ struct dispatch_t<StableAddress,
           max_occupancy * tile_size * loaded_bytes_per_iteration(kernel_source.ItValueSizes());
         if (policy.MinBif() <= bytes_in_flight_SM)
         {
-          return elem_counts{elem_per_thread, tile_size, max_smem};
+          return elem_counts{elem_per_thread, tile_size, smem_size};
         }
 
-        last_counts = elem_counts{elem_per_thread, tile_size, max_smem};
+        last_counts = elem_counts{elem_per_thread, tile_size, smem_size};
       }
       return last_counts;
     };
