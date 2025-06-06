@@ -297,7 +297,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
             _CCCL_ASSERT(reinterpret_cast<uintptr_t>(src) % alignof(T) == 0, "");
             _CCCL_ASSERT(reinterpret_cast<uintptr_t>(dst) % alignof(T) == 0, "");
 
-            const int bytes_to_copy = static_cast<int>(sizeof(T)) * tile_stride;
+            const int bytes_to_copy = static_cast<int>(sizeof(T)) * tile_size;
             cuda::memcpy_async(this_thread_block(), dst, src, bytes_to_copy, pipe);
 
             // add bulk_copy_alignment to make space for the next tile's head padding
