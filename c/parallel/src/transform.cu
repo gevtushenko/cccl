@@ -300,7 +300,7 @@ struct device_transform_policy {{
     // Note: `-default-device` is needed because of the use of lambdas
     // in the transform kernel code. Qualifying those explicitly with
     // `__device__` seems not to be supported by NVRTC.
-    constexpr size_t num_args  = 11;
+    constexpr size_t num_args  = 12;
     const char* args[num_args] = {
       arch.c_str(),
       cub_path,
@@ -312,7 +312,8 @@ struct device_transform_policy {{
       "-default-device",
       "-DCUB_DISABLE_CDP",
       "-lineinfo",
-      "-G"};
+      "-G",
+      "-O0"};
 
     constexpr size_t num_lto_args   = 2;
     const char* lopts[num_lto_args] = {"-lto", arch.c_str()};
