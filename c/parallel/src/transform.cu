@@ -534,7 +534,7 @@ struct device_transform_policy {{
 
     const std::string arch = std::format("-arch=sm_{0}{1}", cc_major, cc_minor);
 
-    constexpr size_t num_args  = 10;
+    constexpr size_t num_args  = 11;
     const char* args[num_args] = {
       arch.c_str(),
       cub_path,
@@ -545,7 +545,8 @@ struct device_transform_policy {{
       "-dlto",
       "-default-device",
       "-DCUB_DISABLE_CDP",
-      "-lineinfo"};
+      "-lineinfo",
+      "-G"};
 
     constexpr size_t num_lto_args   = 2;
     const char* lopts[num_lto_args] = {"-lto", arch.c_str()};
