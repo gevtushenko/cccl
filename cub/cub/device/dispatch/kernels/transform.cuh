@@ -222,11 +222,8 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 {
   constexpr int bulk_copy_alignment = BulkCopyPolicy::algo_policy::bulk_copy_alignment;
 
-  __shared__ uint64_t bar;
-  extern __shared__ char __align__(bulk_copy_alignment) smem_storage[];
-  char* smem = reinterpret_cast<char*>(
-    round_up_to_po2_multiple(reinterpret_cast<uintptr_t>(smem_storage), (uintptr_t) bulk_copy_alignment));
-  _CCCL_ASSERT(reinterpret_cast<uintptr_t>(smem) % bulk_copy_alignment == 0, "");
+  extern __shared__ char __align__(bulk_copy_alignment) smem[];
+  uint64_t& bar = *reinterpret_cast<uint64_t*>(smem);
 
   namespace ptx = ::cuda::ptx;
 
@@ -244,7 +241,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
       ptx::mbarrier_init(&bar, 1);
       ptx::fence_proxy_async(ptx::space_shared);
 
-      int smem_offset                    = 0;
+      int smem_offset                    = bulk_copy_alignment;
       ::cuda::std::uint32_t total_copied = 0;
 
       auto bulk_copy_tile = [&](auto aligned_ptr) {
@@ -259,8 +256,8 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
         // TODO(bgruber): we could precompute bytes_to_copy on the host
         const int bytes_to_copy = round_up_to_po2_multiple(
           aligned_ptr.head_padding + static_cast<int>(sizeof(T)) * tile_stride, bulk_copy_size_multiple);
-        //_CCCL_ASSERT(__isShared(dst), "");
-        //_CCCL_ASSERT(__isShared(dst + bytes_to_copy - 1), "");
+        _CCCL_ASSERT(__isShared(dst), "");
+        _CCCL_ASSERT(__isShared(dst + bytes_to_copy - 1), "");
 
         ::cuda::ptx::cp_async_bulk(::cuda::ptx::space_shared, ::cuda::ptx::space_global, dst, src, bytes_to_copy, &bar);
         total_copied += bytes_to_copy;
