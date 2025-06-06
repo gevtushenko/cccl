@@ -68,10 +68,10 @@ _CCCL_DEVICE static inline void cp_async_bulk(
 // __space == space_shared (due to parameter type constraint)
 // __space == space_global (due to parameter type constraint)
 #  if _CCCL_CUDA_COMPILER(NVHPC) || __CUDA_ARCH__ >= 900
-  asm volatile("cp.async.bulk.shared::cta.global.mbarrier::complete_tx::bytes [%0], [%1], %2, [%3];"
-               :
-               : "r"(__as_ptr_smem(__dstMem)), "l"(__as_ptr_gmem(__srcMem)), "r"(__size), "r"(__as_ptr_smem(__smem_bar))
-               : "memory");
+  asm("cp.async.bulk.shared::cta.global.mbarrier::complete_tx::bytes [%0], [%1], %2, [%3];"
+      :
+      : "r"(__as_ptr_smem(__dstMem)), "l"(__as_ptr_gmem(__srcMem)), "r"(__size), "r"(__as_ptr_smem(__smem_bar))
+      : "memory");
 #  else
   // Unsupported architectures will have a linker error with a semi-decent error message
   __cuda_ptx_cp_async_bulk_is_not_supported_before_SM_90__();

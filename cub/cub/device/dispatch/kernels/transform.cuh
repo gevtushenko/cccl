@@ -263,8 +263,9 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
         _CCCL_ASSERT(__isShared(dst), "");
         _CCCL_ASSERT(__isShared(dst + bytes_to_copy), "");
 
-        ::cuda::ptx::cp_async_bulk(::cuda::ptx::space_shared, ::cuda::ptx::space_global, dst, src, bytes_to_copy, &bar);
-        total_copied += bytes_to_copy;
+        //::cuda::ptx::cp_async_bulk(::cuda::ptx::space_shared, ::cuda::ptx::space_global, dst, src, bytes_to_copy,
+        //:&bar);
+        // total_copied += bytes_to_copy;
 
         // add bulk_copy_alignment to make space for the next tile's head padding
         smem_offset += round_up_to_po2_multiple(
