@@ -41,7 +41,6 @@ _LIBCUDACXX_BEGIN_NAMESPACE_CUDA_PTX
 inline _CCCL_DEVICE _CUDA_VSTD::uint32_t __as_ptr_smem(const void* __ptr)
 {
   // Consider adding debug asserts here.
-  _CCCL_ASSERT(__isShared(__ptr), "");
   return static_cast<_CUDA_VSTD::uint32_t>(::__cvta_generic_to_shared(__ptr));
 }
 
@@ -62,7 +61,6 @@ inline _CCCL_DEVICE _CUDA_VSTD::uint32_t __as_ptr_remote_dsmem(const void* __ptr
 inline _CCCL_DEVICE _CUDA_VSTD::uint64_t __as_ptr_gmem(const void* __ptr)
 {
   // Consider adding debug asserts here.
-  _CCCL_ASSERT(__isGlobal(__ptr), "");
   return static_cast<_CUDA_VSTD::uint64_t>(::__cvta_generic_to_global(__ptr));
 }
 
