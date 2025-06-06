@@ -185,7 +185,8 @@ _CCCL_HOST_DEVICE auto make_aligned_base_ptr(const T* ptr, int alignment) -> ali
 #ifdef _CUB_HAS_TRANSFORM_UBLKCP
 _CCCL_DEVICE _CCCL_FORCEINLINE static bool elect_one()
 {
-  const ::cuda::std::uint32_t membermask = ~0;
+  return threadIdx.x == 0;
+  /* const ::cuda::std::uint32_t membermask = ~0;
   ::cuda::std::uint32_t is_elected;
   asm volatile(
     "{\n\t .reg .pred P_OUT; \n\t"
@@ -195,7 +196,7 @@ _CCCL_DEVICE _CCCL_FORCEINLINE static bool elect_one()
     : "=r"(is_elected)
     : "r"(membermask)
     :);
-  return threadIdx.x < 32 && static_cast<bool>(is_elected);
+  return threadIdx.x < 32 && static_cast<bool>(is_elected); */
 }
 
 struct thread_block
