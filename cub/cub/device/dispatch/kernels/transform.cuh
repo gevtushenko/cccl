@@ -287,7 +287,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
       NV_PROVIDES_SM_90,
       (
         // use all threads to schedule an async_memcpy
-        int smem_offset = 0; auto pipe = cuda::make_pipeline();
+        int smem_offset = bulk_copy_alignment; auto pipe = cuda::make_pipeline();
 
         auto bulk_copy_tile_fallback =
           [&](auto aligned_ptr) {
@@ -325,7 +325,7 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
       const int idx = j * block_dim + threadIdx.x;
       if (full_tile || idx < tile_size)
       {
-        int smem_offset    = 0;
+        int smem_offset    = bulk_copy_alignment;
         auto fetch_operand = [&](auto aligned_ptr) {
           using T                         = typename decltype(aligned_ptr)::value_type;
           const T* smem_operand_tile_base = reinterpret_cast<const T*>(smem + smem_offset + aligned_ptr.head_padding);
