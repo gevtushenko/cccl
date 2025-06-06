@@ -259,9 +259,11 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
 
         for (int i = 0; i < bytes_to_copy; ++i)
         {
-          _CCCL_ASSERT(!__isGlobal(src + i), "");
-          _CCCL_ASSERT(!__isShared(dst + i), "");
+          _CCCL_ASSERT(__isGlobal(src + i), "");
+          _CCCL_ASSERT(__isShared(dst + i), "");
         }
+        _CCCL_ASSERT(__isShared(&bar), "");
+        _CCCL_ASSERT(dst - (char*) &bar >= sizeof(bar), "");
 
         ::cuda::ptx::cp_async_bulk(::cuda::ptx::space_shared, ::cuda::ptx::space_global, dst, src, bytes_to_copy, &bar);
         total_copied += bytes_to_copy;
