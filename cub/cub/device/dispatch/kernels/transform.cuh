@@ -185,8 +185,7 @@ _CCCL_HOST_DEVICE auto make_aligned_base_ptr(const T* ptr, int alignment) -> ali
 #ifdef _CUB_HAS_TRANSFORM_UBLKCP
 _CCCL_DEVICE _CCCL_FORCEINLINE static bool elect_one()
 {
-  return threadIdx.x == 0;
-  /* const ::cuda::std::uint32_t membermask = ~0;
+  const ::cuda::std::uint32_t membermask = ~0;
   ::cuda::std::uint32_t is_elected;
   asm volatile(
     "{\n\t .reg .pred P_OUT; \n\t"
@@ -196,7 +195,7 @@ _CCCL_DEVICE _CCCL_FORCEINLINE static bool elect_one()
     : "=r"(is_elected)
     : "r"(membermask)
     :);
-  return threadIdx.x < 32 && static_cast<bool>(is_elected); */
+  return threadIdx.x < 32 && static_cast<bool>(is_elected);
 }
 
 struct thread_block
@@ -257,6 +256,8 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
         // TODO(bgruber): we could precompute bytes_to_copy on the host
         const int bytes_to_copy = round_up_to_po2_multiple(
           aligned_ptr.head_padding + static_cast<int>(sizeof(T)) * tile_stride, bulk_copy_size_multiple);
+        _CCCL_ASSERT(__isGlobal(src), "");
+        _CCCL_ASSERT(__isGlobal(src + bytes_to_copy - 1), "");
         _CCCL_ASSERT(__isShared(dst), "");
         _CCCL_ASSERT(__isShared(dst + bytes_to_copy - 1), "");
 
