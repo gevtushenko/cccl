@@ -86,7 +86,7 @@ _CCCL_DEVICE void transform_kernel_prefetch(
   constexpr int block_threads = PrefetchPolicy::block_threads;
   const int tile_size         = block_threads * num_elem_per_thread;
   const Offset offset         = static_cast<Offset>(blockIdx.x) * tile_size;
-  const int valid_items       = static_cast<int>((::cuda::std::min)(num_items - offset, Offset{tile_size}));
+  const int valid_items       = static_cast<int>((::cuda::std::min) (num_items - offset, Offset{tile_size}));
 
   // move index and iterator domain to the block/thread index, to reduce arithmetic in the loops below
   {
@@ -94,7 +94,11 @@ _CCCL_DEVICE void transform_kernel_prefetch(
     out += offset;
   }
 
+  _CCCL_PDL_GRID_DEPENDENCY_SYNC();
+
   (..., prefetch_tile<block_threads>(ins, valid_items));
+
+  _CCCL_PDL_TRIGGER_NEXT_LAUNCH();
 
   auto process_tile = [&](auto full_tile, auto... ins2 /* nvcc fails to compile when just using the captured ins */) {
     // ahendriksen: various unrolling yields less <1% gains at much higher compile-time cost
@@ -181,7 +185,7 @@ _CCCL_DEVICE void transform_kernel_vectorized(
   _CCCL_ASSERT(!can_vectorize || (items_per_thread == num_elem_per_thread_prefetch), "");
   constexpr int tile_size = block_dim * items_per_thread;
   const Offset offset     = static_cast<Offset>(blockIdx.x) * tile_size;
-  const int valid_items   = static_cast<int>((::cuda::std::min)(num_items - offset, Offset{tile_size}));
+  const int valid_items   = static_cast<int>((::cuda::std::min) (num_items - offset, Offset{tile_size}));
 
   // if we cannot vectorize or don't have a full tile, fall back to prefetch kernel
   if (!can_vectorize || valid_items != tile_size)
@@ -595,9 +599,12 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
   constexpr int block_threads = BulkCopyPolicy::block_threads;
   const int tile_size         = block_threads * num_elem_per_thread;
   const Offset offset         = static_cast<Offset>(blockIdx.x) * tile_size;
-  const int valid_items       = (::cuda::std::min)(num_items - offset, Offset{tile_size});
+  const int valid_items       = (::cuda::std::min) (num_items - offset, Offset{tile_size});
 
   const bool inner_blocks = 0 < blockIdx.x && blockIdx.x + 2 < gridDim.x;
+
+  _CCCL_PDL_GRID_DEPENDENCY_SYNC();
+
   if (inner_blocks)
   {
     // use one thread to setup the entire bulk copy
@@ -680,6 +687,8 @@ _CCCL_DEVICE void transform_kernel_ublkcp(
   __syncthreads();
   while (!ptx::mbarrier_try_wait_parity(&bar, 0))
     ;
+
+  _CCCL_PDL_TRIGGER_NEXT_LAUNCH();
 
   // move the whole index and iterator to the block/thread index, to reduce arithmetic in the loops below
   out += offset;
