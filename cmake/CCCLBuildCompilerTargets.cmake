@@ -152,27 +152,6 @@ function(cccl_build_compiler_targets)
     if (CCCL_ENABLE_WERROR)
       append_option_if_available("-Werror" cxx_compile_options)
     endif()
-
-    append_option_if_available("-Wall" cxx_compile_options)
-    append_option_if_available("-Wextra" cxx_compile_options)
-    append_option_if_available("-Wreorder" cxx_compile_options)
-    append_option_if_available("-Winit-self" cxx_compile_options)
-    append_option_if_available("-Woverloaded-virtual" cxx_compile_options)
-    append_option_if_available("-Wcast-qual" cxx_compile_options)
-    append_option_if_available("-Wpointer-arith" cxx_compile_options)
-    append_option_if_available("-Wunused-local-typedef" cxx_compile_options)
-    append_option_if_available("-Wvla" cxx_compile_options)
-
-    # Disable GNU extensions (flag is clang only)
-    append_option_if_available("-Wgnu" cxx_compile_options)
-    append_option_if_available("-Wno-gnu-line-marker" cxx_compile_options) # WAR 3916341
-    # Calling a variadic macro with zero args is a GNU extension until C++20,
-    # but the THRUST_PP_ARITY macro is used with zero args. Need to see if this
-    # is a real problem worth fixing.
-    append_option_if_available("-Wno-gnu-zero-variadic-macro-arguments" cxx_compile_options)
-
-    # This complains about functions in CUDA system headers when used with nvcc.
-    append_option_if_available("-Wno-unused-function" cxx_compile_options)
   endif()
 
   if ("GNU" STREQUAL "${CMAKE_CXX_COMPILER_ID}")
