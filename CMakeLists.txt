@@ -56,20 +56,17 @@ endif()
 include(CTest)
 enable_testing()
 
+include(cmake/AppendOptionIfAvailable.cmake)
+include(cmake/CCCLUtilities.cmake) # include this before other CCCL helpers
+
+include(cmake/CCCLBuildCompilerTargets.cmake)
+include(cmake/CCCLClangdCompileInfo.cmake)
+include(cmake/CCCLConfigureTarget.cmake)
+include(cmake/CCCLGenerateHeaderTests.cmake)
 include(cmake/CCCLGetDependencies.cmake)
+include(cmake/CCCLTestParams.cmake)
 
-if (CCCL_TOPLEVEL_PROJECT)
-  include(cmake/AppendOptionIfAvailable.cmake)
-  include(cmake/CCCLUtilities.cmake) # include this before other CCCL helpers
-
-  include(cmake/CCCLBuildCompilerTargets.cmake)
-  include(cmake/CCCLClangdCompileInfo.cmake)
-  include(cmake/CCCLConfigureTarget.cmake)
-  include(cmake/CCCLGenerateHeaderTests.cmake)
-  include(cmake/CCCLTestParams.cmake)
-
-  cccl_build_compiler_targets()
-endif()
+cccl_build_compiler_targets()
 
 add_subdirectory(libcudacxx)
 add_subdirectory(cub)
