@@ -10,6 +10,8 @@ option(CCCL_C_Parallel_ENABLE_HEADER_TESTING "Build cccl.c.parallel standalone h
 set(CCCL_C_PARALLEL_LIBRARY_OUTPUT_DIRECTORY "" CACHE PATH "Override output directory for the cccl.c.parallel library")
 mark_as_advanced(CCCL_C_PARALLEL_LIBRARY_OUTPUT_DIRECTORY)
 
+include(cmake/CCCLGetDependencies.cmake)
+
 file(GLOB_RECURSE srcs
   RELATIVE "${CMAKE_CURRENT_LIST_DIR}"
   CONFIGURE_DEPENDS
