@@ -56,6 +56,8 @@ endif()
 include(CTest)
 enable_testing()
 
+include(cmake/CCCLGetDependencies.cmake)
+
 if (CCCL_TOPLEVEL_PROJECT)
   include(cmake/AppendOptionIfAvailable.cmake)
   include(cmake/CCCLUtilities.cmake) # include this before other CCCL helpers
@@ -64,7 +66,6 @@ if (CCCL_TOPLEVEL_PROJECT)
   include(cmake/CCCLClangdCompileInfo.cmake)
   include(cmake/CCCLConfigureTarget.cmake)
   include(cmake/CCCLGenerateHeaderTests.cmake)
-  include(cmake/CCCLGetDependencies.cmake)
   include(cmake/CCCLTestParams.cmake)
 
   cccl_build_compiler_targets()
