@@ -92,6 +92,7 @@ CompileFlags:
     - "--expt-relaxed-constexpr"
     - "-forward-unknown-to-host-compiler"
     - "-Werror=cross-execution-space-call"
+
 Diagnostics:
   Suppress:
     - "variadic_device_fn"
@@ -99,3 +100,16 @@ Diagnostics:
     # The NVHPC version of _NVCXX_EXPAND_PACK macro triggers this clang error.
     # Temporarily suppressing it, but should probably fix
     - "template_param_shadow"
+
+  # Enable clang-tidy with the project's .clang-tidy configuration
+  ClangTidy:
+    # Enable the namespace qualification check
+    Add:
+      - misc-namespace-qualification
+    CheckOptions:
+      misc-namespace-qualification.Namespace: "cuda"
+      # Using comma-separated patterns for GlobList
+      misc-namespace-qualification.RequireGlobalIn: "*/cub/cub/*,*/thrust/thrust/*,*/libcudacxx/include/*"
+      misc-namespace-qualification.ForbidGlobalIn: "*test*"
+    # Allow unknown-latency checks to run in-editor
+    FastCheckFilter: Loose
