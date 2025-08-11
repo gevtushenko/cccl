@@ -74,6 +74,8 @@ html_theme_options = {
     "navbar_end": ["navbar-icon-links"],
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version"],
+    "sidebar_includehidden": True,
+    "collapse_navigation": False,
 }
 
 html_static_path = ["_static"] if os.path.exists("_static") else []
