@@ -1,0 +1,73 @@
+# Doxyfile for Thrust
+
+PROJECT_NAME           = Thrust
+OUTPUT_DIRECTORY       = ../_build/doxygen/thrust
+CREATE_SUBDIRS         = NO
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+XML_PROGRAMLISTING     = YES
+
+INPUT                  = ../../thrust/thrust
+
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */detail/* */test/* */examples/* */testing/*
+EXCLUDE_SYMBOLS        = *detail* *__* THRUST_NS_QUALIFIER optional
+
+FILE_PATTERNS          = *.h *.hpp
+EXTENSION_MAPPING      = cuh=C++ cu=C++
+
+# Documentation extraction settings
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+SHOW_INCLUDE_FILES     = YES
+INLINE_INHERITED_MEMB  = YES
+FULL_PATH_NAMES        = YES
+STRIP_FROM_PATH        = ../../thrust
+SHORT_NAMES            = NO
+DISTRIBUTE_GROUP_DOC   = YES
+
+# Parsing settings
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = NO
+MULTILINE_CPP_IS_BRIEF = NO
+INHERIT_DOCS           = YES
+SEPARATE_MEMBER_PAGES  = NO
+TAB_SIZE               = 4
+BUILTIN_STL_SUPPORT    = YES
+
+# Preprocessing
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+SEARCH_INCLUDES        = YES
+SKIP_FUNCTION_MACROS   = YES
+
+# Predefined macros
+PREDEFINED             = __device__= \
+                        __host__= \
+                        __global__= \
+                        __forceinline__= \
+                        _CCCL_DOXYGEN_INVOKED \
+                        "THRUST_NAMESPACE_BEGIN=namespace thrust {" \
+                        "THRUST_NAMESPACE_END=}" \
+                        THRUST_PREVENT_MACRO_SUBSTITUTION \
+                        "THRUST_FWD(x)=x"
+
+# Images and examples
+IMAGE_PATH             = ../img
+EXAMPLE_PATH           = ../../thrust/examples
+EXAMPLE_RECURSIVE      = NO
+EXAMPLE_PATTERNS       = *.cu
+
+# Output settings
+AUTOLINK_SUPPORT       = YES
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES

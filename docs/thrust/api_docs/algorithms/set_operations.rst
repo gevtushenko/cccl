@@ -1,10 +1,9 @@
 .. _thrust-module-api-algorithms-set-operations:
 
 Set Operations
----------------
+--------
 
-.. toctree::
-   :glob:
-   :maxdepth: 1
-
-   ${repo_docs_api_path}/*function_group__set__operations*
+.. doxygengroup:: set__operations
+   :project: thrust
+   :members:
+   :content-only:

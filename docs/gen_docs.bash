@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# This script just wraps launching a repo docs build within a container
+# This script builds CCCL documentation using Sphinx directly
 #
-# Additional options, e.g --stage sphinx will be passed on to repo.sh
+# Usage: ./gen_docs.bash [sphinx-build options]
 
 set -e
 
@@ -37,7 +37,22 @@ if [ ! -n "$(find img -name '*.png')" ]; then
     done
 fi
 
-if ! ./repo.sh docs "$@"; then
-    echo "!!! There were errors while generating"
+# Check if documentation dependencies are installed
+echo "Checking for documentation dependencies..."
+if ! python3 -c "import sphinx" 2>/dev/null; then
+    echo "Installing documentation dependencies..."
+    pip3 install -r requirements.txt || {
+        echo "Error: Failed to install documentation dependencies"
+        echo "Please install manually: pip3 install -r requirements.txt"
+        exit 1
+    }
+fi
+
+# Build the documentation using Sphinx directly
+echo "Building documentation with Sphinx..."
+if ! make html "$@"; then
+    echo "!!! There were errors while generating documentation"
     exit 1
 fi
+
+echo "Documentation build complete! HTML output is in _build/html/"
