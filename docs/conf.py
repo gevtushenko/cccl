@@ -25,7 +25,7 @@ release = version
 
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary", 
+    "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.extlinks",
@@ -38,7 +38,7 @@ extensions = [
 # Breathe configuration for Doxygen integration
 breathe_projects = {
     "cub": "_build/doxygen/cub/xml",
-    "thrust": "_build/doxygen/thrust/xml", 
+    "thrust": "_build/doxygen/thrust/xml",
     "cudax": "_build/doxygen/cudax/xml",
 }
 
@@ -57,7 +57,7 @@ exclude_patterns = [
     "_repo",
     "tools",
     "VERSION.md",
-    "Thumbs.db", 
+    "Thumbs.db",
     ".DS_Store",
 ]
 
@@ -71,7 +71,7 @@ html_theme_options = {
     "navigation_depth": 4,
     "show_toc_level": 2,
     "navbar_start": ["navbar-logo"],
-    "navbar_end": ["navbar-icon-links"],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version"],
     "sidebar_includehidden": True,
@@ -80,7 +80,7 @@ html_theme_options = {
 
 html_static_path = ["_static"] if os.path.exists("_static") else []
 
-# Images directory  
+# Images directory
 if os.path.exists("img"):
     html_static_path.append("img")
 
@@ -134,6 +134,7 @@ autodoc_default_options = {
 extlinks = {
     "github": ("https://github.com/NVIDIA/cccl/blob/main/%s", "%s"),
 }
+
 
 def setup(app):
     app.add_css_file("custom.css")
