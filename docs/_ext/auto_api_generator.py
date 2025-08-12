@@ -12,6 +12,63 @@ from sphinx.util import logging
 logger = logging.getLogger(__name__)
 
 
+def extract_function_signatures(func_name, refids, xml_dir):
+    """Extract full function signatures from Doxygen XML for overloaded functions."""
+    signatures = []
+    xml_path = Path(xml_dir)
+    
+    if not xml_path.exists():
+        return signatures
+    
+    # Parse the namespace XML file to get function signatures
+    namespace_files = list(xml_path.glob('namespace*.xml'))
+    
+    for ns_file in namespace_files:
+        try:
+            tree = ET.parse(ns_file)
+            root = tree.getroot()
+            
+            # Find all function members with matching refids
+            for memberdef in root.findall('.//memberdef[@kind="function"]'):
+                member_refid = memberdef.get('id')
+                if member_refid in refids:
+                    # Get the function name
+                    name_elem = memberdef.find('name')
+                    if name_elem is not None and name_elem.text == func_name:
+                        # Build the full signature
+                        sig_parts = []
+                        
+                        # Get template parameters if any
+                        templateparamlist = memberdef.find('templateparamlist')
+                        if templateparamlist is not None:
+                            template_params = []
+                            for param in templateparamlist.findall('param'):
+                                param_type = param.find('type')
+                                if param_type is not None:
+                                    # Extract text content from type element
+                                    param_text = ''.join(param_type.itertext()).strip()
+                                    template_params.append(param_text)
+                            if template_params:
+                                sig_parts.append(f"template<{', '.join(template_params)}>")
+                        
+                        # Get return type
+                        return_type = memberdef.find('type')
+                        if return_type is not None:
+                            ret_text = ''.join(return_type.itertext()).strip()
+                            if ret_text:
+                                sig_parts.append(ret_text)
+                        
+                        # Get the function name and parameters
+                        argsstring_elem = memberdef.find('argsstring')
+                        if argsstring_elem is not None and argsstring_elem.text:
+                            full_sig = ' '.join(sig_parts) + ' ' + func_name + argsstring_elem.text
+                            signatures.append((member_refid, full_sig.strip()))
+        except Exception as e:
+            logger.debug(f"Failed to extract signatures from {ns_file}: {e}")
+    
+    return signatures
+
+
 def extract_doxygen_items(xml_dir):
     """Extract all items (classes, structs, functions, etc.) from Doxygen XML."""
     items = {
@@ -20,7 +77,8 @@ def extract_doxygen_items(xml_dir):
         'functions': [],
         'typedefs': [],
         'enums': [],
-        'variables': []
+        'variables': [],
+        'function_groups': {}  # Group functions by name for overloads
     }
     
     xml_path = Path(xml_dir)
@@ -72,6 +130,11 @@ def extract_doxygen_items(xml_dir):
                 name = member.find('name').text
                 refid = member.get('refid')
                 items['functions'].append((name, refid))
+                
+                # Also track function groups for overloads
+                if name not in items['function_groups']:
+                    items['function_groups'][name] = []
+                items['function_groups'][name].append(refid)
             
             for member in namespace_compound.findall('member[@kind="typedef"]'):
                 name = member.find('name').text
@@ -199,29 +262,56 @@ def generate_individual_api_page(class_name, refid, project_name):
     return '\n'.join(content)
 
 
-def generate_member_api_page(member_name, member_type, project_name):
+def generate_member_api_page(member_name, member_type, project_name, refid=None, overload_refids=None, xml_dir=None):
     """Generate RST content for a single function/typedef/enum/variable API page."""
     content = []
     
     # Add title
-    content.append(member_name)
-    content.append('=' * len(member_name))
+    content.append(f'``{member_name}``')
+    content.append('=' * (len(member_name) + 4))
     content.append('')
     
-    # Map member type to doxygen directive
+    # Map member types to Doxygen directives
     directive_map = {
         'function': 'doxygenfunction',
-        'typedef': 'doxygentypedef', 
+        'typedef': 'doxygentypedef',
         'enum': 'doxygenenum',
         'variable': 'doxygenvariable'
     }
     
     directive = directive_map.get(member_type, 'doxygenfunction')
     
-    # Add the doxygen directive
-    content.append(f'.. {directive}:: {member_name}')
-    content.append(f'   :project: {project_name}')
-    content.append('')
+    if member_type == 'function' and overload_refids and len(overload_refids) > 1 and xml_dir:
+        # For functions with multiple overloads, try to extract and document each
+        signatures = extract_function_signatures(member_name, overload_refids, xml_dir)
+        
+        if signatures:
+            for refid, full_sig in signatures:
+                # Extract just the parameter list from the full signature
+                # Look for the function name and get everything after it
+                if member_name in full_sig:
+                    idx = full_sig.rfind(member_name)
+                    if idx != -1:
+                        params = full_sig[idx + len(member_name):].strip()
+                        # Use doxygenfunction with the specific parameter signature
+                        content.append(f'.. doxygenfunction:: {member_name}{params}')
+                        content.append(f'   :project: {project_name}')
+                        content.append('')
+        else:
+            # Fallback to simple directive
+            content.append(f'.. {directive}:: {member_name}')
+            content.append(f'   :project: {project_name}')
+            content.append('')
+    elif member_type == 'function':
+        # For single functions or when we don't have xml_dir
+        content.append(f'.. {directive}:: {member_name}')
+        content.append(f'   :project: {project_name}')
+        content.append('')
+    else:
+        # For other types, use the standard directive
+        content.append(f'.. {directive}:: {member_name}')
+        content.append(f'   :project: {project_name}')
+        content.append('')
     
     return '\n'.join(content)
 
@@ -326,18 +416,20 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         content.append('')
     
     # Functions section
-    if items['functions']:
+    if items.get('function_groups'):
         content.append('Functions')
         content.append('~~~~~~~~~')
         content.append('')
         
-        # Sort functions alphabetically
-        items['functions'].sort(key=lambda x: x[0].lower())
-        for name, refid in items['functions']:
+        # Sort functions alphabetically by name
+        sorted_functions = sorted(items['function_groups'].keys(), key=lambda x: x.lower())
+        for func_name in sorted_functions:
+            # Use the first refid for the link
+            first_refid = items['function_groups'][func_name][0]
             if doc_prefix:
-                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+                content.append(f'* :doc:`{func_name} <{doc_prefix}{first_refid}>`')
             else:
-                content.append(f'* :doc:`{name} <{refid}>`')
+                content.append(f'* :doc:`{func_name} <{first_refid}>`')
         content.append('')
     
     # Typedefs section
@@ -434,17 +526,24 @@ def generate_api_docs(app, config):
                 f.write(content)
             logger.info(f"Generated API page: {output_file}")
         
-        # Generate individual pages for functions
-        for name, refid in items['functions']:
-            content = generate_member_api_page(name, 'function', project_name)
-            output_file = api_dir / f'{refid}.rst'
+        # Generate individual pages for functions (one per unique function name)
+        # Use function_groups to handle overloads
+        function_groups = items.get('function_groups', {})
+        for func_name in function_groups:
+            # Use the first refid as the filename for consistency
+            first_refid = function_groups[func_name][0]
+            content = generate_member_api_page(func_name, 'function', project_name, 
+                                              refid=first_refid,
+                                              overload_refids=function_groups[func_name],
+                                              xml_dir=xml_dir)
+            output_file = api_dir / f'{first_refid}.rst'
             with open(output_file, 'w') as f:
                 f.write(content)
             logger.info(f"Generated function API page: {output_file}")
         
         # Generate individual pages for typedefs
         for name, refid in items['typedefs']:
-            content = generate_member_api_page(name, 'typedef', project_name)
+            content = generate_member_api_page(name, 'typedef', project_name, refid)
             output_file = api_dir / f'{refid}.rst'
             with open(output_file, 'w') as f:
                 f.write(content)
@@ -452,7 +551,7 @@ def generate_api_docs(app, config):
         
         # Generate individual pages for enums
         for name, refid in items['enums']:
-            content = generate_member_api_page(name, 'enum', project_name)
+            content = generate_member_api_page(name, 'enum', project_name, refid)
             output_file = api_dir / f'{refid}.rst'
             with open(output_file, 'w') as f:
                 f.write(content)
@@ -460,7 +559,7 @@ def generate_api_docs(app, config):
         
         # Generate individual pages for variables
         for name, refid in items['variables']:
-            content = generate_member_api_page(name, 'variable', project_name)
+            content = generate_member_api_page(name, 'variable', project_name, refid)
             output_file = api_dir / f'{refid}.rst'
             with open(output_file, 'w') as f:
                 f.write(content)
