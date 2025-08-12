@@ -1,6 +1,7 @@
 # CCCL Documentation Configuration File
 # Generated to replace repo-docs with direct Sphinx usage
 
+import textwrap
 from datetime import datetime
 import os
 import sys
@@ -30,19 +31,25 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.extlinks",
     "sphinx.ext.mathjax",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.doctest",
     "breathe",  # For Doxygen integration
-    "myst_parser",  # For markdown support
+    "exhale",  # For automatic C++ API generation
     "sphinx_design",  # For dropdown, card, and other directives
+    "sphinx_copybutton",
+    "nbsphinx"
 ]
 
 # Breathe configuration for Doxygen integration
 breathe_projects = {
+    "cccl": "_build/doxygen/xml",  # For exhale
     "cub": "_build/doxygen/cub/xml",
     "thrust": "_build/doxygen/thrust/xml",
+    "libcudacxx": "_build/doxygen/libcudacxx/xml",
     "cudax": "_build/doxygen/cudax/xml",
 }
 
-breathe_default_project = "cub"
+breathe_default_project = "cccl"
 breathe_default_members = ('members', 'undoc-members')
 
 # Add support for .rst and .md files
@@ -136,5 +143,69 @@ extlinks = {
 }
 
 
+# Exhale configuration for automatic C++ API generation
+# Using targeted exclusions to avoid template parsing issues
+
+exhale_args = {
+    "containmentFolder": "_build/_api",
+    "rootFileName": "index.rst",
+    "doxygenStripFromPath": "../",
+    "rootFileTitle": "C++ API",
+    "createTreeView": True,
+    "exhaleExecutesDoxygen": False,  # We run doxygen separately in Makefile
+    "listingExclude": [
+        "pointer_traits",  # Complex templates cause parsing issues
+        "__memory",  # Skip internal memory utilities
+        "__detail",  # Skip detail namespaces
+        "detail",
+    ],
+    "exhaleDoxygenStdin": textwrap.dedent(r'''
+        PROJECT_NAME = "CUDA C++ Core Libraries"
+        BRIEF_MEMBER_DESC = YES
+        BUILTIN_STL_SUPPORT = YES
+        DOT_IMAGE_FORMAT = svg
+        EXCLUDE_PATTERNS = */tests/* */test/* */examples/* */benchmarks/* */__pycache__/* */detail/* */__memory/* */__detail/*
+        EXCLUDE_SYMBOLS = "@*" "*detail*" "*__*" "CUB_DETAIL*" "THRUST_DETAIL*" "_Has*"
+        EXTENSION_MAPPING = cu=C++ cuh=C++
+        EXTRACT_ALL = YES
+        FILE_PATTERNS = *.c *.cc *.cpp *.h *.hpp *.cu *.cuh
+        HAVE_DOT = NO
+        HIDE_UNDOC_MEMBERS = NO
+        INPUT = ../cub/cub ../thrust/thrust
+        INTERACTIVE_SVG = NO
+        SOURCE_BROWSER = NO
+        ENABLE_PREPROCESSING = YES
+        MACRO_EXPANSION = YES
+        EXPAND_ONLY_PREDEF = NO
+        SKIP_FUNCTION_MACROS = YES
+        QUIET = YES
+        WARNINGS = NO
+        WARN_IF_UNDOCUMENTED = NO
+        PREDEFINED += "__device__="
+        PREDEFINED += "__host__="
+        PREDEFINED += "__global__="
+        PREDEFINED += "__forceinline__="
+        PREDEFINED += "_CCCL_DOXYGEN_INVOKED"
+        PREDEFINED += "_CCCL_HOST_DEVICE="
+        PREDEFINED += "_CCCL_DEVICE="
+        PREDEFINED += "_CCCL_HOST="
+        PREDEFINED += "_CCCL_FORCEINLINE="
+        GENERATE_XML = YES
+        XML_OUTPUT = xml
+    ''')
+}
+
+# Config numpydoc
+numpydoc_show_inherited_class_members = True
+numpydoc_class_members_toctree = False
+
+# Config copybutton
+copybutton_prompt_text = ">>> |$ |# "
+autosummary_imported_members = False
+autosummary_generate = True
+autoclass_content = "class"
+
+
 def setup(app):
-    app.add_css_file("custom.css")
+    if os.path.exists("_static/custom.css"):
+        app.add_css_file("custom.css")
