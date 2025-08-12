@@ -30,6 +30,7 @@ INLINE_INHERITED_MEMB  = YES
 FULL_PATH_NAMES        = YES
 STRIP_FROM_PATH        = ../../thrust
 SHORT_NAMES            = NO
+BRIEF_MEMBER_DESC      = YES
 DISTRIBUTE_GROUP_DOC   = YES
 
 # Parsing settings
@@ -40,6 +41,7 @@ INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
 BUILTIN_STL_SUPPORT    = YES
+SOURCE_BROWSER         = YES
 
 # Preprocessing
 ENABLE_PREPROCESSING   = YES
