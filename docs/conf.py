@@ -44,9 +44,6 @@ extensions = [
     # "rst_processor",  # Disabled - breathe handles embed:rst natively
 ]
 
-# Determine which project to build API docs for
-api_project = os.environ.get('EXHALE_PROJECT', 'cub')  # default to cub
-
 # Breathe configuration for Doxygen integration
 breathe_projects = {
     "cub": "_build/doxygen/cub/xml",
@@ -55,7 +52,7 @@ breathe_projects = {
     "cudax": "_build/doxygen/cudax/xml",
 }
 
-breathe_default_project = api_project
+breathe_default_project = "cub"
 breathe_default_members = ('members', 'undoc-members')
 breathe_show_enumvalue_initializer = True
 breathe_domain_by_extension = {"cuh": "cpp", "h": "cpp", "hpp": "cpp"}
@@ -156,43 +153,16 @@ extlinks = {
 }
 
 
-# Project-specific configurations for Exhale
-project_configs = {
-    'cub': {
-        'containmentFolder': './cub/api_generated',
-        'rootFileTitle': 'CUB API Reference',
-        'doxygenStripFromPath': '../cub',
-    },
-    'thrust': {
-        'containmentFolder': './thrust/api_generated', 
-        'rootFileTitle': 'Thrust API Reference',
-        'doxygenStripFromPath': '../thrust',
-    },
-}
-
 # Exhale configuration for automated API generation
-if api_project in project_configs:
-    config = project_configs[api_project]
-    exhale_args = {
-        "containmentFolder": config['containmentFolder'],
-        "rootFileName": "exhale_api.rst",
-        "rootFileTitle": config['rootFileTitle'],
-        "doxygenStripFromPath": config['doxygenStripFromPath'],
-        "createTreeView": True,
-        "exhaleExecutesDoxygen": False,
-        "verboseBuild": True,
-    }
-else:
-    # Default to CUB if invalid project specified
-    exhale_args = {
-        "containmentFolder": "./cub/api",
-        "rootFileName": "exhale_api.rst",
-        "rootFileTitle": "CUB API Reference",
-        "doxygenStripFromPath": "../cub",
-        "createTreeView": True,
-        "exhaleExecutesDoxygen": False,
-        "verboseBuild": True,
-    }
+exhale_args = {
+    "containmentFolder": "./cub/api",
+    "rootFileName": "exhale_api.rst",
+    "rootFileTitle": "CUB API Reference",
+    "doxygenStripFromPath": "../cub",
+    "createTreeView": True,
+    "exhaleExecutesDoxygen": False,
+    "verboseBuild": True,
+}
 
 # Config numpydoc
 numpydoc_show_inherited_class_members = True
