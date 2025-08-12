@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath('_ext'))
 
 # -- Project information -----------------------------------------------------
 
-project = "CUDA C++ Core Libraries"
+project = "CUDA Core Compute Libraries"
 copyright = f"{datetime.now().year}, NVIDIA Corporation"
 author = "NVIDIA Corporation"
 
@@ -37,12 +37,11 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx.ext.doctest",
     "breathe",  # For Doxygen integration - has built-in embed:rst support
-    # "exhale",  # Disabled - causing build timeouts, API docs handled by breathe
+    "exhale",  # Generate API reference pages from Doxygen XML
     "sphinx_design",  # For dropdown, card, and other directives
     "sphinx_copybutton",
     "nbsphinx",
     # "rst_processor",  # Disabled - breathe handles embed:rst natively
-    "auto_api_generator",  # Automatically generate API reference pages from Doxygen XML
 ]
 
 # Breathe configuration for Doxygen integration
@@ -104,7 +103,7 @@ if os.path.exists("img"):
 
 html_favicon = "img/logo.png" if os.path.exists("img/logo.png") else None
 
-html_title = "CUDA C++ Core Libraries"
+html_title = "CUDA Core Compute Libraries"
 
 # Logo settings for nvidia-sphinx-theme
 html_logo = "img/logo.png" if os.path.exists("img/logo.png") else None
@@ -154,7 +153,16 @@ extlinks = {
 }
 
 
-# Exhale not used - API documentation is handled directly through breathe directives
+# Exhale configuration for automated API generation
+exhale_args = {
+    "containmentFolder": "./cub/api",
+    "rootFileName": "exhale_api.rst",
+    "rootFileTitle": "CUB API Reference",
+    "doxygenStripFromPath": "../cub",
+    "createTreeView": True,
+    "exhaleExecutesDoxygen": False,
+    "verboseBuild": True,
+}
 
 # Config numpydoc
 numpydoc_show_inherited_class_members = True
