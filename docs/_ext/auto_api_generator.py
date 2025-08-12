@@ -368,6 +368,7 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                         # Use doxygenfunction with the specific parameter signature
                         content.append(f'.. doxygenfunction:: {member_name}{params}')
                         content.append(f'   :project: {project_name}')
+                        content.append(f'   :no-link:')
                         content.append('')
         else:
             # Fallback to simple directive
