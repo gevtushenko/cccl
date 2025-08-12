@@ -45,59 +45,29 @@ def extract_param_summary(params):
     if current:
         param_parts.append(''.join(current).strip())
     
-    # Create a meaningful summary based on parameter patterns
-    simplified = []
-    has_exec_policy = False
+    # Extract parameter names
+    param_names = []
     
-    for i, param in enumerate(param_parts):
+    for param in param_parts:
         param = param.strip()
         
-        # Check for execution policy
-        if 'execution_policy_base' in param or 'DerivedPolicy' in param:
-            has_exec_policy = True
-            simplified.append('exec')
-        # Check for common iterator types
-        elif 'Iterator' in param:
-            # Extract the iterator type prefix if present
-            if 'InputIterator' in param:
-                if '1' in param:
-                    simplified.append('first1')
-                elif '2' in param:
-                    simplified.append('first2')
-                else:
-                    simplified.append('first')
-            elif 'OutputIterator' in param:
-                simplified.append('result')
-            elif 'BidirectionalIterator' in param:
-                simplified.append('first')
-            elif 'ForwardIterator' in param:
-                simplified.append('first')
-            elif 'RandomAccessIterator' in param:
-                simplified.append('first')
-            else:
-                simplified.append('iter')
-        # Check for function objects
-        elif 'Function' in param or 'Predicate' in param or 'Compare' in param:
-            simplified.append('op')
-        # Check for value types
-        elif param.startswith('T ') or param == 'T' or ' T ' in param:
-            simplified.append('init')
-        # Check for specific parameter names
-        elif any(name in param for name in ['first', 'last', 'result', 'init', 'value']):
-            # Extract the parameter name
+        # Special case for execution policy - shorten for readability
+        if 'execution_policy_base' in param:
+            param_names.append('exec')
+        else:
+            # Split by spaces and find the parameter name (typically the last word)
             words = param.split()
             if words:
-                simplified.append(words[-1])
-        else:
-            # For other types, try to extract something meaningful
-            if len(simplified) < 3:  # Limit to keep it concise
-                simplified.append('...')
+                # The parameter name is the last word
+                param_name = words[-1]
+                # Clean up reference/pointer markers
+                param_name = param_name.strip('&*,')
+                
+                # Just use the parameter name as-is
+                if param_name:
+                    param_names.append(param_name)
     
-    # Create the final summary
-    if len(simplified) > 4:
-        return ', '.join(simplified[:3]) + ', ...'
-    else:
-        return ', '.join(simplified)
+    return ', '.join(param_names)
 
 
 def extract_function_signatures(func_name, refids, xml_dir):
