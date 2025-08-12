@@ -14,20 +14,20 @@ how many threads participate,
 and on which thread(s) the result is valid.
 
 These layers naturally build on each other.
-For example, :cpp:struct:`WarpReduce` uses :cpp:func:`ThreadReduce`,
-:cpp:struct:`BlockReduce` uses :cpp:struct:`WarpReduce`, etc.
+For example, :cpp:struct:`cub::WarpReduce` uses :cpp:func:`cub::ThreadReduce`,
+:cpp:struct:`cub::BlockReduce` uses :cpp:struct:`cub::WarpReduce`, etc.
 
-:cpp:func:`ThreadReduce`
+:cpp:func:`cub::ThreadReduce`
 
    - A normal function invoked and executed sequentially by a single thread that returns a valid result on that thread
    - Single thread functions are usually an implementation detail and not exposed in CUB's public API
 
-:cpp:struct:`WarpReduce` and :cpp:struct:`BlockReduce`
+:cpp:struct:`cub::WarpReduce` and :cpp:struct:`cub::BlockReduce`
 
    - A "cooperative" function where threads concurrently invoke the same function to execute parallel work
    - The function's return value is well-defined only on the "first" thread (lowest thread index)
 
-:cpp:struct:`DeviceReduce`
+:cpp:struct:`cub::DeviceReduce`
 
    - A normal function invoked by a single thread that spawns additional threads to execute parallel work
    - Result is stored in the pointer provided to the function
@@ -46,22 +46,22 @@ The table below provides a summary of these functions:
       - parallel execution
       - max threads
       - valid result in
-    * - :cpp:func:`ThreadReduce`
+    * - :cpp:func:`cub::ThreadReduce`
       - :math:`-`
       - :math:`-`
       - :math:`1`
       - invoking thread
-    * - :cpp:struct:`WarpReduce`
+    * - :cpp:struct:`cub::WarpReduce`
       - :math:`+`
       - :math:`+`
       - :math:`32`
       - main thread
-    * - :cpp:struct:`BlockReduce`
+    * - :cpp:struct:`cub::BlockReduce`
       - :math:`+`
       - :math:`+`
       - :math:`1024`
       - main thread
-    * - :cpp:struct:`DeviceReduce`
+    * - :cpp:struct:`cub::DeviceReduce`
       - :math:`-`
       - :math:`+`
       - :math:`\infty`
@@ -88,7 +88,7 @@ Invoking any CUB algorithm follows the same general pattern:
     #. Pass the temporary storage to the algorithm
     #. Invoke it via the appropriate member function
 
-An example of :cpp:struct:`BlockReduce` demonstrates these patterns in practice:
+An example of :cpp:struct:`cub::BlockReduce` demonstrates these patterns in practice:
 
 .. code-block:: c++
 
@@ -152,7 +152,7 @@ Overview
 
 Warp-level functionality is provided by types (classes) to provide encapsulation and enable partial template specialization.
 
-For example, :cpp:struct:`WarpReduce` is a class template:
+For example, :cpp:struct:`cub::WarpReduce` is a class template:
 
 .. code-block:: c++
 
@@ -228,7 +228,7 @@ Specialization
 The goal of CUB is to provide users with algorithms that abstract the complexities of achieving speed-of-light performance across a variety of use cases and hardware.
 It is a CUB developer's job to abstract this complexity from the user by providing a uniform interface that statically dispatches to the optimal code path.
 This is usually accomplished via customizing the implementation based on compile time information like the logical warp size, the data type, and the target architecture.
-For example, :cpp:struct:`WarpReduce` dispatches to two different implementations based on if the logical warp size is a power of two (described above):
+For example, :cpp:struct:`cub::WarpReduce` dispatches to two different implementations based on if the logical warp size is a power of two (described above):
 
 .. code-block:: c++
 

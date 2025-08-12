@@ -29,6 +29,7 @@ SHOW_INCLUDE_FILES     = YES
 INLINE_INHERITED_MEMB  = YES
 FULL_PATH_NAMES        = YES
 STRIP_FROM_PATH        = ../../cub
+STRIP_FROM_INC_PATH    = ../../cub
 SHORT_NAMES            = NO
 
 # Parsing settings
@@ -89,6 +90,13 @@ PREDEFINED             = __device__= \
                         "__declspec(x)=" \
                         "__align__(x)=" \
                         __cccl_lib_mdspan \
+                        "CUB_NAMESPACE_BEGIN=namespace cub {" \
+                        "CUB_NAMESPACE_END=}" \
+                        "CUB_NS_PREFIX=" \
+                        "CUB_NS_POSTFIX=" \
+                        "CUB_NS_QUALIFIER=cub::" \
+                        "CUB_DETAIL_MAGIC_NS_BEGIN=" \
+                        "CUB_DETAIL_MAGIC_NS_END=" \
                         "_CCCL_AND=&&" \
                         "_CCCL_CONCEPT=constexpr bool " \
                         "_CCCL_CONSTEXPR_FRIEND=friend " \

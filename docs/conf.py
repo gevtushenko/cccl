@@ -58,6 +58,11 @@ breathe_default_members = ('members', 'undoc-members')
 breathe_show_enumvalue_initializer = True
 breathe_domain_by_extension = {"cuh": "cpp", "h": "cpp", "hpp": "cpp"}
 
+# Configure cpp domain to handle cub namespace
+cpp_index_common_prefix = ['cub::']
+cpp_id_attributes = []
+cpp_paren_attributes = []
+
 # Add support for .rst and .md files
 source_suffix = {
     ".rst": "restructuredtext",

@@ -104,14 +104,8 @@ def generate_api_page(category, classes, project_name):
         # Doxygen uses 'struct' prefix in the refid for structs
         directive = 'doxygenstruct' if refid.startswith('struct') else 'doxygenclass'
         
-        # For CUB, don't use namespace prefix in directive
-        # because the XML doesn't include it
-        if project_name == 'cub':
-            # Use the name without namespace
-            content.append(f'.. {directive}:: {display_name}')
-        else:
-            # For other projects, use full name
-            content.append(f'.. {directive}:: {class_name}')
+        # Use the full qualified name including namespace
+        content.append(f'.. {directive}:: {class_name}')
             
         content.append(f'   :project: {project_name}')
         content.append('   :members:')
