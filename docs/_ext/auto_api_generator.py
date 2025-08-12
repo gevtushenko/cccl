@@ -199,6 +199,33 @@ def generate_individual_api_page(class_name, refid, project_name):
     return '\n'.join(content)
 
 
+def generate_member_api_page(member_name, member_type, project_name):
+    """Generate RST content for a single function/typedef/enum/variable API page."""
+    content = []
+    
+    # Add title
+    content.append(member_name)
+    content.append('=' * len(member_name))
+    content.append('')
+    
+    # Map member type to doxygen directive
+    directive_map = {
+        'function': 'doxygenfunction',
+        'typedef': 'doxygentypedef', 
+        'enum': 'doxygenenum',
+        'variable': 'doxygenvariable'
+    }
+    
+    directive = directive_map.get(member_type, 'doxygenfunction')
+    
+    # Add the doxygen directive
+    content.append(f'.. {directive}:: {member_name}')
+    content.append(f'   :project: {project_name}')
+    content.append('')
+    
+    return '\n'.join(content)
+
+
 def generate_category_index(category, class_list, project_name):
     """Generate an index page for a category with links to individual class pages."""
     category_titles = {
@@ -248,19 +275,22 @@ def generate_category_index(category, class_list, project_name):
 
 
 
-def generate_namespace_api_page(project_name, items):
+def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
     """Generate a comprehensive namespace API reference page."""
     content = []
     
     # Determine namespace name
     namespace_name = project_name  # e.g., 'cub', 'thrust', etc.
     
-    # Title
-    content.append(f'API Reference')
-    content.append('=' * len('API Reference'))
+    # Title - use provided title or default
+    if not title:
+        title = f'{project_name.upper()} API Reference'
+    
+    content.append(title)
+    content.append('=' * len(title))
     content.append('')
     
-    # Add namespace description if available
+    # Add namespace description
     content.append(f'Namespace ``{namespace_name}``')
     content.append('-' * (len(namespace_name) + 13))
     content.append('')
@@ -274,7 +304,10 @@ def generate_namespace_api_page(project_name, items):
         # Sort classes alphabetically
         items['classes'].sort(key=lambda x: x[0].lower())
         for name, refid in items['classes']:
-            content.append(f'* :doc:`{name} <{refid}>`')
+            if doc_prefix:
+                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+            else:
+                content.append(f'* :doc:`{name} <{refid}>`')
         content.append('')
     
     # Structs section
@@ -286,7 +319,10 @@ def generate_namespace_api_page(project_name, items):
         # Sort structs alphabetically
         items['structs'].sort(key=lambda x: x[0].lower())
         for name, refid in items['structs']:
-            content.append(f'* :doc:`{name} <{refid}>`')
+            if doc_prefix:
+                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+            else:
+                content.append(f'* :doc:`{name} <{refid}>`')
         content.append('')
     
     # Functions section
@@ -298,8 +334,10 @@ def generate_namespace_api_page(project_name, items):
         # Sort functions alphabetically
         items['functions'].sort(key=lambda x: x[0].lower())
         for name, refid in items['functions']:
-            # For functions, we might need to handle overloads differently
-            content.append(f'* ``{name}``')
+            if doc_prefix:
+                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+            else:
+                content.append(f'* :doc:`{name} <{refid}>`')
         content.append('')
     
     # Typedefs section
@@ -311,7 +349,10 @@ def generate_namespace_api_page(project_name, items):
         # Sort typedefs alphabetically
         items['typedefs'].sort(key=lambda x: x[0].lower())
         for name, refid in items['typedefs']:
-            content.append(f'* ``{name}``')
+            if doc_prefix:
+                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+            else:
+                content.append(f'* :doc:`{name} <{refid}>`')
         content.append('')
     
     # Enums section
@@ -323,7 +364,10 @@ def generate_namespace_api_page(project_name, items):
         # Sort enums alphabetically
         items['enums'].sort(key=lambda x: x[0].lower())
         for name, refid in items['enums']:
-            content.append(f'* ``{name}``')
+            if doc_prefix:
+                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+            else:
+                content.append(f'* :doc:`{name} <{refid}>`')
         content.append('')
     
     # Variables section
@@ -335,10 +379,14 @@ def generate_namespace_api_page(project_name, items):
         # Sort variables alphabetically
         items['variables'].sort(key=lambda x: x[0].lower())
         for name, refid in items['variables']:
-            content.append(f'* ``{name}``')
+            if doc_prefix:
+                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+            else:
+                content.append(f'* :doc:`{name} <{refid}>`')
         content.append('')
     
     return '\n'.join(content)
+
 
 def generate_api_docs(app, config):
     """Generate API documentation pages during Sphinx build."""
@@ -386,106 +434,61 @@ def generate_api_docs(app, config):
                 f.write(content)
             logger.info(f"Generated API page: {output_file}")
         
-        # Generate the main namespace API reference page
+        # Generate individual pages for functions
+        for name, refid in items['functions']:
+            content = generate_member_api_page(name, 'function', project_name)
+            output_file = api_dir / f'{refid}.rst'
+            with open(output_file, 'w') as f:
+                f.write(content)
+            logger.info(f"Generated function API page: {output_file}")
+        
+        # Generate individual pages for typedefs
+        for name, refid in items['typedefs']:
+            content = generate_member_api_page(name, 'typedef', project_name)
+            output_file = api_dir / f'{refid}.rst'
+            with open(output_file, 'w') as f:
+                f.write(content)
+            logger.info(f"Generated typedef API page: {output_file}")
+        
+        # Generate individual pages for enums
+        for name, refid in items['enums']:
+            content = generate_member_api_page(name, 'enum', project_name)
+            output_file = api_dir / f'{refid}.rst'
+            with open(output_file, 'w') as f:
+                f.write(content)
+            logger.info(f"Generated enum API page: {output_file}")
+        
+        # Generate individual pages for variables
+        for name, refid in items['variables']:
+            content = generate_member_api_page(name, 'variable', project_name)
+            output_file = api_dir / f'{refid}.rst'
+            with open(output_file, 'w') as f:
+                f.write(content)
+            logger.info(f"Generated variable API page: {output_file}")
+        
+        # Generate the main namespace API reference page for api/index.rst
         namespace_content = generate_namespace_api_page(project_name, items)
         namespace_file = api_dir / 'index.rst'
         with open(namespace_file, 'w') as f:
             f.write(namespace_content)
         logger.info(f"Generated namespace API reference: {namespace_file}")
         
-        # Also write to the main api.rst file for better visibility
-        main_api_file = Path(app.srcdir) / project_name / 'api.rst'
-        if main_api_file.exists():
-            # Generate the comprehensive API content directly in api.rst
-            content = []
-            
-            # Title
-            content.append(f'{project_name.upper()} API Reference')
-            content.append('=' * len(f'{project_name.upper()} API Reference'))
-            content.append('')
-            
-            # Add namespace description
-            content.append(f'Namespace ``{project_name}``')
-            content.append('-' * (len(project_name) + 13))
-            content.append('')
-            
-            # Classes section
-            if items['classes']:
-                content.append('Classes')
-                content.append('~~~~~~~')
-                content.append('')
-                
-                # Sort classes alphabetically
-                items['classes'].sort(key=lambda x: x[0].lower())
-                for name, refid in items['classes']:
-                    content.append(f'* :doc:`{name} <api/{refid}>`')
-                content.append('')
-            
-            # Structs section
-            if items['structs']:
-                content.append('Structs')
-                content.append('~~~~~~~')
-                content.append('')
-                
-                # Sort structs alphabetically
-                items['structs'].sort(key=lambda x: x[0].lower())
-                for name, refid in items['structs']:
-                    content.append(f'* :doc:`{name} <api/{refid}>`')
-                content.append('')
-            
-            # Functions section
-            if items['functions']:
-                content.append('Functions')
-                content.append('~~~~~~~~~')
-                content.append('')
-                
-                # Sort functions alphabetically
-                items['functions'].sort(key=lambda x: x[0].lower())
-                for name, refid in items['functions']:
-                    content.append(f'* ``{name}``')
-                content.append('')
-            
-            # Typedefs section
-            if items['typedefs']:
-                content.append('Type Definitions')
-                content.append('~~~~~~~~~~~~~~~~')
-                content.append('')
-                
-                # Sort typedefs alphabetically
-                items['typedefs'].sort(key=lambda x: x[0].lower())
-                for name, refid in items['typedefs']:
-                    content.append(f'* ``{name}``')
-                content.append('')
-            
-            # Enums section
-            if items['enums']:
-                content.append('Enumerations')
-                content.append('~~~~~~~~~~~~')
-                content.append('')
-                
-                # Sort enums alphabetically
-                items['enums'].sort(key=lambda x: x[0].lower())
-                for name, refid in items['enums']:
-                    content.append(f'* ``{name}``')
-                content.append('')
-            
-            # Variables section
-            if items['variables']:
-                content.append('Variables')
-                content.append('~~~~~~~~~')
-                content.append('')
-                
-                # Sort variables alphabetically
-                items['variables'].sort(key=lambda x: x[0].lower())
-                for name, refid in items['variables']:
-                    content.append(f'* ``{name}``')
-                content.append('')
-            
-            
-            # Write the comprehensive content directly to api.rst
-            with open(main_api_file, 'w') as f:
-                f.write('\n'.join(content))
-            logger.info(f"Updated main API reference: {main_api_file}")
+        # Generate auto_api.rst file with comprehensive API listing
+        auto_api_file = Path(app.srcdir) / project_name / 'auto_api.rst'
+        
+        # Determine the title for the auto-generated API page
+        if project_name == 'cub':
+            title = 'CUB API Reference'
+        elif project_name == 'thrust':
+            title = 'Thrust: The C++ Parallel Algorithms Library API'
+        else:
+            title = f'{project_name.upper()} API Reference'
+        
+        # Generate the auto API content with api/ prefix for links
+        auto_api_content = generate_namespace_api_page(project_name, items, title=title, doc_prefix='api/')
+        with open(auto_api_file, 'w') as f:
+            f.write(auto_api_content)
+        logger.info(f"Generated auto API reference: {auto_api_file}")
         
         # Generate category index pages (for backward compatibility)
         for category, class_list in classes.items():

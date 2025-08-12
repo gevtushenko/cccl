@@ -12,7 +12,7 @@ Thrust: The C++ Parallel Algorithms Library
    release_process
    developer_build
    api
-   ${repo_docs_api_path}/thrust_api
+   auto_api
 
 Thrust is the C++ parallel algorithms library which inspired the introduction of parallel algorithms to the
 C++ Standard Library. Thrust's **high-level** interface greatly enhances programmer **productivity** while
