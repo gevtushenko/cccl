@@ -60,11 +60,6 @@ breathe_default_members = ('members', 'undoc-members')
 breathe_show_enumvalue_initializer = True
 breathe_domain_by_extension = {"cuh": "cpp", "h": "cpp", "hpp": "cpp"}
 
-# Breathe formatting options for better signature display
-breathe_order_parameters_first = True
-breathe_show_define_initializer = True
-breathe_implementation_filename_extensions = ['.c', '.cc', '.cpp', '.cu', '.cuh']
-
 # Configure cpp domain to handle cub namespace
 cpp_index_common_prefix = ['cub::']
 cpp_id_attributes = []
@@ -84,7 +79,6 @@ exclude_patterns = [
     "VERSION.md",
     "Thumbs.db",
     ".DS_Store",
-    "thrust/api_docs/**",  # Exclude manual Thrust API docs (replaced by Exhale)
 ]
 
 # -- Options for HTML output -------------------------------------------------
@@ -168,13 +162,11 @@ project_configs = {
         'containmentFolder': './cub/api_generated',
         'rootFileTitle': 'CUB API Reference',
         'doxygenStripFromPath': '../cub',
-        'input': '../cub/cub',
     },
     'thrust': {
         'containmentFolder': './thrust/api_generated', 
         'rootFileTitle': 'Thrust API Reference',
         'doxygenStripFromPath': '../thrust',
-        'input': '../thrust/thrust',
     },
 }
 
@@ -187,19 +179,7 @@ if api_project in project_configs:
         "rootFileTitle": config['rootFileTitle'],
         "doxygenStripFromPath": config['doxygenStripFromPath'],
         "createTreeView": True,
-        "exhaleExecutesDoxygen": True,
-        "exhaleDoxygenStdin": f"""
-            INPUT = {config['input']}
-            BRIEF_MEMBER_DESC = YES
-            SOURCE_BROWSER = YES
-            DOT_IMAGE_FORMAT = svg
-            HAVE_DOT = YES
-            INTERACTIVE_SVG = YES
-            RECURSIVE = YES
-            FILE_PATTERNS = *.h *.hpp *.cuh
-            EXTENSION_MAPPING = cuh=C++ cu=C++
-            EXCLUDE_PATTERNS = */detail/* */test/* */tests/* */examples/*
-        """,
+        "exhaleExecutesDoxygen": False,
         "verboseBuild": True,
     }
 else:
@@ -210,19 +190,7 @@ else:
         "rootFileTitle": "CUB API Reference",
         "doxygenStripFromPath": "../cub",
         "createTreeView": True,
-        "exhaleExecutesDoxygen": True,
-        "exhaleDoxygenStdin": """
-            INPUT = ../cub/cub
-            BRIEF_MEMBER_DESC = YES
-            SOURCE_BROWSER = YES
-            DOT_IMAGE_FORMAT = svg
-            HAVE_DOT = YES
-            INTERACTIVE_SVG = YES
-            RECURSIVE = YES
-            FILE_PATTERNS = *.h *.hpp *.cuh
-            EXTENSION_MAPPING = cuh=C++ cu=C++
-            EXCLUDE_PATTERNS = */detail/* */test/* */tests/* */examples/*
-        """,
+        "exhaleExecutesDoxygen": False,
         "verboseBuild": True,
     }
 
