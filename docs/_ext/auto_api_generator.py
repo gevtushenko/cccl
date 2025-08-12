@@ -12,6 +12,94 @@ from sphinx.util import logging
 logger = logging.getLogger(__name__)
 
 
+def extract_param_summary(params):
+    """Extract a simplified parameter summary for section headers."""
+    if not params:
+        return ""
+    
+    # Remove template details and namespaces for brevity
+    params = params.strip()
+    if params.startswith('(') and params.endswith(')'):
+        params = params[1:-1]
+    
+    # If empty after removing parentheses
+    if not params.strip():
+        return ""
+    
+    # Split by comma (handling nested templates/parentheses)
+    param_parts = []
+    depth = 0
+    current = []
+    
+    for char in params:
+        if char in '<([':
+            depth += 1
+        elif char in '>)]':
+            depth -= 1
+        elif char == ',' and depth == 0:
+            param_parts.append(''.join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    
+    if current:
+        param_parts.append(''.join(current).strip())
+    
+    # Create a meaningful summary based on parameter patterns
+    simplified = []
+    has_exec_policy = False
+    
+    for i, param in enumerate(param_parts):
+        param = param.strip()
+        
+        # Check for execution policy
+        if 'execution_policy_base' in param or 'DerivedPolicy' in param:
+            has_exec_policy = True
+            simplified.append('exec')
+        # Check for common iterator types
+        elif 'Iterator' in param:
+            # Extract the iterator type prefix if present
+            if 'InputIterator' in param:
+                if '1' in param:
+                    simplified.append('first1')
+                elif '2' in param:
+                    simplified.append('first2')
+                else:
+                    simplified.append('first')
+            elif 'OutputIterator' in param:
+                simplified.append('result')
+            elif 'BidirectionalIterator' in param:
+                simplified.append('first')
+            elif 'ForwardIterator' in param:
+                simplified.append('first')
+            elif 'RandomAccessIterator' in param:
+                simplified.append('first')
+            else:
+                simplified.append('iter')
+        # Check for function objects
+        elif 'Function' in param or 'Predicate' in param or 'Compare' in param:
+            simplified.append('op')
+        # Check for value types
+        elif param.startswith('T ') or param == 'T' or ' T ' in param:
+            simplified.append('init')
+        # Check for specific parameter names
+        elif any(name in param for name in ['first', 'last', 'result', 'init', 'value']):
+            # Extract the parameter name
+            words = param.split()
+            if words:
+                simplified.append(words[-1])
+        else:
+            # For other types, try to extract something meaningful
+            if len(simplified) < 3:  # Limit to keep it concise
+                simplified.append('...')
+    
+    # Create the final summary
+    if len(simplified) > 4:
+        return ', '.join(simplified[:3]) + ', ...'
+    else:
+        return ', '.join(simplified)
+
+
 def extract_function_signatures(func_name, refids, xml_dir):
     """Extract full function signatures from Doxygen XML for overloaded functions."""
     signatures = []
@@ -286,13 +374,27 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
         signatures = extract_function_signatures(member_name, overload_refids, xml_dir)
         
         if signatures:
-            for refid, full_sig in signatures:
+            content.append('Overloads')
+            content.append('~~~~~~~~~')
+            content.append('')
+            
+            for idx, (refid, full_sig) in enumerate(signatures, 1):
                 # Extract just the parameter list from the full signature
                 # Look for the function name and get everything after it
                 if member_name in full_sig:
-                    idx = full_sig.rfind(member_name)
-                    if idx != -1:
-                        params = full_sig[idx + len(member_name):].strip()
+                    sig_idx = full_sig.rfind(member_name)
+                    if sig_idx != -1:
+                        params = full_sig[sig_idx + len(member_name):].strip()
+                        
+                        # Create a simplified signature for the section header
+                        # Extract key parameter types for identification
+                        param_summary = extract_param_summary(params)
+                        
+                        # Add a section header for this overload
+                        content.append(f'``{member_name}({param_summary})``')
+                        content.append('^' * (len(member_name) + len(param_summary) + 6))
+                        content.append('')
+                        
                         # Use doxygenfunction with the specific parameter signature
                         content.append(f'.. doxygenfunction:: {member_name}{params}')
                         content.append(f'   :project: {project_name}')
