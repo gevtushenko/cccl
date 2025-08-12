@@ -93,8 +93,8 @@ def generate_api_page(category, classes, project_name):
     classes.sort(key=lambda x: x[0])
     
     for class_name, refid in classes:
-        # Clean up the class name for display - remove namespace prefix
-        display_name = class_name.split('::')[-1] if '::' in class_name else class_name
+        # Use the full name including namespace for display
+        display_name = class_name
         
         content.append(display_name)
         content.append('-' * len(display_name))
