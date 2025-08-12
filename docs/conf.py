@@ -10,6 +10,32 @@ import subprocess
 # Add extension directory to path
 sys.path.insert(0, os.path.abspath('_ext'))
 
+# Add Python CCCL package to path for autodoc
+python_package_path = os.path.abspath('../python/cuda_cccl')
+if os.path.exists(python_package_path):
+    sys.path.insert(0, python_package_path)
+
+# Pre-configure numpy mock to support type annotations
+# This must be done before autodoc tries to import the modules
+class MockNumpyModule:
+    """Mock numpy module that supports type annotations"""
+    class ndarray:
+        pass
+    
+    def __or__(self, other):
+        """Support union type syntax (|)"""
+        return type('UnionType', (), {})
+    
+    def __getattr__(self, name):
+        """Return mock for any attribute access"""
+        return type(name, (), {})
+
+# Pre-inject numpy mock if needed
+if 'numpy' not in sys.modules:
+    mock_numpy = MockNumpyModule()
+    sys.modules['numpy'] = mock_numpy
+    sys.modules['np'] = mock_numpy
+
 # -- Project information -----------------------------------------------------
 
 project = "CUDA C++ Core Libraries"
@@ -148,6 +174,44 @@ autodoc_default_options = {
     "exclude-members": "__weakref__",
 }
 
+# Enable type hints to be shown in the documentation
+autodoc_typehints = "description"
+autodoc_type_aliases = {}
+
+# Set Python domain primary for intersphinx
+primary_domain = 'py'
+
+# Mock imports for Python documentation - these modules may not be installed
+autodoc_mock_imports = [
+    "numba",
+    "numba.core",
+    "numba.core.cgutils",
+    "numba.core.extending",
+    "numba.core.typing",
+    "numba.core.typing.ctypes_utils",
+    "numba.core.typing.templates",
+    "numba.cuda",
+    "numba.cuda.cudadecl",
+    "numba.cuda.dispatcher",
+    "numba.extending",
+    "numba.types",
+    "pynvjitlink",
+    "cuda.bindings",
+    "cuda.bindings.driver",
+    "cuda.bindings.runtime",
+    "cuda.bindings.path_finder",
+    "cuda.core",
+    "cuda.core.experimental",
+    "cuda.core.experimental._utils",
+    "cuda.core.experimental._utils.cuda_utils",
+    "llvmlite",
+    "llvmlite.ir",
+    "numpy",
+    "cupy",
+    "cuda.cccl.parallel.experimental._bindings",
+    "cuda.cccl.parallel.experimental._bindings_impl"
+]
+
 # External links configuration
 extlinks = {
     "github": ("https://github.com/NVIDIA/cccl/blob/main/%s", "%s"),
@@ -170,3 +234,14 @@ autoclass_content = "class"
 def setup(app):
     if os.path.exists("_static/custom.css"):
         app.add_css_file("custom.css")
+    
+    # Fix for type annotations with mocked numpy - ensure numpy.ndarray exists
+    import sys
+    if 'numpy' in sys.modules and hasattr(sys.modules['numpy'], '__class__'):
+        # If numpy is mocked, add ndarray attribute
+        import types
+        if not hasattr(sys.modules['numpy'], 'ndarray'):
+            # Create a simple mock class for ndarray
+            class MockNdarray:
+                pass
+            sys.modules['numpy'].ndarray = MockNdarray
