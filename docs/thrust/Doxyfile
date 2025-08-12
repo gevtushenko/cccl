@@ -48,6 +48,13 @@ EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 SKIP_FUNCTION_MACROS   = YES
 
+# IMPORTANT: Aliases for custom commands
+# The rst alias enables embedding reStructuredText in doxygen comments
+ALIASES = "rst=\\verbatim embed:rst"
+ALIASES += "endrst=\\endverbatim"
+ALIASES += "rststar=\\verbatim embed:rst:leading-asterisk"
+ALIASES += "inlinerst=\\verbatim embed:rst:inline"
+
 # Predefined macros
 PREDEFINED             = __device__= \
                         __host__= \

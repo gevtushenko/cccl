@@ -100,40 +100,11 @@ doxygen-cudax: check-doxygen
 doxygen-combined: check-doxygen
 	@mkdir -p _build/doxygen
 	@echo "Generating combined Doxygen XML for exhale..."
-	@echo "PROJECT_NAME = CCCL" > _build/doxygen/Doxyfile
-	@echo "OUTPUT_DIRECTORY = ." >> _build/doxygen/Doxyfile
-	@echo "GENERATE_HTML = NO" >> _build/doxygen/Doxyfile
-	@echo "GENERATE_LATEX = NO" >> _build/doxygen/Doxyfile
-	@echo "GENERATE_XML = YES" >> _build/doxygen/Doxyfile
-	@echo "XML_OUTPUT = xml" >> _build/doxygen/Doxyfile
-	@echo "INPUT = ../../../cub/cub ../../../thrust/thrust" >> _build/doxygen/Doxyfile
-	@echo "RECURSIVE = YES" >> _build/doxygen/Doxyfile
-	@echo "EXCLUDE_PATTERNS = */detail/* */test/* */tests/* */examples/* */__detail/*" >> _build/doxygen/Doxyfile
-	@echo "FILE_PATTERNS = *.h *.cuh *.hpp" >> _build/doxygen/Doxyfile
-	@echo "EXTENSION_MAPPING = cuh=C++ cu=C++" >> _build/doxygen/Doxyfile
-	@echo "EXTRACT_ALL = YES" >> _build/doxygen/Doxyfile
-	@echo "QUIET = YES" >> _build/doxygen/Doxyfile
-	@echo "WARNINGS = NO" >> _build/doxygen/Doxyfile
-	@echo "ENABLE_PREPROCESSING = YES" >> _build/doxygen/Doxyfile
-	@echo "MACRO_EXPANSION = YES" >> _build/doxygen/Doxyfile
-	@echo "PREDEFINED = __device__= __host__= __global__= __forceinline__= _CCCL_DOXYGEN_INVOKED" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"rst=\\verbatim embed:rst:leading-asterisk\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"endrst=\\endverbatim\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"smemwarpreuse=A subsequent __syncwarp() warp-wide barrier should be invoked after calling this method if the collective's temporary storage (e.g., temp_storage) is to be reused or repurposed.\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"smemreuse=A subsequent __syncthreads() threadblock barrier should be invoked after calling this method if the collective's temporary storage (e.g., temp_storage) is to be reused or repurposed.\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"smemstorage{1}=The operations exposed by \\1 require a temporary memory allocation of this nested type for thread communication. This opaque storage can be allocated directly using the __shared__ keyword.\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"granularity=Efficiency is increased with increased granularity ITEMS_PER_THREAD.\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"blocksize=The number of threads in the block is a multiple of the architecture's warp size\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"blocked=Assumes a blocked arrangement of (block-threads * items-per-thread) items across the thread block.\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"striped=Assumes a striped arrangement of (block-threads * items-per-thread) items across the thread block.\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"rowmajor=For multi-dimensional blocks, threads are linearly ranked in row-major order.\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"iterator=(may be a simple pointer type)\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"offset_size1=Consider using 32-bit values as offsets/lengths/etc.\"" >> _build/doxygen/Doxyfile
-	@echo "ALIASES += \"offset_size2=Careful consideration should be given to the size of integer types used for offsets and lengths.\"" >> _build/doxygen/Doxyfile
+	@cp Doxyfile.in _build/doxygen/Doxyfile
 	@cd _build/doxygen && $(DOXYGEN) Doxyfile
 
 doxygen: 
-	@which $(DOXYGEN) > /dev/null 2>&1 && ($(MAKE) doxygen-combined; $(MAKE) doxygen-cub doxygen-thrust doxygen-cudax) && echo "Doxygen XML generation complete" || echo "Skipping Doxygen generation (not installed)"
+	@which $(DOXYGEN) > /dev/null 2>&1 && ($(MAKE) doxygen-cub doxygen-thrust doxygen-cudax) && echo "Doxygen XML generation complete" || echo "Skipping Doxygen generation (not installed)"
 
 html: 
 	@$(MAKE) doxygen || true

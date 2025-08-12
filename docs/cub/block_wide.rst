@@ -8,7 +8,7 @@ Block-Wide "Collective" Primitives
    :hidden:
    :maxdepth: 2
 
-   ${repo_docs_api_path}/*Block*
+   api/block
 
 CUB block-level algorithms are specialized for execution by threads in the same CUDA thread block:
 

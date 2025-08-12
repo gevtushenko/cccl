@@ -1,0 +1,95 @@
+# Doxyfile for CCCL combined documentation
+
+PROJECT_NAME           = "CUDA C++ Core Libraries"
+OUTPUT_DIRECTORY       = .
+CREATE_SUBDIRS         = NO
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+XML_PROGRAMLISTING     = YES
+
+INPUT                  = ../../../cub/cub ../../../thrust/thrust
+
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */detail/* */test/* */tests/* */examples/* */__detail/*
+EXCLUDE_SYMBOLS        = *detail* *__* CUB_DETAIL* THRUST_DETAIL*
+
+FILE_PATTERNS          = *.h *.hpp *.cuh
+EXTENSION_MAPPING      = cuh=C++ cu=C++
+
+# Documentation extraction settings
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+SHOW_INCLUDE_FILES     = YES
+INLINE_INHERITED_MEMB  = YES
+FULL_PATH_NAMES        = YES
+SHORT_NAMES            = NO
+
+# Parsing settings
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = NO
+MULTILINE_CPP_IS_BRIEF = NO
+INHERIT_DOCS           = YES
+SEPARATE_MEMBER_PAGES  = NO
+TAB_SIZE               = 4
+BUILTIN_STL_SUPPORT    = YES
+
+# Preprocessing
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+SEARCH_INCLUDES        = YES
+SKIP_FUNCTION_MACROS   = YES
+
+# Enable SPHINX section for conditional documentation
+ENABLED_SECTIONS       = SPHINX
+
+# Predefined macros
+PREDEFINED = \
+    "__device__=" \
+    "__host__=" \
+    "__global__=" \
+    "__forceinline__=" \
+    "__declspec(x)=" \
+    "__align__(x)=" \
+    "_CCCL_DOXYGEN_INVOKED" \
+    "_CCCL_HOST_DEVICE=" \
+    "_CCCL_DEVICE=" \
+    "_CCCL_HOST=" \
+    "_CCCL_FORCEINLINE="
+
+# IMPORTANT: Aliases for custom commands
+# The rst alias enables embedding reStructuredText in doxygen comments
+# Using the same format as repo_docs for compatibility
+ALIASES = "rst=\\verbatim embed:rst"
+ALIASES += "endrst=\\endverbatim"
+ALIASES += "rststar=\\verbatim embed:rst:leading-asterisk"
+ALIASES += "inlinerst=\\verbatim embed:rst:inline"
+ALIASES += "smemwarpreuse=<b>Synchronization:</b> A subsequent <tt>__syncwarp()</tt> warp-wide barrier should be invoked after calling this method if the collective's temporary storage (e.g., <tt>temp_storage</tt>) is to be reused or repurposed."
+ALIASES += "smemreuse=<b>Synchronization:</b> A subsequent <tt>__syncthreads()</tt> threadblock barrier should be invoked after calling this method if the collective's temporary storage (e.g., <tt>temp_storage</tt>) is to be reused or repurposed."
+ALIASES += "smemreuse{1}=<b>Synchronization:</b> After any operation, a subsequent <tt>__syncthreads()</tt> barrier is required if the collective's \1 is to be reused or repurposed"
+ALIASES += "smemstorage{1}=<b>Shared Memory Storage:</b> The operations exposed by \1 require a temporary memory allocation of this nested type for thread communication. This opaque storage can be allocated directly using the <tt>__shared__</tt> keyword. Alternatively, it can be aliased to externally allocated memory (shared or global) or <tt>union</tt>'d with other storage allocation types to facilitate memory reuse."
+ALIASES += "granularity=<b>Performance:</b> Efficiency is increased with increased granularity <tt>ITEMS_PER_THREAD</tt>. Performance is also typically increased until the additional register pressure or shared memory allocation size causes SM occupancy to fall too low."
+ALIASES += "blocksize=<b>Block Size:</b> The number of threads in the block must be a multiple of the architecture's warp size"
+ALIASES += "blocked=<b>Data arrangement:</b> Assumes a blocked arrangement of (<em>block-threads</em> * <em>items-per-thread</em>) items across the thread block, where <em>thread</em><sub>i</sub> owns the <em>i</em><sup>th</sup> range of <em>items-per-thread</em> contiguous items."
+ALIASES += "striped=<b>Data arrangement:</b> Assumes a striped arrangement of (<em>block-threads</em> * <em>items-per-thread</em>) items across the thread block."
+ALIASES += "rowmajor=<b>Thread ordering:</b> For multi-dimensional blocks, threads are linearly ranked in row-major order."
+ALIASES += "iterator=<em>(may be a simple pointer type)</em>"
+ALIASES += "offset_size1=<b>Performance note:</b> Consider using 32-bit values as offsets/lengths/etc. For example, <tt>int</tt> will typically yield better performance than <tt>size_t</tt> in 64-bit memory mode."
+ALIASES += "offset_size2=<b>Performance note:</b> Careful consideration should be given to the size of integer types used for offsets and lengths."
+ALIASES += "ptxversion=<b>PTX Version:</b> The PTX compute capability for which to specialize this collective"
+ALIASES += "blockcollective{1}=Every thread in the block uses the \1 class by first specializing the \1 type, then instantiating an instance with parameters for communication, and finally invoking one or more collective member functions."
+ALIASES += "warpcollective{1}=Every thread in the warp uses the \1 class by first specializing the \1 type, then instantiating an instance with parameters for communication, and finally invoking one or more collective member functions."
+ALIASES += "devicestorage=When <tt>d_temp_storage</tt> is <tt>nullptr</tt>, no work is done and the required allocation size is returned in <tt>temp_storage_bytes</tt>."
+ALIASES += "cdp_class{1}=<b>Dynamic parallelism:</b> \1 methods can be called within kernel code on devices in which CUDA dynamic parallelism is supported."
+
+# Quiet mode
+QUIET                  = YES
+WARNINGS               = NO
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = NO

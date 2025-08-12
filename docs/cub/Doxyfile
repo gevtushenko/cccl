@@ -47,6 +47,40 @@ EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 SKIP_FUNCTION_MACROS   = YES
 
+# IMPORTANT: Aliases for custom commands
+# The rst alias enables embedding reStructuredText in doxygen comments
+ALIASES = "rst=\verbatim embed:rst:leading-asterisk"
+ALIASES += "endrst=\endverbatim"
+ALIASES += "rststar=\verbatim embed:rst:leading-asterisk"
+ALIASES += "inlinerst=\verbatim embed:rst:inline"
+
+# Key aliases that are used within @rst blocks (from repo.toml)
+ALIASES += "smemwarpreuse=A subsequent ``__syncwarp()`` warp-wide barrier should be invoked after calling this method if the collective's temporary storage (e.g., ``temp_storage``) is to be reused or repurposed."
+ALIASES += "smemreuse=A subsequent ``__syncthreads()`` threadblock barrier should be invoked after calling this method if the collective's temporary storage (e.g., ``temp_storage``) is to be reused or repurposed."
+ALIASES += "smemreuse{1}=After any operation, a subsequent ``__syncthreads()`` barrier is required if the collective's \\1 is to be reused or repurposed"
+ALIASES += "smemstorage{1}=The operations exposed by \\1 require a temporary memory allocation of this nested type for thread communication. This opaque storage can be allocated directly using the ``__shared__`` keyword. Alternatively, it can be aliased to externally allocated memory (shared or global) or ``union``'d with other storage allocation types to facilitate memory reuse."
+ALIASES += "granularity=Efficiency is increased with increased granularity ``ITEMS_PER_THREAD``. Performance is also typically increased until the additional register pressure or shared memory allocation size causes SM occupancy to fall too low. Consider variants of ``cub::BlockLoad`` for efficiently gathering a :ref:`blocked arrangement <flexible-data-arrangement>` of elements across threads."
+ALIASES += "blocksize=The number of threads in the block is a multiple of the architecture's warp size"
+ALIASES += "ptxversion=The PTX compute capability for which to to specialize this collective, formatted as per the ``__CUDA_ARCH__`` macro (e.g., 750 for sm_75). Useful for determining the collective's storage requirements for a given device from the host. (Default: the value of ``__CUDA_ARCH__`` during the current compiler pass)"
+ALIASES += "blockcollective{1}=Every thread in the block uses the \\1 class by first specializing the \\1 type, then instantiating an instance with parameters for communication, and finally invoking one or more collective member functions."
+ALIASES += "warpcollective{1}=Every thread in the warp uses the \\1 class by first specializing the \\1 type, then instantiating an instance with parameters for communication, and finally invoking or more collective member functions."
+ALIASES += "devicestorage=When ``d_temp_storage`` is ``nullptr``, no work is done and the required allocation size is returned in ``temp_storage_bytes``."
+ALIASES += "devicestorageP=This operation requires a relatively small allocation of temporary device storage that is ``O(P)``, where ``P`` is the number of streaming multiprocessors on the device (and is typically a small constant relative to the input size ``N``)."
+ALIASES += "devicestorageNP=This operation requires an allocation of temporary device storage that is ``O(N+P)``, where ``N`` is the length of the input and ``P`` is the number of streaming multiprocessors on the device."
+ALIASES += "devicestorageNCP=This operation requires a relatively small allocation of temporary device storage that is ``O(N/C + P)``, where ``N`` is the length of the input, ``C`` is the number of concurrent threads that can be actively scheduled on each streaming multiprocessor (typically several thousand), and ``P`` is the number of streaming multiprocessors on the device."
+ALIASES += "cdp_class{1}= - Dynamic parallelism. \\1 methods can be called within kernel code on devices in which CUDA dynamic parallelism is supported."
+ALIASES += "iterator=(may be a simple pointer type)"
+ALIASES += "offset_size1=(Consider using 32-bit values as offsets/lengths/etc. For example, ``int`` will typically yield better performance than ``size_t`` in 64-bit memory mode.)"
+ALIASES += "offset_size2=Careful consideration should be given to the size of integer types used for offsets and lengths. Many (if not most) scenarios will only require 32-bit offsets (e.g., ``int``). 64-bit offset types (e.g., ``size_t`` on 64-bit memory mode) can consume a significant amount of thread storage resources, adversely affecting processor occupancy and performance."
+ALIASES += "rowmajor=For multi-dimensional blocks, threads are linearly ranked in row-major order."
+ALIASES += "blocked=Assumes a :ref:`blocked arrangement <flexible-data-arrangement>` of (*block-threads* * *items-per-thread*) items across the thread block, where *thread*\\ :sub:`i` owns the *i*\\ :sup:`th` range of *items-per-thread* contiguous items. For multi-dimensional thread blocks, a row-major thread ordering is assumed."
+ALIASES += "striped=Assumes a :ref:`striped arrangement <flexible-data-arrangement>` of (*block-threads* * *items-per-thread*) items across the thread block, where *thread*\\ :sub:`i` owns items (*i*), (*i* + *block-threads*), ..., (*i* + (*block-threads* * (*items-per-thread* - 1))).  For multi-dimensional thread blocks, a row-major thread ordering is assumed."
+ALIASES += "warpstriped=Assumes a *warp-striped arrangement* of elements across threads, where warp\\ :sub:`i` owns the *i*\\ :sup:`th` range of (*warp-threads* * *items-per-thread*) contiguous items, and each thread owns items (*i*), (*i* + *warp-threads*), ..., (*i* + (*warp-threads* * (*items-per-thread* - 1)))."
+ALIASES += "linear_performance{1}=The work-complexity of \\1 as a function of input size is linear, resulting in performance throughput that plateaus with problem sizes large enough to saturate the GPU."
+ALIASES += "plots_below=Performance plots for other scenarios can be found in the detailed method descriptions below."
+ALIASES += "identityzero=This operation assumes the value of obtained by the ``T``'s default constructor (or by zero-initialization if no user-defined default constructor exists) is suitable as the identity value \"zero\" for addition."
+ALIASES += "lookback=`decoupled look-back <https://research.nvidia.com/publication/single-pass-parallel-prefix-scan-decoupled-look-back>`_"
+
 # Predefined macros (based on repo.toml doxygen_predefined)
 PREDEFINED             = __device__= \
                         __host__= \
@@ -98,28 +132,15 @@ PREDEFINED             = __device__= \
                         _CCCL_TRY=try \
                         _CCCL_CATCH=catch \
                         "_CCCL_CATCH_ALL=catch (...)" \
+                        _CUDA_VMR=cuda::mr \
+                        _CUDA_VRANGES=cuda::std::ranges \
+                        _CUDA_VSTD=cuda::std \
                         _CCCL_PUBLIC_API=inline \
-                        _CCCL_PUBLIC_HOST_API=inline \
-                        _CCCL_PUBLIC_DEVICE_API=inline \
-                        CCCL_DEPRECATED= \
-                        "CCCL_DEPRECATED_BECAUSE(x)=" \
-                        CCCL_IGNORE_DEPRECATED_CPP_DIALECT \
-                        CUB_DISABLE_NAMESPACE_MAGIC \
-                        CUB_IGNORE_NAMESPACE_MAGIC_ERROR \
-                        "CUB_NAMESPACE_BEGIN=namespace cub {" \
-                        "CUB_NAMESPACE_END=}" \
-                        "CUB_STATIC_ASSERT(cond,msg)=" \
-                        CUB_RUNTIME_FUNCTION=
+                        _CCCL_DOXYGEN_INVOKED \
+                        _CCCL_DOXYGEN_INVOKED
 
-# Images and examples (from repo.toml)
-IMAGE_PATH             = ../img
-EXAMPLE_PATH           = ../../cub/examples/device
-EXAMPLE_RECURSIVE      = NO
-EXAMPLE_PATTERNS       = *.cu
-
-# Output settings
-AUTOLINK_SUPPORT       = YES
+# Quiet mode
 QUIET                  = YES
-WARNINGS               = YES
+WARNINGS               = NO
 WARN_IF_UNDOCUMENTED   = NO
-WARN_IF_DOC_ERROR      = YES
+WARN_IF_DOC_ERROR      = NO

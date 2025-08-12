@@ -8,7 +8,7 @@ Device-Wide Primitives
    :hidden:
    :maxdepth: 2
 
-   ${repo_docs_api_path}/struct*Device*
+   api/device
 
 
 CUB device-level single-problem parallel algorithms:
