@@ -321,6 +321,28 @@ def generate_individual_api_page(class_name, refid, project_name):
     return '\n'.join(content)
 
 
+def check_function_in_namespace(member_name, xml_dir, namespace):
+    """Check if a function is defined in the namespace XML (not just referenced)."""
+    namespace_xml = os.path.join(xml_dir, f'namespace{namespace}.xml')
+    if not os.path.exists(namespace_xml):
+        return False
+    
+    try:
+        tree = ET.parse(namespace_xml)
+        root = tree.getroot()
+        
+        # Look for actual function definitions, not just references
+        for memberdef in root.findall('.//memberdef[@kind="function"]'):
+            name_elem = memberdef.find('name')
+            if name_elem is not None and name_elem.text == member_name:
+                # Check if it has a definition (not just a reference)
+                definition = memberdef.find('definition')
+                if definition is not None and definition.text:
+                    return True
+        return False
+    except:
+        return False
+
 def generate_member_api_page(member_name, member_type, project_name, refid=None, overload_refids=None, xml_dir=None):
     """Generate RST content for a single function/typedef/enum/variable API page."""
     content = []
@@ -341,7 +363,12 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
     directive = directive_map.get(member_type, 'doxygenfunction')
     
     if member_type == 'function' and overload_refids:
-        # Check if functions are in a group (not in namespace XML)
+        # First check if function is actually defined in namespace XML
+        is_in_namespace = False
+        if xml_dir:
+            is_in_namespace = check_function_in_namespace(member_name, xml_dir, project_name)
+        
+        # Check if functions are in a group
         is_group_function = False
         group_name = None
         
@@ -349,16 +376,39 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
             parts = overload_refids[0].split('_1')
             if parts[0].startswith('group__'):
                 is_group_function = True
-                group_name = parts[0].replace('group__', '')
+                # Get the group refid (e.g., 'group__stream__compaction')
+                group_refid = parts[0]
+                
+                # Look up the actual group name from index.xml
+                group_name = None
+                if xml_dir:
+                    index_xml = os.path.join(xml_dir, 'index.xml')
+                    if os.path.exists(index_xml):
+                        try:
+                            tree = ET.parse(index_xml)
+                            root = tree.getroot()
+                            # Find the compound with this refid
+                            compound = root.find(f'.//compound[@refid="{group_refid}"]')
+                            if compound is not None:
+                                name_elem = compound.find('name')
+                                if name_elem is not None:
+                                    group_name = name_elem.text
+                        except:
+                            pass
+                
+                # Fallback: remove 'group__' prefix if lookup fails
+                if not group_name:
+                    group_name = group_refid[7:]
         
-        if is_group_function and group_name:
-            # Use doxygengroup for functions only in group XML
+        if not is_in_namespace and is_group_function and group_name:
+            # For group functions, just use doxygengroup
+            # The TOC will be generated from the actual function signatures
             content.append(f'.. doxygengroup:: {group_name}')
             content.append(f'   :project: {project_name}')
             content.append(f'   :members:')
             content.append('')
         elif len(overload_refids) > 1 and xml_dir:
-            # For functions with multiple overloads, extract signatures and document each
+            # For functions with multiple overloads in namespace, extract signatures
             signatures = extract_function_signatures(member_name, overload_refids, xml_dir, namespace=project_name)
             
             if signatures:
