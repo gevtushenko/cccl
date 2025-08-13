@@ -70,20 +70,21 @@ def extract_param_summary(params):
     return ', '.join(param_names)
 
 
-def extract_function_signatures(func_name, refids, xml_dir):
-    """Extract full function signatures from Doxygen XML for overloaded functions."""
+def extract_function_signatures(func_name, refids, xml_dir, namespace=''):
+    """Extract exact function signatures from Doxygen XML for overloaded functions."""
     signatures = []
     xml_path = Path(xml_dir)
     
     if not xml_path.exists():
         return signatures
     
-    # Parse the namespace XML file to get function signatures
-    namespace_files = list(xml_path.glob('namespace*.xml'))
+    # Parse both namespace and group XML files to get function signatures
+    # Functions can be defined in either location
+    xml_files = list(xml_path.glob('namespace*.xml')) + list(xml_path.glob('group*.xml'))
     
-    for ns_file in namespace_files:
+    for xml_file in xml_files:
         try:
-            tree = ET.parse(ns_file)
+            tree = ET.parse(xml_file)
             root = tree.getroot()
             
             # Find all function members with matching refids
@@ -93,36 +94,36 @@ def extract_function_signatures(func_name, refids, xml_dir):
                     # Get the function name
                     name_elem = memberdef.find('name')
                     if name_elem is not None and name_elem.text == func_name:
-                        # Build the full signature
-                        sig_parts = []
-                        
-                        # Get template parameters if any
-                        templateparamlist = memberdef.find('templateparamlist')
-                        if templateparamlist is not None:
-                            template_params = []
-                            for param in templateparamlist.findall('param'):
-                                param_type = param.find('type')
-                                if param_type is not None:
-                                    # Extract text content from type element
-                                    param_text = ''.join(param_type.itertext()).strip()
-                                    template_params.append(param_text)
-                            if template_params:
-                                sig_parts.append(f"template<{', '.join(template_params)}>")
-                        
-                        # Get return type
-                        return_type = memberdef.find('type')
-                        if return_type is not None:
-                            ret_text = ''.join(return_type.itertext()).strip()
-                            if ret_text:
-                                sig_parts.append(ret_text)
-                        
-                        # Get the function name and parameters
+                        # Get the exact args string and definition
                         argsstring_elem = memberdef.find('argsstring')
+                        definition_elem = memberdef.find('definition')
+                        
                         if argsstring_elem is not None and argsstring_elem.text:
-                            full_sig = ' '.join(sig_parts) + ' ' + func_name + argsstring_elem.text
-                            signatures.append((member_refid, full_sig.strip()))
+                            # Get the full qualified name from definition if available
+                            if definition_elem is not None and definition_elem.text:
+                                # Definition includes namespace and return type
+                                # Extract just the qualified function name
+                                definition = definition_elem.text
+                                # Look for the function name in the definition
+                                if '::' in definition and func_name in definition:
+                                    # Extract namespace::function from definition
+                                    parts = definition.split()
+                                    for part in parts:
+                                        if func_name in part and '::' in part:
+                                            qualified_name = part
+                                            break
+                                    else:
+                                        qualified_name = f"{namespace}::{func_name}" if namespace else func_name
+                                else:
+                                    qualified_name = f"{namespace}::{func_name}" if namespace else func_name
+                            else:
+                                qualified_name = f"{namespace}::{func_name}" if namespace else func_name
+                            
+                            # Build the complete signature for breathe
+                            full_signature = qualified_name + argsstring_elem.text.strip()
+                            signatures.append((member_refid, full_signature))
         except Exception as e:
-            logger.debug(f"Failed to extract signatures from {ns_file}: {e}")
+            logger.debug(f"Failed to extract signatures from {xml_file}: {e}")
     
     return signatures
 
@@ -339,44 +340,61 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
     
     directive = directive_map.get(member_type, 'doxygenfunction')
     
-    if member_type == 'function' and overload_refids and len(overload_refids) > 1 and xml_dir:
-        # For functions with multiple overloads, try to extract and document each
-        signatures = extract_function_signatures(member_name, overload_refids, xml_dir)
+    if member_type == 'function' and overload_refids:
+        # Check if functions are in a group (not in namespace XML)
+        is_group_function = False
+        group_name = None
         
-        if signatures:
-            content.append('Overloads')
-            content.append('~~~~~~~~~')
+        if overload_refids and '_1' in overload_refids[0]:
+            parts = overload_refids[0].split('_1')
+            if parts[0].startswith('group__'):
+                is_group_function = True
+                group_name = parts[0].replace('group__', '')
+        
+        if is_group_function and group_name:
+            # Use doxygengroup for functions only in group XML
+            content.append(f'.. doxygengroup:: {group_name}')
+            content.append(f'   :project: {project_name}')
+            content.append(f'   :members:')
             content.append('')
+        elif len(overload_refids) > 1 and xml_dir:
+            # For functions with multiple overloads, extract signatures and document each
+            signatures = extract_function_signatures(member_name, overload_refids, xml_dir, namespace=project_name)
             
-            for idx, (refid, full_sig) in enumerate(signatures, 1):
-                # Extract just the parameter list from the full signature
-                # Look for the function name and get everything after it
-                if member_name in full_sig:
-                    sig_idx = full_sig.rfind(member_name)
-                    if sig_idx != -1:
-                        params = full_sig[sig_idx + len(member_name):].strip()
-                        
-                        # Create a simplified signature for the section header
-                        # Extract key parameter types for identification
-                        param_summary = extract_param_summary(params)
-                        
-                        # Add a section header for this overload
-                        content.append(f'``{member_name}({param_summary})``')
-                        content.append('^' * (len(member_name) + len(param_summary) + 6))
-                        content.append('')
-                        
-                        # Use doxygenfunction with the specific parameter signature
-                        content.append(f'.. doxygenfunction:: {member_name}{params}')
-                        content.append(f'   :project: {project_name}')
-                        content.append(f'   :no-link:')
-                        content.append('')
+            if signatures:
+                content.append('Overloads')
+                content.append('---------')
+                content.append('')
+                
+                for idx, (refid, full_signature) in enumerate(signatures, 1):
+                    # Extract parameter summary for section header
+                    if '(' in full_signature:
+                        params_part = full_signature[full_signature.index('('):]
+                        param_summary = extract_param_summary(params_part)
+                    else:
+                        param_summary = ''
+                    
+                    # Add a section header for this overload
+                    content.append(f'``{member_name}({param_summary})``')
+                    content.append('^' * (len(member_name) + len(param_summary) + 6))
+                    content.append('')
+                    
+                    # Use doxygenfunction with exact signature
+                    content.append(f'.. doxygenfunction:: {full_signature}')
+                    content.append(f'   :project: {project_name}')
+                    content.append('')
+            else:
+                # Fallback to simple directive
+                content.append(f'.. {directive}:: {member_name}')
+                content.append(f'   :project: {project_name}')
+                content.append('')
         else:
-            # Fallback to simple directive
+            # Single function
             content.append(f'.. {directive}:: {member_name}')
             content.append(f'   :project: {project_name}')
             content.append('')
     elif member_type == 'function':
-        # For single functions or when we don't have xml_dir
+        # For single functions
         content.append(f'.. {directive}:: {member_name}')
         content.append(f'   :project: {project_name}')
         content.append('')
