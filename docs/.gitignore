@@ -1,5 +1,6 @@
 _build
 _repo
+env
 api
 *png
 cubimg

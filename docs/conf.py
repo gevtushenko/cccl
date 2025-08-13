@@ -62,6 +62,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.graphviz",
     "sphinx.ext.doctest",
+    "myst_parser",  # MyST parser for markdown support
     "breathe",  # For Doxygen integration - has built-in embed:rst support
     # "exhale",  # Disabled - causing build timeouts, API docs handled by breathe
     "sphinx_design",  # For dropdown, card, and other directives
@@ -133,7 +134,8 @@ html_favicon = "img/logo.png" if os.path.exists("img/logo.png") else None
 html_title = "CUDA C++ Core Libraries"
 
 # Logo settings for nvidia-sphinx-theme
-html_logo = "img/logo.png" if os.path.exists("img/logo.png") else None
+# Use the PNG logo directly
+html_logo = "_static/nvidia-logo.png" if os.path.exists("_static/nvidia-logo.png") else "img/logo.png"
 
 # -- Options for extensions --------------------------------------------------
 
