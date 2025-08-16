@@ -7,4 +7,4 @@ Transformed Reductions
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__transformed__reductions*
+   ../../../api/group__transformed__reductions*

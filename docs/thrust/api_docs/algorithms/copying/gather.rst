@@ -7,4 +7,4 @@ Gather
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__gather*
+   ../../../api/group__gather*

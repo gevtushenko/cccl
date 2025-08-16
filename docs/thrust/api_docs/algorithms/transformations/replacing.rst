@@ -7,4 +7,4 @@ Replacing
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__replacing*
+   ../../../api/group__replacing*

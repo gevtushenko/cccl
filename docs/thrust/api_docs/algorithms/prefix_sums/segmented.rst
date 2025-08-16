@@ -7,4 +7,4 @@ Segmented Prefix Sums
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__segmentedprefix*
+   ../../../api/group__segmentedprefix*

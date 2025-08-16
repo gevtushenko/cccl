@@ -7,4 +7,4 @@ Transformed Prefix Sums
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__transformed__prefixsums*
+   ../../../api/group__transformed__prefixsums*

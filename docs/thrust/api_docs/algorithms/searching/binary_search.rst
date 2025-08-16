@@ -7,4 +7,4 @@ Binary Search
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__binary__search*
+   ../../../api/group__binary__search*

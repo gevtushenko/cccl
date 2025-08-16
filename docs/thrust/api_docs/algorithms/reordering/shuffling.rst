@@ -7,4 +7,4 @@ Shuffling
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__shuffling*
+   ../../../api/group__shuffling*

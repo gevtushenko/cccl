@@ -7,4 +7,4 @@ Partitioning
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__partitioning*
+   ../../../api/group__partitioning*

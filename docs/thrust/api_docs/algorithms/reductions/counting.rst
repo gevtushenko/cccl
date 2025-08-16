@@ -7,4 +7,4 @@ Counting
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__counting*
+   ../../../api/group__counting*

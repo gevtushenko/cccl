@@ -7,4 +7,4 @@ Predicates
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__predicates*
+   ../../../api/group__predicates*

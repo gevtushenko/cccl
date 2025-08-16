@@ -7,4 +7,4 @@ Scatter
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__scatter*
+   ../../../api/group__scatter*

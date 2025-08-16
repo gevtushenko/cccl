@@ -7,4 +7,4 @@ Comparisons
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__comparisons*
+   ../../../api/group__comparisons*

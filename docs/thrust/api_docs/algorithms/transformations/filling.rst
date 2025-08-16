@@ -7,4 +7,4 @@ Filling
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__filling*
+   ../../../api/group__filling*

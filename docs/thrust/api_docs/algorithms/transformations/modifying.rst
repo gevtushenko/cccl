@@ -7,4 +7,4 @@ Modifying
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__modifying*
+   ../../../api/group__modifying*

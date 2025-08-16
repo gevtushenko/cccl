@@ -7,4 +7,4 @@ Extrema
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__extrema*
+   ../../../api/group__extrema*

@@ -7,4 +7,4 @@ Stream Compactation
    :glob:
    :maxdepth: 1
 
-   ../../../../api/group__stream__compaction*
+   ../../../api/group__stream__compaction*
