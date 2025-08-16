@@ -79,7 +79,7 @@ def extract_function_signatures(func_name, refids, xml_dir, namespace=''):
         return signatures
     
     # Parse both namespace and group XML files to get function signatures
-    # Functions can be defined in either location
+    # Functions can be defined in either location (often in group_*.xml for thrust/cub)
     xml_files = list(xml_path.glob('namespace*.xml')) + list(xml_path.glob('group*.xml'))
     
     for xml_file in xml_files:
@@ -153,14 +153,13 @@ def extract_doxygen_items(xml_dir):
         tree = ET.parse(index_file)
         root = tree.getroot()
         
-        # Get the namespace compound (e.g., cub, thrust)
-        namespace_compound = None
+        # Get the namespace compound (e.g., cub, thrust, cuda::experimental)
+        namespace_compounds = []
         for compound in root.findall('.//compound[@kind="namespace"]'):
             name = compound.find('name').text
-            # Match primary namespaces
-            if name in ['cub', 'thrust', 'cuda']:
-                namespace_compound = compound
-                break
+            # Match primary namespaces and nested namespaces for cudax
+            if name in ['cub', 'thrust', 'cuda'] or name.startswith('cuda::experimental'):
+                namespace_compounds.append(compound)
         
         # Extract classes and structs
         for compound in root.findall('.//compound[@kind="class"]'):
@@ -183,32 +182,55 @@ def extract_doxygen_items(xml_dir):
             
             items['structs'].append((name, refid))
         
-        # Extract functions, typedefs, enums, and variables from namespace
-        if namespace_compound:
+        # Extract functions, typedefs, enums, and variables from namespaces
+        for namespace_compound in namespace_compounds:
+            namespace_name = namespace_compound.find('name').text
+            
             for member in namespace_compound.findall('member[@kind="function"]'):
                 name = member.find('name').text
                 refid = member.get('refid')
-                items['functions'].append((name, refid))
+                # Only include full namespace for nested namespaces (cudax)
+                # For simple namespaces like 'thrust', 'cub', just use the function name
+                if namespace_name and '::' in namespace_name:
+                    full_name = f"{namespace_name}::{name}"
+                else:
+                    full_name = name
+                items['functions'].append((full_name, refid))
                 
                 # Also track function groups for overloads
-                if name not in items['function_groups']:
-                    items['function_groups'][name] = []
-                items['function_groups'][name].append(refid)
+                if full_name not in items['function_groups']:
+                    items['function_groups'][full_name] = []
+                items['function_groups'][full_name].append(refid)
             
             for member in namespace_compound.findall('member[@kind="typedef"]'):
                 name = member.find('name').text
                 refid = member.get('refid')
-                items['typedefs'].append((name, refid))
+                # Only include full namespace for nested namespaces
+                if namespace_name and '::' in namespace_name:
+                    full_name = f"{namespace_name}::{name}"
+                else:
+                    full_name = name
+                items['typedefs'].append((full_name, refid))
             
             for member in namespace_compound.findall('member[@kind="enum"]'):
                 name = member.find('name').text
                 refid = member.get('refid')
-                items['enums'].append((name, refid))
+                # Only include full namespace for nested namespaces
+                if namespace_name and '::' in namespace_name:
+                    full_name = f"{namespace_name}::{name}"
+                else:
+                    full_name = name
+                items['enums'].append((full_name, refid))
             
             for member in namespace_compound.findall('member[@kind="variable"]'):
                 name = member.find('name').text
                 refid = member.get('refid')
-                items['variables'].append((name, refid))
+                # Only include full namespace for nested namespaces
+                if namespace_name and '::' in namespace_name:
+                    full_name = f"{namespace_name}::{name}"
+                else:
+                    full_name = name
+                items['variables'].append((full_name, refid))
     
     except Exception as e:
         logger.warning(f"Failed to parse Doxygen XML: {e}")
@@ -362,6 +384,17 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
     
     directive = directive_map.get(member_type, 'doxygenfunction')
     
+    # For thrust and cub, we need to use the namespace-qualified name
+    # For cudax, the member_name already includes the namespace
+    if project_name in ['thrust', 'cub']:
+        # If the member_name doesn't already include the namespace, add it
+        if '::' not in member_name:
+            qualified_name = f'{project_name}::{member_name}'
+        else:
+            qualified_name = member_name
+    else:
+        qualified_name = member_name
+    
     if member_type == 'function' and overload_refids:
         # First check if function is actually defined in namespace XML
         is_in_namespace = False
@@ -416,41 +449,46 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                 content.append('---------')
                 content.append('')
                 
-                for idx, (refid, full_signature) in enumerate(signatures, 1):
-                    # Extract parameter summary for section header
-                    if '(' in full_signature:
-                        params_part = full_signature[full_signature.index('('):]
-                        param_summary = extract_param_summary(params_part)
-                    else:
-                        param_summary = ''
-                    
-                    # Add a section header for this overload
-                    content.append(f'``{member_name}({param_summary})``')
-                    content.append('^' * (len(member_name) + len(param_summary) + 6))
-                    content.append('')
-                    
-                    # Use doxygenfunction with exact signature
-                    content.append(f'.. doxygenfunction:: {full_signature}')
-                    content.append(f'   :project: {project_name}')
-                    content.append('')
+                for idx, (refid, full_sig) in enumerate(signatures, 1):
+                    # Extract just the parameter list from the full signature
+                    # Look for the function name and get everything after it
+                    if member_name in full_sig:
+                        sig_idx = full_sig.rfind(member_name)
+                        if sig_idx != -1:
+                            params = full_sig[sig_idx + len(member_name):].strip()
+                            
+                            # Create a simplified signature for the section header
+                            # Extract key parameter types for identification
+                            param_summary = extract_param_summary(params)
+                            
+                            # Add a section header for this overload
+                            content.append(f'``{member_name}({param_summary})``')
+                            content.append('^' * (len(member_name) + len(param_summary) + 6))
+                            content.append('')
+                            
+                            # Use doxygenfunction with the specific parameter signature and qualified name
+                            content.append(f'.. doxygenfunction:: {qualified_name}{params}')
+                            content.append(f'   :project: {project_name}')
+                            content.append(f'   :no-link:')
+                            content.append('')
             else:
-                # Fallback to simple directive
-                content.append(f'.. {directive}:: {member_name}')
+                # Fallback to simple directive with qualified name
+                content.append(f'.. {directive}:: {qualified_name}')
                 content.append(f'   :project: {project_name}')
                 content.append('')
         else:
-            # Single function
-            content.append(f'.. {directive}:: {member_name}')
+            # Single function with qualified name
+            content.append(f'.. {directive}:: {qualified_name}')
             content.append(f'   :project: {project_name}')
             content.append('')
     elif member_type == 'function':
-        # For single functions
-        content.append(f'.. {directive}:: {member_name}')
+        # For single functions or when we don't have xml_dir, use qualified name
+        content.append(f'.. {directive}:: {qualified_name}')
         content.append(f'   :project: {project_name}')
         content.append('')
     else:
-        # For other types, use the standard directive
-        content.append(f'.. {directive}:: {member_name}')
+        # For other types, use the qualified name
+        content.append(f'.. {directive}:: {qualified_name}')
         content.append(f'   :project: {project_name}')
         content.append('')
     

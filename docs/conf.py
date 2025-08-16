@@ -87,8 +87,23 @@ breathe_domain_by_extension = {"cuh": "cpp", "h": "cpp", "hpp": "cpp"}
 
 # Configure cpp domain to handle cub namespace
 cpp_index_common_prefix = ['cub::']
-cpp_id_attributes = []
-cpp_paren_attributes = []
+
+# Preprocessor definitions for Breathe to handle CCCL macros
+cpp_id_attributes = [
+    "__device__",
+    "__host__", 
+    "__global__",
+    "__forceinline__",
+    "_CCCL_HOST_DEVICE",
+    "_CCCL_DEVICE",
+    "_CCCL_HOST",
+    "_CCCL_HOST_API",
+    "_CCCL_FORCEINLINE",
+    "_CUDAX_API",
+    "_CUDAX_HOST_API",
+    "_CUDAX_DEVICE_API"
+]
+cpp_paren_attributes = ["__declspec", "__align__"]
 
 # Add support for .rst and .md files
 source_suffix = {

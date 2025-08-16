@@ -95,7 +95,9 @@ doxygen-thrust: check-doxygen
 	@cd thrust && doxygen Doxyfile
 
 doxygen-cudax: check-doxygen
-	@echo "Generating Doxygen XML for CUDAX (not yet configured)"
+	@mkdir -p _build/doxygen/cudax
+	@echo "Generating Doxygen XML for CUDAX..."
+	@cd cudax && doxygen Doxyfile
 
 doxygen-combined: check-doxygen
 	@mkdir -p _build/doxygen
