@@ -14,6 +14,8 @@ SPHINXOPTS="${SPHINXOPTS:---keep-going -j auto}"
 SPHINXBUILD="${SPHINXBUILD:-python3 -m sphinx.cmd.build}"
 BUILDDIR="_build"
 DOXYGEN="${DOXYGEN:-doxygen}"
+CMAKE="${CMAKE:-cmake}"
+CMAKE_BUILD_DIR="${BUILDDIR}/cmake-docs"
 
 # Handle clean command
 if [ "$1" = "clean" ]; then
@@ -58,6 +60,26 @@ if ! python3 -c "import sphinx" 2>/dev/null; then
         echo "Please install manually: pip3 install -r requirements.txt"
         exit 1
     }
+fi
+
+# Generate compilation database using CMake (for clang-assisted parsing)
+if which ${CMAKE} > /dev/null 2>&1; then
+    echo "Generating compilation database with CMake..."
+    mkdir -p ${CMAKE_BUILD_DIR}
+    
+    # Configure with all-dev preset to get complete compilation database
+    ${CMAKE} --preset=all-dev -B ${CMAKE_BUILD_DIR} -S .. \
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON || {
+        echo "Warning: CMake configuration failed, continuing without compilation database"
+    }
+    
+    # Copy compilation database to docs directory for Doxygen
+    if [ -f "${CMAKE_BUILD_DIR}/compile_commands.json" ]; then
+        cp ${CMAKE_BUILD_DIR}/compile_commands.json ./compile_commands.json
+        echo "Compilation database generated successfully"
+    fi
+else
+    echo "CMake not found, skipping compilation database generation"
 fi
 
 # Generate Doxygen XML in parallel (if doxygen is available)
