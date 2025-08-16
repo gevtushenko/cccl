@@ -128,8 +128,9 @@ exclude_patterns = [
 
 html_theme = "nvidia_sphinx_theme"
 
+html_logo = "_static/nvidia-logo.png"
 html_theme_options = {
-    # GitHub button - using icon_links for more control
+    "logo_only": True,
     "icon_links": [
         {
             "name": "GitHub",
@@ -154,14 +155,7 @@ html_static_path = ["_static"] if os.path.exists("_static") else []
 if os.path.exists("img"):
     html_static_path.append("img")
 
-html_favicon = "img/logo.png" if os.path.exists("img/logo.png") else None
-
-html_title = "CUDA C++ Core Libraries"
-
-# Logo settings for nvidia-sphinx-theme
-# Use the PNG logo directly
-html_logo = "_static/nvidia-logo.png" if os.path.exists(
-    "_static/nvidia-logo.png") else "img/logo.png"
+html_title = "CUDA Core Compute Libraries"
 
 # -- Options for extensions --------------------------------------------------
 
