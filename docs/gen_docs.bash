@@ -10,7 +10,7 @@ SCRIPT_PATH=$(cd $(dirname ${0}); pwd -P)
 cd $SCRIPT_PATH
 
 # Configuration
-SPHINXOPTS="${SPHINXOPTS:---keep-going -j auto}"
+SPHINXOPTS="${SPHINXOPTS:---keep-going}"
 SPHINXBUILD="${SPHINXBUILD:-python3 -m sphinx.cmd.build}"
 BUILDDIR="_build"
 DOXYGEN="${DOXYGEN:-doxygen}"
