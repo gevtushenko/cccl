@@ -17,18 +17,21 @@ if os.path.exists(python_package_path):
 
 # Pre-configure numpy mock to support type annotations
 # This must be done before autodoc tries to import the modules
+
+
 class MockNumpyModule:
     """Mock numpy module that supports type annotations"""
     class ndarray:
         pass
-    
+
     def __or__(self, other):
         """Support union type syntax (|)"""
         return type('UnionType', (), {})
-    
+
     def __getattr__(self, name):
         """Return mock for any attribute access"""
         return type(name, (), {})
+
 
 # Pre-inject numpy mock if needed
 if 'numpy' not in sys.modules:
@@ -38,7 +41,7 @@ if 'numpy' not in sys.modules:
 
 # -- Project information -----------------------------------------------------
 
-project = "CUDA C++ Core Libraries"
+project = "CUDA Core Compute Libraries"
 copyright = f"{datetime.now().year}, NVIDIA Corporation"
 author = "NVIDIA Corporation"
 
@@ -91,7 +94,7 @@ cpp_index_common_prefix = ['cub::']
 # Preprocessor definitions for Breathe to handle CCCL macros
 cpp_id_attributes = [
     "__device__",
-    "__host__", 
+    "__host__",
     "__global__",
     "__forceinline__",
     "_CCCL_HOST_DEVICE",
@@ -126,8 +129,15 @@ exclude_patterns = [
 html_theme = "nvidia_sphinx_theme"
 
 html_theme_options = {
-    "repository_url": "https://github.com/NVIDIA/cccl",
-    "use_repository_button": True,
+    # GitHub button - using icon_links for more control
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/NVIDIA/cccl",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        }
+    ],
     "navigation_depth": 4,
     "show_toc_level": 2,
     "navbar_start": ["navbar-logo"],
@@ -150,7 +160,8 @@ html_title = "CUDA C++ Core Libraries"
 
 # Logo settings for nvidia-sphinx-theme
 # Use the PNG logo directly
-html_logo = "_static/nvidia-logo.png" if os.path.exists("_static/nvidia-logo.png") else "img/logo.png"
+html_logo = "_static/nvidia-logo.png" if os.path.exists(
+    "_static/nvidia-logo.png") else "img/logo.png"
 
 # -- Options for extensions --------------------------------------------------
 
@@ -251,7 +262,7 @@ autoclass_content = "class"
 def setup(app):
     if os.path.exists("_static/custom.css"):
         app.add_css_file("custom.css")
-    
+
     # Fix for type annotations with mocked numpy - ensure numpy.ndarray exists
     import sys
     if 'numpy' in sys.modules and hasattr(sys.modules['numpy'], '__class__'):
