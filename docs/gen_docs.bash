@@ -2,13 +2,25 @@
 
 # This script builds CCCL documentation using Sphinx directly
 #
-# Usage: ./gen_docs.bash [sphinx-build options]
+# Usage: ./gen_docs.bash [clean]
 
 set -e
 
 SCRIPT_PATH=$(cd $(dirname ${0}); pwd -P)
-
 cd $SCRIPT_PATH
+
+# Configuration
+SPHINXOPTS="${SPHINXOPTS:---keep-going -j auto}"
+SPHINXBUILD="${SPHINXBUILD:-python3 -m sphinx.cmd.build}"
+BUILDDIR="_build"
+DOXYGEN="${DOXYGEN:-doxygen}"
+
+# Handle clean command
+if [ "$1" = "clean" ]; then
+    echo "Cleaning build directory..."
+    rm -rf ${BUILDDIR}/*
+    exit 0
+fi
 
 ## Clean image directory, without this any artifacts will prevent fetching
 rm -rf img
@@ -48,11 +60,25 @@ if ! python3 -c "import sphinx" 2>/dev/null; then
     }
 fi
 
-# Build the documentation using Sphinx directly
-echo "Building documentation with Sphinx..."
-if ! make html "$@"; then
-    echo "!!! There were errors while generating documentation"
-    exit 1
+# Generate Doxygen XML in parallel (if doxygen is available)
+if which ${DOXYGEN} > /dev/null 2>&1; then
+    echo "Generating Doxygen XML..."
+    mkdir -p ${BUILDDIR}/doxygen/cub ${BUILDDIR}/doxygen/thrust ${BUILDDIR}/doxygen/cudax ${BUILDDIR}/doxygen/libcudacxx
+    
+    # Run all Doxygen builds in parallel
+    (cd cub && ${DOXYGEN} Doxyfile) &
+    (cd thrust && ${DOXYGEN} Doxyfile) &
+    (cd cudax && ${DOXYGEN} Doxyfile) &
+    (cd libcudacxx && ${DOXYGEN} Doxyfile) &
+    wait
+    
+    echo "Doxygen complete"
+else
+    echo "Skipping Doxygen (not installed)"
 fi
 
-echo "Documentation build complete! HTML output is in _build/html/"
+# Build Sphinx HTML documentation
+echo "Building documentation with Sphinx..."
+${SPHINXBUILD} -b html . ${BUILDDIR}/html ${SPHINXOPTS}
+
+echo "Documentation build complete! HTML output is in ${BUILDDIR}/html/"
