@@ -75,7 +75,7 @@ PREDEFINED = \
     "_CUDAX_DEVICE_API=" \
     "_CUDA_VSTD=cuda::std" \
     "_CUDA_VRANGES=cuda::std::ranges" \
-    "CUDAX_DOXYGEN_INVOKED"
+    "LIBCUDACXX_ENABLE_EXPERIMENTAL_MEMORY_RESOURCE"
 
 # Additional settings from repo.toml
 DISTRIBUTE_GROUP_DOC   = YES
@@ -84,6 +84,14 @@ INPUT_ENCODING         = UTF-8
 EXAMPLE_RECURSIVE      = NO
 EXAMPLE_PATTERNS       = *.cu
 AUTOLINK_SUPPORT       = YES
+
+# IMPORTANT: Aliases for custom commands
+# The rst alias enables embedding reStructuredText in doxygen comments
+# Using the same format as repo_docs for compatibility
+ALIASES = "rst=\verbatim embed:rst:leading-asterisk"
+ALIASES += "endrst=\endverbatim"
+ALIASES += "rststar=\verbatim embed:rst:leading-asterisk"
+ALIASES += "inlinerst=\verbatim embed:rst:inline"
 
 # Quiet mode
 QUIET                  = YES

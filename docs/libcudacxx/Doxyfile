@@ -71,6 +71,14 @@ PREDEFINED = \
     "_CUDA_VRANGES=cuda::std::ranges" \
     "_CUDA_VMR=cuda::mr"
 
+# IMPORTANT: Aliases for custom commands
+# The rst alias enables embedding reStructuredText in doxygen comments
+# Using the same format as repo_docs for compatibility
+ALIASES = "rst=\verbatim embed:rst:leading-asterisk"
+ALIASES += "endrst=\endverbatim"
+ALIASES += "rststar=\verbatim embed:rst:leading-asterisk"
+ALIASES += "inlinerst=\verbatim embed:rst:inline"
+
 # Quiet mode
 QUIET                  = YES
 WARNINGS               = NO
