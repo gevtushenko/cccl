@@ -550,9 +550,9 @@ def generate_category_index(category, class_list, project_name):
     
     for class_name, refid in class_list:
         filename = refid
-        # Clean template parameters for doc reference
-        clean_name = clean_template_name(class_name)
-        content.append(f'   * - :doc:`{clean_name} <{filename}>`')
+        # Use format_doc_reference but without the list item marker
+        doc_ref = format_doc_reference(class_name, filename, '', as_list_item=False)
+        content.append(f'   * - {doc_ref}')
         content.append('     - ')  # Description would go here if available
     
     return '\n'.join(content)
@@ -574,6 +574,25 @@ def clean_template_name(name):
     # Handle spaces after :: in nested namespaces
     cleaned = cleaned.replace(':: ', '::')
     return cleaned
+
+def format_doc_reference(name, refid, doc_prefix='', as_list_item=True):
+    """Format a documentation reference, handling template specializations."""
+    clean_name = clean_template_name(name)
+    
+    # Build the reference path
+    ref_path = f'{doc_prefix}{refid}' if doc_prefix else refid
+    
+    # Check if the name contains any angle brackets (template)
+    if '<' in clean_name:
+        # For any template specialization, just use the file reference without display name
+        # This avoids RST parsing issues with angle brackets in the display name
+        doc_ref = f':doc:`{ref_path}`'
+    else:
+        # For non-templates, use the full name as display
+        doc_ref = f':doc:`{clean_name} <{ref_path}>`'
+    
+    # Return with or without list item marker
+    return f'* {doc_ref}' if as_list_item else doc_ref
 
 def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
     """Generate a comprehensive namespace API reference page."""
@@ -608,12 +627,7 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort classes alphabetically
         items['classes'].sort(key=lambda x: x[0].lower())
         for name, refid in items['classes']:
-            # Clean template parameters for doc reference
-            clean_name = clean_template_name(name)
-            if doc_prefix:
-                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
-            else:
-                content.append(f'* :doc:`{clean_name} <{refid}>`')
+            content.append(format_doc_reference(name, refid, doc_prefix))
         content.append('')
     
     # Structs section
@@ -625,12 +639,7 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort structs alphabetically
         items['structs'].sort(key=lambda x: x[0].lower())
         for name, refid in items['structs']:
-            # Clean template parameters for doc reference
-            clean_name = clean_template_name(name)
-            if doc_prefix:
-                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
-            else:
-                content.append(f'* :doc:`{clean_name} <{refid}>`')
+            content.append(format_doc_reference(name, refid, doc_prefix))
         content.append('')
     
     # Functions section
@@ -644,12 +653,7 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         for func_name in sorted_functions:
             # Use the first refid for the link
             first_refid = items['function_groups'][func_name][0]
-            # Clean template parameters for doc reference
-            clean_name = clean_template_name(func_name)
-            if doc_prefix:
-                content.append(f'* :doc:`{clean_name} <{doc_prefix}{first_refid}>`')
-            else:
-                content.append(f'* :doc:`{clean_name} <{first_refid}>`')
+            content.append(format_doc_reference(func_name, first_refid, doc_prefix))
         content.append('')
     
     # Typedefs section
@@ -661,12 +665,7 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort typedefs alphabetically
         items['typedefs'].sort(key=lambda x: x[0].lower())
         for name, refid in items['typedefs']:
-            # Clean template parameters for doc reference
-            clean_name = clean_template_name(name)
-            if doc_prefix:
-                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
-            else:
-                content.append(f'* :doc:`{clean_name} <{refid}>`')
+            content.append(format_doc_reference(name, refid, doc_prefix))
         content.append('')
     
     # Enums section
@@ -678,12 +677,7 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort enums alphabetically
         items['enums'].sort(key=lambda x: x[0].lower())
         for name, refid in items['enums']:
-            # Clean template parameters for doc reference
-            clean_name = clean_template_name(name)
-            if doc_prefix:
-                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
-            else:
-                content.append(f'* :doc:`{clean_name} <{refid}>`')
+            content.append(format_doc_reference(name, refid, doc_prefix))
         content.append('')
     
     # Variables section
@@ -695,12 +689,7 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort variables alphabetically
         items['variables'].sort(key=lambda x: x[0].lower())
         for name, refid in items['variables']:
-            # Clean template parameters for doc reference
-            clean_name = clean_template_name(name)
-            if doc_prefix:
-                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
-            else:
-                content.append(f'* :doc:`{clean_name} <{refid}>`')
+            content.append(format_doc_reference(name, refid, doc_prefix))
         content.append('')
     
     return '\n'.join(content)
