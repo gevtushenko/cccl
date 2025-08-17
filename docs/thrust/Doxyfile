@@ -9,7 +9,16 @@ GENERATE_XML           = YES
 XML_OUTPUT             = xml
 XML_PROGRAMLISTING     = YES
 
-INPUT                  = ../../thrust/thrust
+INPUT                  = ../../thrust/thrust \
+                         ../../thrust/thrust/iterator \
+                         ../../thrust/thrust/mr \
+                         ../../thrust/thrust/random \
+                         ../../thrust/thrust/system \
+                         ../../thrust/thrust/system/cpp \
+                         ../../thrust/thrust/system/omp \
+                         ../../thrust/thrust/system/tbb \
+                         ../../thrust/thrust/type_traits \
+                         ../../thrust/thrust/detail/pointer.h
 
 RECURSIVE              = YES
 EXCLUDE_PATTERNS       = */detail/* */test/* */examples/* */testing/*

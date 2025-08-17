@@ -376,11 +376,15 @@ def generate_group_index_page(group_name, group_refid, project_name, xml_dir):
     content.append('')
     
     # Add the doxygengroup directive to get the full documentation
+    # If we have members that will be included in the toctree, don't include :members:
+    # to avoid duplicate declarations
     content.append(f'.. doxygengroup:: {group_name}')
     content.append(f'   :project: {project_name}')
     content.append('   :content-only:')
-    content.append('   :members:')
-    content.append('   :undoc-members:')
+    if not members:
+        # Only include members if we don't have individual member pages
+        content.append('   :members:')
+        content.append('   :undoc-members:')
     content.append('')
     
     # Add toctree for all member files

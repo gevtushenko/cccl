@@ -9,7 +9,13 @@ GENERATE_XML           = YES
 XML_OUTPUT             = xml
 XML_PROGRAMLISTING     = YES
 
-INPUT                  = ../../cub/cub
+INPUT                  = ../../cub/cub \
+                         ../../cub/cub/thread \
+                         ../../cub/cub/warp \
+                         ../../cub/cub/block \
+                         ../../cub/cub/device \
+                         ../../cub/cub/grid \
+                         ../../cub/cub/iterator
 
 RECURSIVE              = YES
 EXCLUDE_PATTERNS       = */detail/* */test/* */examples/*

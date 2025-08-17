@@ -9,8 +9,31 @@ GENERATE_XML           = YES
 XML_OUTPUT             = xml
 XML_PROGRAMLISTING     = YES
 
-# Input directory - will process all files recursively
-INPUT                  = ../../cudax/include/cuda/experimental
+# Input directory - specific paths for cudax
+INPUT                  = ../../cudax/include/cuda/experimental/__container \
+                         ../../cudax/include/cuda/experimental/__device \
+                         ../../cudax/include/cuda/experimental/__event \
+                         ../../cudax/include/cuda/experimental/graph.cuh \
+                         ../../cudax/include/cuda/experimental/__graph \
+                         ../../cudax/include/cuda/experimental/__hierarchy \
+                         ../../cudax/include/cuda/experimental/__launch \
+                         ../../cudax/include/cuda/experimental/__memory_resource \
+                         ../../cudax/include/cuda/experimental/__stream \
+                         ../../cudax/include/cuda/experimental/stf.cuh \
+                         ../../cudax/include/cuda/experimental/__stf \
+                         ../../cudax/include/cuda/experimental/__stf/internal \
+                         ../../cudax/include/cuda/experimental/__stf/utility \
+                         ../../cudax/include/cuda/experimental/__stf/localization \
+                         ../../cudax/include/cuda/experimental/__stf/allocators \
+                         ../../cudax/include/cuda/experimental/__stf/graph \
+                         ../../cudax/include/cuda/experimental/__stf/graph/internal \
+                         ../../cudax/include/cuda/experimental/__stf/graph/interfaces \
+                         ../../cudax/include/cuda/experimental/__stf/places \
+                         ../../cudax/include/cuda/experimental/__stf/places/exec \
+                         ../../cudax/include/cuda/experimental/__stf/places/exec/host \
+                         ../../cudax/include/cuda/experimental/__stf/stream \
+                         ../../cudax/include/cuda/experimental/__stf/stream/internal \
+                         ../../cudax/include/cuda/experimental/__stf/stream/interfaces
 
 RECURSIVE              = YES
 # Exclude patterns from repo.toml
