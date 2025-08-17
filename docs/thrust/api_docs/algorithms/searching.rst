@@ -1,9 +1,11 @@
 .. _thrust-module-api-algorithms-searching:
 
 Searching
---------
+----------
 
-.. doxygengroup:: searching
-   :project: thrust
-   :members:
-   :content-only:
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   searching/binary_search
+   ../../api/group__searching*

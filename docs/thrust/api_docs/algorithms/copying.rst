@@ -1,9 +1,12 @@
 .. _thrust-module-api-algorithms-copying:
 
 Copying
---------
+-------
 
-.. doxygengroup:: copying
-   :project: thrust
-   :members:
-   :content-only:
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   copying/gather
+   copying/scatter
+   ../../api/group__copying*

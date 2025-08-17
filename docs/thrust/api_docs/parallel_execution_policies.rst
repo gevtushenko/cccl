@@ -10,4 +10,4 @@ Parallel Execution Policies
    :glob:
    :maxdepth: 2
 
-   ../../api/group__execution__policies*
+   ../api/group__execution__policies*

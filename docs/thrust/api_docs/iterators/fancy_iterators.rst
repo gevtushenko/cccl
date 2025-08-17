@@ -21,4 +21,4 @@ Fancy iterators
    :glob:
    :maxdepth: 1
 
-   ../../../api/group__fancyiterator*
+   ../../api/group__fancyiterator*

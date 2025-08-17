@@ -9,4 +9,4 @@ Numerics
    :glob:
    :maxdepth: 2
 
-   ../../api/group__complex*
+   ../api/group__complex*

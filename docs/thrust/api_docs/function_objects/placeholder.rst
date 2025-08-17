@@ -7,4 +7,4 @@ Placeholder Objects
    :glob:
    :maxdepth: 1
 
-   ../../../api/*placeholder*
+   ../../api/*placeholder*

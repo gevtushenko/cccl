@@ -7,4 +7,4 @@ Iterator tags
    :glob:
    :maxdepth: 1
 
-   ../../../api/*iterator__tag*
+   ../../api/*iterator__tag*

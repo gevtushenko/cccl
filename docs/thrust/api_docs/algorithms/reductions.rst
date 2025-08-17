@@ -1,9 +1,16 @@
 .. _thrust-module-api-algorithms-reductions:
 
 Reductions
---------
+----------
 
-.. doxygengroup:: reductions
-   :project: thrust
-   :members:
-   :content-only:
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   reductions/comparisons
+   reductions/counting
+   reductions/extrema
+   reductions/logical
+   reductions/predicates
+   reductions/transformed
+   ../../api/group__reductions*

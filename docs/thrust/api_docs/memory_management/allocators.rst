@@ -15,4 +15,4 @@ Allocators
    :glob:
    :maxdepth: 1
 
-   ../../../api/group__allocators*
+   ../../api/group__allocators*

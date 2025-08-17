@@ -9,4 +9,4 @@ Memory Management
 
    memory_management/allocators
    memory_management/memory_resources
-   ../../api/group__memory__management*
+   ../api/group__memory__management*

@@ -3,7 +3,8 @@
 Sorting
 --------
 
-.. doxygengroup:: sorting
-   :project: thrust
-   :members:
-   :content-only:
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   ../../api/group__sorting*

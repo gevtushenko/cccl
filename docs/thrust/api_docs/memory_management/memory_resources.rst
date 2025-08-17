@@ -15,4 +15,4 @@ Memory Resources
    :glob:
    :maxdepth: 1
 
-   ../../../api/group__memory__resources*
+   ../../api/group__memory__resources*
