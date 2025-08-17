@@ -537,12 +537,27 @@ def generate_category_index(category, class_list, project_name):
     
     for class_name, refid in class_list:
         filename = refid
-        content.append(f'   * - :doc:`{class_name} <{filename}>`')
+        # Clean template parameters for doc reference
+        clean_name = clean_template_name(class_name)
+        content.append(f'   * - :doc:`{clean_name} <{filename}>`')
         content.append('     - ')  # Description would go here if available
     
     return '\n'.join(content)
 
 
+
+def clean_template_name(name):
+    """Remove spaces around template parameters to avoid Sphinx parsing issues."""
+    # Remove spaces after '<' and before '>'
+    cleaned = name.replace('< ', '<').replace(' >', '>')
+    # Handle pointer types - remove space before *
+    cleaned = cleaned.replace(' *', '*')
+    # Handle spaces after commas in template parameters
+    while ' ,' in cleaned:
+        cleaned = cleaned.replace(' ,', ',')
+    # Handle spaces after :: in nested namespaces
+    cleaned = cleaned.replace(':: ', '::')
+    return cleaned
 
 def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
     """Generate a comprehensive namespace API reference page."""
@@ -573,10 +588,12 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort classes alphabetically
         items['classes'].sort(key=lambda x: x[0].lower())
         for name, refid in items['classes']:
+            # Clean template parameters for doc reference
+            clean_name = clean_template_name(name)
             if doc_prefix:
-                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
             else:
-                content.append(f'* :doc:`{name} <{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{refid}>`')
         content.append('')
     
     # Structs section
@@ -588,10 +605,12 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort structs alphabetically
         items['structs'].sort(key=lambda x: x[0].lower())
         for name, refid in items['structs']:
+            # Clean template parameters for doc reference
+            clean_name = clean_template_name(name)
             if doc_prefix:
-                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
             else:
-                content.append(f'* :doc:`{name} <{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{refid}>`')
         content.append('')
     
     # Functions section
@@ -605,10 +624,12 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         for func_name in sorted_functions:
             # Use the first refid for the link
             first_refid = items['function_groups'][func_name][0]
+            # Clean template parameters for doc reference
+            clean_name = clean_template_name(func_name)
             if doc_prefix:
-                content.append(f'* :doc:`{func_name} <{doc_prefix}{first_refid}>`')
+                content.append(f'* :doc:`{clean_name} <{doc_prefix}{first_refid}>`')
             else:
-                content.append(f'* :doc:`{func_name} <{first_refid}>`')
+                content.append(f'* :doc:`{clean_name} <{first_refid}>`')
         content.append('')
     
     # Typedefs section
@@ -620,10 +641,12 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort typedefs alphabetically
         items['typedefs'].sort(key=lambda x: x[0].lower())
         for name, refid in items['typedefs']:
+            # Clean template parameters for doc reference
+            clean_name = clean_template_name(name)
             if doc_prefix:
-                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
             else:
-                content.append(f'* :doc:`{name} <{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{refid}>`')
         content.append('')
     
     # Enums section
@@ -635,10 +658,12 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort enums alphabetically
         items['enums'].sort(key=lambda x: x[0].lower())
         for name, refid in items['enums']:
+            # Clean template parameters for doc reference
+            clean_name = clean_template_name(name)
             if doc_prefix:
-                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
             else:
-                content.append(f'* :doc:`{name} <{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{refid}>`')
         content.append('')
     
     # Variables section
@@ -650,10 +675,12 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
         # Sort variables alphabetically
         items['variables'].sort(key=lambda x: x[0].lower())
         for name, refid in items['variables']:
+            # Clean template parameters for doc reference
+            clean_name = clean_template_name(name)
             if doc_prefix:
-                content.append(f'* :doc:`{name} <{doc_prefix}{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{doc_prefix}{refid}>`')
             else:
-                content.append(f'* :doc:`{name} <{refid}>`')
+                content.append(f'* :doc:`{clean_name} <{refid}>`')
         content.append('')
     
     return '\n'.join(content)
