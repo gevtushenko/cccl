@@ -99,6 +99,11 @@ exclude_patterns = [
     "VERSION.md",
     "Thumbs.db",
     ".DS_Store",
+    "env/**",  # Virtual environment
+    "**/.pytest_cache",
+    "**/__pycache__",
+    "*.pyc",
+    "*.pyo",
 ]
 
 # -- Options for HTML output -------------------------------------------------
