@@ -78,6 +78,9 @@ def extract_function_signatures(func_name, refids, xml_dir, namespace=''):
     if not xml_path.exists():
         return signatures
     
+    # Extract the simple function name (without namespace) for comparison
+    simple_func_name = func_name.split('::')[-1] if '::' in func_name else func_name
+    
     # Parse both namespace and group XML files to get function signatures
     # Functions can be defined in either location (often in group_*.xml for thrust/cub)
     xml_files = list(xml_path.glob('namespace*.xml')) + list(xml_path.glob('group*.xml'))
@@ -93,7 +96,7 @@ def extract_function_signatures(func_name, refids, xml_dir, namespace=''):
                 if member_refid in refids:
                     # Get the function name
                     name_elem = memberdef.find('name')
-                    if name_elem is not None and name_elem.text == func_name:
+                    if name_elem is not None and name_elem.text == simple_func_name:
                         # Get the exact args string and definition
                         argsstring_elem = memberdef.find('argsstring')
                         definition_elem = memberdef.find('definition')
@@ -105,19 +108,22 @@ def extract_function_signatures(func_name, refids, xml_dir, namespace=''):
                                 # Extract just the qualified function name
                                 definition = definition_elem.text
                                 # Look for the function name in the definition
-                                if '::' in definition and func_name in definition:
+                                if '::' in definition and simple_func_name in definition:
                                     # Extract namespace::function from definition
                                     parts = definition.split()
                                     for part in parts:
-                                        if func_name in part and '::' in part:
+                                        if simple_func_name in part and '::' in part:
                                             qualified_name = part
                                             break
                                     else:
-                                        qualified_name = f"{namespace}::{func_name}" if namespace else func_name
+                                        # Use the original func_name if it has namespace, otherwise add namespace
+                                        qualified_name = func_name if '::' in func_name else (f"{namespace}::{func_name}" if namespace else func_name)
                                 else:
-                                    qualified_name = f"{namespace}::{func_name}" if namespace else func_name
+                                    # Use the original func_name if it has namespace, otherwise add namespace
+                                    qualified_name = func_name if '::' in func_name else (f"{namespace}::{func_name}" if namespace else func_name)
                             else:
-                                qualified_name = f"{namespace}::{func_name}" if namespace else func_name
+                                # Use the original func_name if it has namespace, otherwise add namespace
+                                qualified_name = func_name if '::' in func_name else (f"{namespace}::{func_name}" if namespace else func_name)
                             
                             # Build the complete signature for breathe
                             full_signature = qualified_name + argsstring_elem.text.strip()
@@ -530,7 +536,14 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
             content.append('')
         elif len(overload_refids) > 1 and xml_dir:
             # For functions with multiple overloads in namespace, extract signatures
-            signatures = extract_function_signatures(member_name, overload_refids, xml_dir, namespace=project_name)
+            # For cudax, member_name already includes namespace, for others use project_name
+            if '::' in member_name:
+                # Extract namespace from the qualified name for cudax
+                namespace_parts = member_name.split('::')[:-1]
+                namespace_name = '::'.join(namespace_parts) if namespace_parts else project_name
+            else:
+                namespace_name = project_name
+            signatures = extract_function_signatures(member_name, overload_refids, xml_dir, namespace=namespace_name)
             
             if signatures:
                 content.append('Overloads')
@@ -539,19 +552,21 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                 
                 for idx, (refid, full_sig) in enumerate(signatures, 1):
                     # Extract just the parameter list from the full signature
-                    # Look for the function name and get everything after it
-                    if member_name in full_sig:
-                        sig_idx = full_sig.rfind(member_name)
+                    # Look for the simple function name (without namespace) in the signature
+                    simple_name = member_name.split('::')[-1] if '::' in member_name else member_name
+                    if simple_name in full_sig:
+                        sig_idx = full_sig.rfind(simple_name)
                         if sig_idx != -1:
-                            params = full_sig[sig_idx + len(member_name):].strip()
+                            params = full_sig[sig_idx + len(simple_name):].strip()
                             
                             # Create a simplified signature for the section header
                             # Extract key parameter types for identification
                             param_summary = extract_param_summary(params)
                             
                             # Add a section header for this overload
-                            content.append(f'``{member_name}({param_summary})``')
-                            content.append('^' * (len(member_name) + len(param_summary) + 6))
+                            # Use simple name for readability in headers
+                            content.append(f'``{simple_name}({param_summary})``')
+                            content.append('^' * (len(simple_name) + len(param_summary) + 6))
                             content.append('')
                             
                             # Use doxygenfunction with the specific parameter signature and qualified name
