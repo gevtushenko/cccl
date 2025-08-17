@@ -565,9 +565,12 @@ def clean_template_name(name):
     cleaned = name.replace('< ', '<').replace(' >', '>')
     # Handle pointer types - remove space before *
     cleaned = cleaned.replace(' *', '*')
-    # Handle spaces after commas in template parameters
+    # Handle spaces before commas in template parameters
     while ' ,' in cleaned:
         cleaned = cleaned.replace(' ,', ',')
+    # Handle spaces after commas in template parameters
+    while ', ' in cleaned:
+        cleaned = cleaned.replace(', ', ',')
     # Handle spaces after :: in nested namespaces
     cleaned = cleaned.replace(':: ', '::')
     return cleaned

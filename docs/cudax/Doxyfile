@@ -90,3 +90,4 @@ QUIET                  = YES
 WARNINGS               = NO
 WARN_IF_UNDOCUMENTED   = NO
 WARN_IF_DOC_ERROR      = NO
+WARN_NO_PARAMDOC       = NO
