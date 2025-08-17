@@ -3,7 +3,7 @@
 
 ld.global.b8
 ^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.b8 dest, [addr]; // PTX ISA 10, SM_50
    // .space     = { .global }
@@ -14,7 +14,7 @@ ld.global.b8
 
 ld.global.b16
 ^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.b16 dest, [addr]; // PTX ISA 10, SM_50
    // .space     = { .global }
@@ -25,7 +25,7 @@ ld.global.b16
 
 ld.global.b32
 ^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.b32 dest, [addr]; // PTX ISA 10, SM_50
    // .space     = { .global }
@@ -36,7 +36,7 @@ ld.global.b32
 
 ld.global.b64
 ^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.b64 dest, [addr]; // PTX ISA 10, SM_50
    // .space     = { .global }
@@ -47,7 +47,7 @@ ld.global.b64
 
 ld.global.b128
 ^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -58,7 +58,7 @@ ld.global.b128
 
 ld.global.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -69,7 +69,7 @@ ld.global.L2::64B.b8
 
 ld.global.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -80,7 +80,7 @@ ld.global.L2::64B.b16
 
 ld.global.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -91,7 +91,7 @@ ld.global.L2::64B.b32
 
 ld.global.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -102,7 +102,7 @@ ld.global.L2::64B.b64
 
 ld.global.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -113,7 +113,7 @@ ld.global.L2::64B.b128
 
 ld.global.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -124,7 +124,7 @@ ld.global.L2::128B.b8
 
 ld.global.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -135,7 +135,7 @@ ld.global.L2::128B.b16
 
 ld.global.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -146,7 +146,7 @@ ld.global.L2::128B.b32
 
 ld.global.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -157,7 +157,7 @@ ld.global.L2::128B.b64
 
 ld.global.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -168,7 +168,7 @@ ld.global.L2::128B.b128
 
 ld.global.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -179,7 +179,7 @@ ld.global.L2::256B.b8
 
 ld.global.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -190,7 +190,7 @@ ld.global.L2::256B.b16
 
 ld.global.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -201,7 +201,7 @@ ld.global.L2::256B.b32
 
 ld.global.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -212,7 +212,7 @@ ld.global.L2::256B.b64
 
 ld.global.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -223,7 +223,7 @@ ld.global.L2::256B.b128
 
 ld.global.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -235,7 +235,7 @@ ld.global.L2::cache_hint.b8
 
 ld.global.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -247,7 +247,7 @@ ld.global.L2::cache_hint.b16
 
 ld.global.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -259,7 +259,7 @@ ld.global.L2::cache_hint.b32
 
 ld.global.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -271,7 +271,7 @@ ld.global.L2::cache_hint.b64
 
 ld.global.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -283,7 +283,7 @@ ld.global.L2::cache_hint.b128
 
 ld.global.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -295,7 +295,7 @@ ld.global.L2::cache_hint.L2::64B.b8
 
 ld.global.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -307,7 +307,7 @@ ld.global.L2::cache_hint.L2::64B.b16
 
 ld.global.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -319,7 +319,7 @@ ld.global.L2::cache_hint.L2::64B.b32
 
 ld.global.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -331,7 +331,7 @@ ld.global.L2::cache_hint.L2::64B.b64
 
 ld.global.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -343,7 +343,7 @@ ld.global.L2::cache_hint.L2::64B.b128
 
 ld.global.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -355,7 +355,7 @@ ld.global.L2::cache_hint.L2::128B.b8
 
 ld.global.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -367,7 +367,7 @@ ld.global.L2::cache_hint.L2::128B.b16
 
 ld.global.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -379,7 +379,7 @@ ld.global.L2::cache_hint.L2::128B.b32
 
 ld.global.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -391,7 +391,7 @@ ld.global.L2::cache_hint.L2::128B.b64
 
 ld.global.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -403,7 +403,7 @@ ld.global.L2::cache_hint.L2::128B.b128
 
 ld.global.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -415,7 +415,7 @@ ld.global.L2::cache_hint.L2::256B.b8
 
 ld.global.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -427,7 +427,7 @@ ld.global.L2::cache_hint.L2::256B.b16
 
 ld.global.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -439,7 +439,7 @@ ld.global.L2::cache_hint.L2::256B.b32
 
 ld.global.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -451,7 +451,7 @@ ld.global.L2::cache_hint.L2::256B.b64
 
 ld.global.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -463,7 +463,7 @@ ld.global.L2::cache_hint.L2::256B.b128
 
 ld.global.L1::evict_normal.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -474,7 +474,7 @@ ld.global.L1::evict_normal.b8
 
 ld.global.L1::evict_normal.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -485,7 +485,7 @@ ld.global.L1::evict_normal.b16
 
 ld.global.L1::evict_normal.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -496,7 +496,7 @@ ld.global.L1::evict_normal.b32
 
 ld.global.L1::evict_normal.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -507,7 +507,7 @@ ld.global.L1::evict_normal.b64
 
 ld.global.L1::evict_normal.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -518,7 +518,7 @@ ld.global.L1::evict_normal.b128
 
 ld.global.L1::evict_normal.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -529,7 +529,7 @@ ld.global.L1::evict_normal.L2::64B.b8
 
 ld.global.L1::evict_normal.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -540,7 +540,7 @@ ld.global.L1::evict_normal.L2::64B.b16
 
 ld.global.L1::evict_normal.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -551,7 +551,7 @@ ld.global.L1::evict_normal.L2::64B.b32
 
 ld.global.L1::evict_normal.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -562,7 +562,7 @@ ld.global.L1::evict_normal.L2::64B.b64
 
 ld.global.L1::evict_normal.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -573,7 +573,7 @@ ld.global.L1::evict_normal.L2::64B.b128
 
 ld.global.L1::evict_normal.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -584,7 +584,7 @@ ld.global.L1::evict_normal.L2::128B.b8
 
 ld.global.L1::evict_normal.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -595,7 +595,7 @@ ld.global.L1::evict_normal.L2::128B.b16
 
 ld.global.L1::evict_normal.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -606,7 +606,7 @@ ld.global.L1::evict_normal.L2::128B.b32
 
 ld.global.L1::evict_normal.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -617,7 +617,7 @@ ld.global.L1::evict_normal.L2::128B.b64
 
 ld.global.L1::evict_normal.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -628,7 +628,7 @@ ld.global.L1::evict_normal.L2::128B.b128
 
 ld.global.L1::evict_normal.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -639,7 +639,7 @@ ld.global.L1::evict_normal.L2::256B.b8
 
 ld.global.L1::evict_normal.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -650,7 +650,7 @@ ld.global.L1::evict_normal.L2::256B.b16
 
 ld.global.L1::evict_normal.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -661,7 +661,7 @@ ld.global.L1::evict_normal.L2::256B.b32
 
 ld.global.L1::evict_normal.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -672,7 +672,7 @@ ld.global.L1::evict_normal.L2::256B.b64
 
 ld.global.L1::evict_normal.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -683,7 +683,7 @@ ld.global.L1::evict_normal.L2::256B.b128
 
 ld.global.L1::evict_normal.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -695,7 +695,7 @@ ld.global.L1::evict_normal.L2::cache_hint.b8
 
 ld.global.L1::evict_normal.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -707,7 +707,7 @@ ld.global.L1::evict_normal.L2::cache_hint.b16
 
 ld.global.L1::evict_normal.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -719,7 +719,7 @@ ld.global.L1::evict_normal.L2::cache_hint.b32
 
 ld.global.L1::evict_normal.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -731,7 +731,7 @@ ld.global.L1::evict_normal.L2::cache_hint.b64
 
 ld.global.L1::evict_normal.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -743,7 +743,7 @@ ld.global.L1::evict_normal.L2::cache_hint.b128
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -755,7 +755,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b8
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -767,7 +767,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b16
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -779,7 +779,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b32
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -791,7 +791,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b64
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -803,7 +803,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::64B.b128
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -815,7 +815,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b8
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -827,7 +827,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b16
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -839,7 +839,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b32
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -851,7 +851,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b64
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -863,7 +863,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::128B.b128
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -875,7 +875,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b8
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -887,7 +887,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b16
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -899,7 +899,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b32
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -911,7 +911,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b64
 
 ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_normal.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -923,7 +923,7 @@ ld.global.L1::evict_normal.L2::cache_hint.L2::256B.b128
 
 ld.global.L1::evict_unchanged.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -934,7 +934,7 @@ ld.global.L1::evict_unchanged.b8
 
 ld.global.L1::evict_unchanged.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -945,7 +945,7 @@ ld.global.L1::evict_unchanged.b16
 
 ld.global.L1::evict_unchanged.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -956,7 +956,7 @@ ld.global.L1::evict_unchanged.b32
 
 ld.global.L1::evict_unchanged.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -967,7 +967,7 @@ ld.global.L1::evict_unchanged.b64
 
 ld.global.L1::evict_unchanged.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -978,7 +978,7 @@ ld.global.L1::evict_unchanged.b128
 
 ld.global.L1::evict_unchanged.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -989,7 +989,7 @@ ld.global.L1::evict_unchanged.L2::64B.b8
 
 ld.global.L1::evict_unchanged.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1000,7 +1000,7 @@ ld.global.L1::evict_unchanged.L2::64B.b16
 
 ld.global.L1::evict_unchanged.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1011,7 +1011,7 @@ ld.global.L1::evict_unchanged.L2::64B.b32
 
 ld.global.L1::evict_unchanged.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1022,7 +1022,7 @@ ld.global.L1::evict_unchanged.L2::64B.b64
 
 ld.global.L1::evict_unchanged.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -1033,7 +1033,7 @@ ld.global.L1::evict_unchanged.L2::64B.b128
 
 ld.global.L1::evict_unchanged.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1044,7 +1044,7 @@ ld.global.L1::evict_unchanged.L2::128B.b8
 
 ld.global.L1::evict_unchanged.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1055,7 +1055,7 @@ ld.global.L1::evict_unchanged.L2::128B.b16
 
 ld.global.L1::evict_unchanged.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1066,7 +1066,7 @@ ld.global.L1::evict_unchanged.L2::128B.b32
 
 ld.global.L1::evict_unchanged.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1077,7 +1077,7 @@ ld.global.L1::evict_unchanged.L2::128B.b64
 
 ld.global.L1::evict_unchanged.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -1088,7 +1088,7 @@ ld.global.L1::evict_unchanged.L2::128B.b128
 
 ld.global.L1::evict_unchanged.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1099,7 +1099,7 @@ ld.global.L1::evict_unchanged.L2::256B.b8
 
 ld.global.L1::evict_unchanged.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1110,7 +1110,7 @@ ld.global.L1::evict_unchanged.L2::256B.b16
 
 ld.global.L1::evict_unchanged.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1121,7 +1121,7 @@ ld.global.L1::evict_unchanged.L2::256B.b32
 
 ld.global.L1::evict_unchanged.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1132,7 +1132,7 @@ ld.global.L1::evict_unchanged.L2::256B.b64
 
 ld.global.L1::evict_unchanged.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1143,7 +1143,7 @@ ld.global.L1::evict_unchanged.L2::256B.b128
 
 ld.global.L1::evict_unchanged.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1155,7 +1155,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.b8
 
 ld.global.L1::evict_unchanged.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1167,7 +1167,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.b16
 
 ld.global.L1::evict_unchanged.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1179,7 +1179,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.b32
 
 ld.global.L1::evict_unchanged.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1191,7 +1191,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.b64
 
 ld.global.L1::evict_unchanged.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1203,7 +1203,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.b128
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1215,7 +1215,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b8
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1227,7 +1227,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b16
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1239,7 +1239,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b32
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1251,7 +1251,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b64
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1263,7 +1263,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::64B.b128
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1275,7 +1275,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b8
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1287,7 +1287,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b16
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1299,7 +1299,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b32
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1311,7 +1311,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b64
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1323,7 +1323,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::128B.b128
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1335,7 +1335,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b8
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1347,7 +1347,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b16
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1359,7 +1359,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b32
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1371,7 +1371,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b64
 
 ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_unchanged.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1383,7 +1383,7 @@ ld.global.L1::evict_unchanged.L2::cache_hint.L2::256B.b128
 
 ld.global.L1::evict_first.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -1394,7 +1394,7 @@ ld.global.L1::evict_first.b8
 
 ld.global.L1::evict_first.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -1405,7 +1405,7 @@ ld.global.L1::evict_first.b16
 
 ld.global.L1::evict_first.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -1416,7 +1416,7 @@ ld.global.L1::evict_first.b32
 
 ld.global.L1::evict_first.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -1427,7 +1427,7 @@ ld.global.L1::evict_first.b64
 
 ld.global.L1::evict_first.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -1438,7 +1438,7 @@ ld.global.L1::evict_first.b128
 
 ld.global.L1::evict_first.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1449,7 +1449,7 @@ ld.global.L1::evict_first.L2::64B.b8
 
 ld.global.L1::evict_first.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1460,7 +1460,7 @@ ld.global.L1::evict_first.L2::64B.b16
 
 ld.global.L1::evict_first.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1471,7 +1471,7 @@ ld.global.L1::evict_first.L2::64B.b32
 
 ld.global.L1::evict_first.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1482,7 +1482,7 @@ ld.global.L1::evict_first.L2::64B.b64
 
 ld.global.L1::evict_first.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -1493,7 +1493,7 @@ ld.global.L1::evict_first.L2::64B.b128
 
 ld.global.L1::evict_first.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1504,7 +1504,7 @@ ld.global.L1::evict_first.L2::128B.b8
 
 ld.global.L1::evict_first.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1515,7 +1515,7 @@ ld.global.L1::evict_first.L2::128B.b16
 
 ld.global.L1::evict_first.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1526,7 +1526,7 @@ ld.global.L1::evict_first.L2::128B.b32
 
 ld.global.L1::evict_first.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1537,7 +1537,7 @@ ld.global.L1::evict_first.L2::128B.b64
 
 ld.global.L1::evict_first.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -1548,7 +1548,7 @@ ld.global.L1::evict_first.L2::128B.b128
 
 ld.global.L1::evict_first.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1559,7 +1559,7 @@ ld.global.L1::evict_first.L2::256B.b8
 
 ld.global.L1::evict_first.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1570,7 +1570,7 @@ ld.global.L1::evict_first.L2::256B.b16
 
 ld.global.L1::evict_first.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1581,7 +1581,7 @@ ld.global.L1::evict_first.L2::256B.b32
 
 ld.global.L1::evict_first.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1592,7 +1592,7 @@ ld.global.L1::evict_first.L2::256B.b64
 
 ld.global.L1::evict_first.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1603,7 +1603,7 @@ ld.global.L1::evict_first.L2::256B.b128
 
 ld.global.L1::evict_first.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1615,7 +1615,7 @@ ld.global.L1::evict_first.L2::cache_hint.b8
 
 ld.global.L1::evict_first.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1627,7 +1627,7 @@ ld.global.L1::evict_first.L2::cache_hint.b16
 
 ld.global.L1::evict_first.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1639,7 +1639,7 @@ ld.global.L1::evict_first.L2::cache_hint.b32
 
 ld.global.L1::evict_first.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1651,7 +1651,7 @@ ld.global.L1::evict_first.L2::cache_hint.b64
 
 ld.global.L1::evict_first.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1663,7 +1663,7 @@ ld.global.L1::evict_first.L2::cache_hint.b128
 
 ld.global.L1::evict_first.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1675,7 +1675,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::64B.b8
 
 ld.global.L1::evict_first.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1687,7 +1687,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::64B.b16
 
 ld.global.L1::evict_first.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1699,7 +1699,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::64B.b32
 
 ld.global.L1::evict_first.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1711,7 +1711,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::64B.b64
 
 ld.global.L1::evict_first.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1723,7 +1723,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::64B.b128
 
 ld.global.L1::evict_first.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1735,7 +1735,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::128B.b8
 
 ld.global.L1::evict_first.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1747,7 +1747,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::128B.b16
 
 ld.global.L1::evict_first.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1759,7 +1759,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::128B.b32
 
 ld.global.L1::evict_first.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1771,7 +1771,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::128B.b64
 
 ld.global.L1::evict_first.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1783,7 +1783,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::128B.b128
 
 ld.global.L1::evict_first.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1795,7 +1795,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::256B.b8
 
 ld.global.L1::evict_first.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1807,7 +1807,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::256B.b16
 
 ld.global.L1::evict_first.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1819,7 +1819,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::256B.b32
 
 ld.global.L1::evict_first.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -1831,7 +1831,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::256B.b64
 
 ld.global.L1::evict_first.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_first.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -1843,7 +1843,7 @@ ld.global.L1::evict_first.L2::cache_hint.L2::256B.b128
 
 ld.global.L1::evict_last.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -1854,7 +1854,7 @@ ld.global.L1::evict_last.b8
 
 ld.global.L1::evict_last.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -1865,7 +1865,7 @@ ld.global.L1::evict_last.b16
 
 ld.global.L1::evict_last.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -1876,7 +1876,7 @@ ld.global.L1::evict_last.b32
 
 ld.global.L1::evict_last.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -1887,7 +1887,7 @@ ld.global.L1::evict_last.b64
 
 ld.global.L1::evict_last.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -1898,7 +1898,7 @@ ld.global.L1::evict_last.b128
 
 ld.global.L1::evict_last.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1909,7 +1909,7 @@ ld.global.L1::evict_last.L2::64B.b8
 
 ld.global.L1::evict_last.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1920,7 +1920,7 @@ ld.global.L1::evict_last.L2::64B.b16
 
 ld.global.L1::evict_last.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1931,7 +1931,7 @@ ld.global.L1::evict_last.L2::64B.b32
 
 ld.global.L1::evict_last.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1942,7 +1942,7 @@ ld.global.L1::evict_last.L2::64B.b64
 
 ld.global.L1::evict_last.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -1953,7 +1953,7 @@ ld.global.L1::evict_last.L2::64B.b128
 
 ld.global.L1::evict_last.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1964,7 +1964,7 @@ ld.global.L1::evict_last.L2::128B.b8
 
 ld.global.L1::evict_last.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1975,7 +1975,7 @@ ld.global.L1::evict_last.L2::128B.b16
 
 ld.global.L1::evict_last.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1986,7 +1986,7 @@ ld.global.L1::evict_last.L2::128B.b32
 
 ld.global.L1::evict_last.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -1997,7 +1997,7 @@ ld.global.L1::evict_last.L2::128B.b64
 
 ld.global.L1::evict_last.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -2008,7 +2008,7 @@ ld.global.L1::evict_last.L2::128B.b128
 
 ld.global.L1::evict_last.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2019,7 +2019,7 @@ ld.global.L1::evict_last.L2::256B.b8
 
 ld.global.L1::evict_last.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2030,7 +2030,7 @@ ld.global.L1::evict_last.L2::256B.b16
 
 ld.global.L1::evict_last.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2041,7 +2041,7 @@ ld.global.L1::evict_last.L2::256B.b32
 
 ld.global.L1::evict_last.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2052,7 +2052,7 @@ ld.global.L1::evict_last.L2::256B.b64
 
 ld.global.L1::evict_last.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2063,7 +2063,7 @@ ld.global.L1::evict_last.L2::256B.b128
 
 ld.global.L1::evict_last.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2075,7 +2075,7 @@ ld.global.L1::evict_last.L2::cache_hint.b8
 
 ld.global.L1::evict_last.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2087,7 +2087,7 @@ ld.global.L1::evict_last.L2::cache_hint.b16
 
 ld.global.L1::evict_last.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2099,7 +2099,7 @@ ld.global.L1::evict_last.L2::cache_hint.b32
 
 ld.global.L1::evict_last.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2111,7 +2111,7 @@ ld.global.L1::evict_last.L2::cache_hint.b64
 
 ld.global.L1::evict_last.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2123,7 +2123,7 @@ ld.global.L1::evict_last.L2::cache_hint.b128
 
 ld.global.L1::evict_last.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2135,7 +2135,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::64B.b8
 
 ld.global.L1::evict_last.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2147,7 +2147,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::64B.b16
 
 ld.global.L1::evict_last.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2159,7 +2159,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::64B.b32
 
 ld.global.L1::evict_last.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2171,7 +2171,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::64B.b64
 
 ld.global.L1::evict_last.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2183,7 +2183,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::64B.b128
 
 ld.global.L1::evict_last.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2195,7 +2195,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::128B.b8
 
 ld.global.L1::evict_last.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2207,7 +2207,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::128B.b16
 
 ld.global.L1::evict_last.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2219,7 +2219,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::128B.b32
 
 ld.global.L1::evict_last.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2231,7 +2231,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::128B.b64
 
 ld.global.L1::evict_last.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2243,7 +2243,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::128B.b128
 
 ld.global.L1::evict_last.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2255,7 +2255,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::256B.b8
 
 ld.global.L1::evict_last.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2267,7 +2267,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::256B.b16
 
 ld.global.L1::evict_last.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2279,7 +2279,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::256B.b32
 
 ld.global.L1::evict_last.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2291,7 +2291,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::256B.b64
 
 ld.global.L1::evict_last.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::evict_last.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2303,7 +2303,7 @@ ld.global.L1::evict_last.L2::cache_hint.L2::256B.b128
 
 ld.global.L1::no_allocate.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -2314,7 +2314,7 @@ ld.global.L1::no_allocate.b8
 
 ld.global.L1::no_allocate.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -2325,7 +2325,7 @@ ld.global.L1::no_allocate.b16
 
 ld.global.L1::no_allocate.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -2336,7 +2336,7 @@ ld.global.L1::no_allocate.b32
 
 ld.global.L1::no_allocate.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -2347,7 +2347,7 @@ ld.global.L1::no_allocate.b64
 
 ld.global.L1::no_allocate.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -2358,7 +2358,7 @@ ld.global.L1::no_allocate.b128
 
 ld.global.L1::no_allocate.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2369,7 +2369,7 @@ ld.global.L1::no_allocate.L2::64B.b8
 
 ld.global.L1::no_allocate.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2380,7 +2380,7 @@ ld.global.L1::no_allocate.L2::64B.b16
 
 ld.global.L1::no_allocate.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2391,7 +2391,7 @@ ld.global.L1::no_allocate.L2::64B.b32
 
 ld.global.L1::no_allocate.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2402,7 +2402,7 @@ ld.global.L1::no_allocate.L2::64B.b64
 
 ld.global.L1::no_allocate.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -2413,7 +2413,7 @@ ld.global.L1::no_allocate.L2::64B.b128
 
 ld.global.L1::no_allocate.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2424,7 +2424,7 @@ ld.global.L1::no_allocate.L2::128B.b8
 
 ld.global.L1::no_allocate.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2435,7 +2435,7 @@ ld.global.L1::no_allocate.L2::128B.b16
 
 ld.global.L1::no_allocate.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2446,7 +2446,7 @@ ld.global.L1::no_allocate.L2::128B.b32
 
 ld.global.L1::no_allocate.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2457,7 +2457,7 @@ ld.global.L1::no_allocate.L2::128B.b64
 
 ld.global.L1::no_allocate.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -2468,7 +2468,7 @@ ld.global.L1::no_allocate.L2::128B.b128
 
 ld.global.L1::no_allocate.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2479,7 +2479,7 @@ ld.global.L1::no_allocate.L2::256B.b8
 
 ld.global.L1::no_allocate.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2490,7 +2490,7 @@ ld.global.L1::no_allocate.L2::256B.b16
 
 ld.global.L1::no_allocate.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2501,7 +2501,7 @@ ld.global.L1::no_allocate.L2::256B.b32
 
 ld.global.L1::no_allocate.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2512,7 +2512,7 @@ ld.global.L1::no_allocate.L2::256B.b64
 
 ld.global.L1::no_allocate.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2523,7 +2523,7 @@ ld.global.L1::no_allocate.L2::256B.b128
 
 ld.global.L1::no_allocate.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2535,7 +2535,7 @@ ld.global.L1::no_allocate.L2::cache_hint.b8
 
 ld.global.L1::no_allocate.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2547,7 +2547,7 @@ ld.global.L1::no_allocate.L2::cache_hint.b16
 
 ld.global.L1::no_allocate.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2559,7 +2559,7 @@ ld.global.L1::no_allocate.L2::cache_hint.b32
 
 ld.global.L1::no_allocate.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2571,7 +2571,7 @@ ld.global.L1::no_allocate.L2::cache_hint.b64
 
 ld.global.L1::no_allocate.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2583,7 +2583,7 @@ ld.global.L1::no_allocate.L2::cache_hint.b128
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2595,7 +2595,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b8
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2607,7 +2607,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b16
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2619,7 +2619,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b32
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2631,7 +2631,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b64
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2643,7 +2643,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::64B.b128
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2655,7 +2655,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b8
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2667,7 +2667,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b16
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2679,7 +2679,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b32
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2691,7 +2691,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b64
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2703,7 +2703,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::128B.b128
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2715,7 +2715,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b8
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2727,7 +2727,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b16
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2739,7 +2739,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b32
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2751,7 +2751,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b64
 
 ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.L1::no_allocate.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2763,7 +2763,7 @@ ld.global.L1::no_allocate.L2::cache_hint.L2::256B.b128
 
 ld.global.nc.b8
 ^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.b8 dest, [addr]; // PTX ISA 10, SM_50
    // .space     = { .global }
@@ -2774,7 +2774,7 @@ ld.global.nc.b8
 
 ld.global.nc.b16
 ^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.b16 dest, [addr]; // PTX ISA 10, SM_50
    // .space     = { .global }
@@ -2785,7 +2785,7 @@ ld.global.nc.b16
 
 ld.global.nc.b32
 ^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.b32 dest, [addr]; // PTX ISA 10, SM_50
    // .space     = { .global }
@@ -2796,7 +2796,7 @@ ld.global.nc.b32
 
 ld.global.nc.b64
 ^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.b64 dest, [addr]; // PTX ISA 10, SM_50
    // .space     = { .global }
@@ -2807,7 +2807,7 @@ ld.global.nc.b64
 
 ld.global.nc.b128
 ^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -2818,7 +2818,7 @@ ld.global.nc.b128
 
 ld.global.nc.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2829,7 +2829,7 @@ ld.global.nc.L2::64B.b8
 
 ld.global.nc.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2840,7 +2840,7 @@ ld.global.nc.L2::64B.b16
 
 ld.global.nc.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2851,7 +2851,7 @@ ld.global.nc.L2::64B.b32
 
 ld.global.nc.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2862,7 +2862,7 @@ ld.global.nc.L2::64B.b64
 
 ld.global.nc.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -2873,7 +2873,7 @@ ld.global.nc.L2::64B.b128
 
 ld.global.nc.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2884,7 +2884,7 @@ ld.global.nc.L2::128B.b8
 
 ld.global.nc.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2895,7 +2895,7 @@ ld.global.nc.L2::128B.b16
 
 ld.global.nc.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2906,7 +2906,7 @@ ld.global.nc.L2::128B.b32
 
 ld.global.nc.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -2917,7 +2917,7 @@ ld.global.nc.L2::128B.b64
 
 ld.global.nc.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -2928,7 +2928,7 @@ ld.global.nc.L2::128B.b128
 
 ld.global.nc.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2939,7 +2939,7 @@ ld.global.nc.L2::256B.b8
 
 ld.global.nc.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2950,7 +2950,7 @@ ld.global.nc.L2::256B.b16
 
 ld.global.nc.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2961,7 +2961,7 @@ ld.global.nc.L2::256B.b32
 
 ld.global.nc.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2972,7 +2972,7 @@ ld.global.nc.L2::256B.b64
 
 ld.global.nc.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -2983,7 +2983,7 @@ ld.global.nc.L2::256B.b128
 
 ld.global.nc.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -2995,7 +2995,7 @@ ld.global.nc.L2::cache_hint.b8
 
 ld.global.nc.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3007,7 +3007,7 @@ ld.global.nc.L2::cache_hint.b16
 
 ld.global.nc.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3019,7 +3019,7 @@ ld.global.nc.L2::cache_hint.b32
 
 ld.global.nc.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3031,7 +3031,7 @@ ld.global.nc.L2::cache_hint.b64
 
 ld.global.nc.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3043,7 +3043,7 @@ ld.global.nc.L2::cache_hint.b128
 
 ld.global.nc.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3055,7 +3055,7 @@ ld.global.nc.L2::cache_hint.L2::64B.b8
 
 ld.global.nc.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3067,7 +3067,7 @@ ld.global.nc.L2::cache_hint.L2::64B.b16
 
 ld.global.nc.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3079,7 +3079,7 @@ ld.global.nc.L2::cache_hint.L2::64B.b32
 
 ld.global.nc.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3091,7 +3091,7 @@ ld.global.nc.L2::cache_hint.L2::64B.b64
 
 ld.global.nc.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3103,7 +3103,7 @@ ld.global.nc.L2::cache_hint.L2::64B.b128
 
 ld.global.nc.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3115,7 +3115,7 @@ ld.global.nc.L2::cache_hint.L2::128B.b8
 
 ld.global.nc.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3127,7 +3127,7 @@ ld.global.nc.L2::cache_hint.L2::128B.b16
 
 ld.global.nc.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3139,7 +3139,7 @@ ld.global.nc.L2::cache_hint.L2::128B.b32
 
 ld.global.nc.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3151,7 +3151,7 @@ ld.global.nc.L2::cache_hint.L2::128B.b64
 
 ld.global.nc.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3163,7 +3163,7 @@ ld.global.nc.L2::cache_hint.L2::128B.b128
 
 ld.global.nc.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3175,7 +3175,7 @@ ld.global.nc.L2::cache_hint.L2::256B.b8
 
 ld.global.nc.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3187,7 +3187,7 @@ ld.global.nc.L2::cache_hint.L2::256B.b16
 
 ld.global.nc.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3199,7 +3199,7 @@ ld.global.nc.L2::cache_hint.L2::256B.b32
 
 ld.global.nc.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3211,7 +3211,7 @@ ld.global.nc.L2::cache_hint.L2::256B.b64
 
 ld.global.nc.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3223,7 +3223,7 @@ ld.global.nc.L2::cache_hint.L2::256B.b128
 
 ld.global.nc.L1::evict_normal.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -3234,7 +3234,7 @@ ld.global.nc.L1::evict_normal.b8
 
 ld.global.nc.L1::evict_normal.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -3245,7 +3245,7 @@ ld.global.nc.L1::evict_normal.b16
 
 ld.global.nc.L1::evict_normal.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -3256,7 +3256,7 @@ ld.global.nc.L1::evict_normal.b32
 
 ld.global.nc.L1::evict_normal.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -3267,7 +3267,7 @@ ld.global.nc.L1::evict_normal.b64
 
 ld.global.nc.L1::evict_normal.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -3278,7 +3278,7 @@ ld.global.nc.L1::evict_normal.b128
 
 ld.global.nc.L1::evict_normal.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3289,7 +3289,7 @@ ld.global.nc.L1::evict_normal.L2::64B.b8
 
 ld.global.nc.L1::evict_normal.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3300,7 +3300,7 @@ ld.global.nc.L1::evict_normal.L2::64B.b16
 
 ld.global.nc.L1::evict_normal.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3311,7 +3311,7 @@ ld.global.nc.L1::evict_normal.L2::64B.b32
 
 ld.global.nc.L1::evict_normal.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3322,7 +3322,7 @@ ld.global.nc.L1::evict_normal.L2::64B.b64
 
 ld.global.nc.L1::evict_normal.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -3333,7 +3333,7 @@ ld.global.nc.L1::evict_normal.L2::64B.b128
 
 ld.global.nc.L1::evict_normal.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3344,7 +3344,7 @@ ld.global.nc.L1::evict_normal.L2::128B.b8
 
 ld.global.nc.L1::evict_normal.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3355,7 +3355,7 @@ ld.global.nc.L1::evict_normal.L2::128B.b16
 
 ld.global.nc.L1::evict_normal.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3366,7 +3366,7 @@ ld.global.nc.L1::evict_normal.L2::128B.b32
 
 ld.global.nc.L1::evict_normal.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3377,7 +3377,7 @@ ld.global.nc.L1::evict_normal.L2::128B.b64
 
 ld.global.nc.L1::evict_normal.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -3388,7 +3388,7 @@ ld.global.nc.L1::evict_normal.L2::128B.b128
 
 ld.global.nc.L1::evict_normal.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3399,7 +3399,7 @@ ld.global.nc.L1::evict_normal.L2::256B.b8
 
 ld.global.nc.L1::evict_normal.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3410,7 +3410,7 @@ ld.global.nc.L1::evict_normal.L2::256B.b16
 
 ld.global.nc.L1::evict_normal.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3421,7 +3421,7 @@ ld.global.nc.L1::evict_normal.L2::256B.b32
 
 ld.global.nc.L1::evict_normal.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3432,7 +3432,7 @@ ld.global.nc.L1::evict_normal.L2::256B.b64
 
 ld.global.nc.L1::evict_normal.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3443,7 +3443,7 @@ ld.global.nc.L1::evict_normal.L2::256B.b128
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3455,7 +3455,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.b8
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3467,7 +3467,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.b16
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3479,7 +3479,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.b32
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3491,7 +3491,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.b64
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3503,7 +3503,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.b128
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3515,7 +3515,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b8
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3527,7 +3527,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b16
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3539,7 +3539,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b32
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3551,7 +3551,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b64
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3563,7 +3563,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::64B.b128
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3575,7 +3575,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b8
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3587,7 +3587,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b16
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3599,7 +3599,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b32
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3611,7 +3611,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b64
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3623,7 +3623,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::128B.b128
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3635,7 +3635,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b8
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3647,7 +3647,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b16
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3659,7 +3659,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b32
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3671,7 +3671,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b64
 
 ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_normal.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3683,7 +3683,7 @@ ld.global.nc.L1::evict_normal.L2::cache_hint.L2::256B.b128
 
 ld.global.nc.L1::evict_unchanged.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -3694,7 +3694,7 @@ ld.global.nc.L1::evict_unchanged.b8
 
 ld.global.nc.L1::evict_unchanged.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -3705,7 +3705,7 @@ ld.global.nc.L1::evict_unchanged.b16
 
 ld.global.nc.L1::evict_unchanged.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -3716,7 +3716,7 @@ ld.global.nc.L1::evict_unchanged.b32
 
 ld.global.nc.L1::evict_unchanged.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -3727,7 +3727,7 @@ ld.global.nc.L1::evict_unchanged.b64
 
 ld.global.nc.L1::evict_unchanged.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -3738,7 +3738,7 @@ ld.global.nc.L1::evict_unchanged.b128
 
 ld.global.nc.L1::evict_unchanged.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3749,7 +3749,7 @@ ld.global.nc.L1::evict_unchanged.L2::64B.b8
 
 ld.global.nc.L1::evict_unchanged.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3760,7 +3760,7 @@ ld.global.nc.L1::evict_unchanged.L2::64B.b16
 
 ld.global.nc.L1::evict_unchanged.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3771,7 +3771,7 @@ ld.global.nc.L1::evict_unchanged.L2::64B.b32
 
 ld.global.nc.L1::evict_unchanged.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3782,7 +3782,7 @@ ld.global.nc.L1::evict_unchanged.L2::64B.b64
 
 ld.global.nc.L1::evict_unchanged.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -3793,7 +3793,7 @@ ld.global.nc.L1::evict_unchanged.L2::64B.b128
 
 ld.global.nc.L1::evict_unchanged.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3804,7 +3804,7 @@ ld.global.nc.L1::evict_unchanged.L2::128B.b8
 
 ld.global.nc.L1::evict_unchanged.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3815,7 +3815,7 @@ ld.global.nc.L1::evict_unchanged.L2::128B.b16
 
 ld.global.nc.L1::evict_unchanged.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3826,7 +3826,7 @@ ld.global.nc.L1::evict_unchanged.L2::128B.b32
 
 ld.global.nc.L1::evict_unchanged.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -3837,7 +3837,7 @@ ld.global.nc.L1::evict_unchanged.L2::128B.b64
 
 ld.global.nc.L1::evict_unchanged.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -3848,7 +3848,7 @@ ld.global.nc.L1::evict_unchanged.L2::128B.b128
 
 ld.global.nc.L1::evict_unchanged.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3859,7 +3859,7 @@ ld.global.nc.L1::evict_unchanged.L2::256B.b8
 
 ld.global.nc.L1::evict_unchanged.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3870,7 +3870,7 @@ ld.global.nc.L1::evict_unchanged.L2::256B.b16
 
 ld.global.nc.L1::evict_unchanged.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3881,7 +3881,7 @@ ld.global.nc.L1::evict_unchanged.L2::256B.b32
 
 ld.global.nc.L1::evict_unchanged.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3892,7 +3892,7 @@ ld.global.nc.L1::evict_unchanged.L2::256B.b64
 
 ld.global.nc.L1::evict_unchanged.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3903,7 +3903,7 @@ ld.global.nc.L1::evict_unchanged.L2::256B.b128
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3915,7 +3915,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.b8
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3927,7 +3927,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.b16
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3939,7 +3939,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.b32
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3951,7 +3951,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.b64
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -3963,7 +3963,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.b128
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3975,7 +3975,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b8
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3987,7 +3987,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b16
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -3999,7 +3999,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b32
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4011,7 +4011,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b64
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4023,7 +4023,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::64B.b128
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4035,7 +4035,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b8
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4047,7 +4047,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b16
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4059,7 +4059,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b32
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4071,7 +4071,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b64
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4083,7 +4083,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::128B.b128
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4095,7 +4095,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b8
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4107,7 +4107,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b16
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4119,7 +4119,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b32
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4131,7 +4131,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b64
 
 ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4143,7 +4143,7 @@ ld.global.nc.L1::evict_unchanged.L2::cache_hint.L2::256B.b128
 
 ld.global.nc.L1::evict_first.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -4154,7 +4154,7 @@ ld.global.nc.L1::evict_first.b8
 
 ld.global.nc.L1::evict_first.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -4165,7 +4165,7 @@ ld.global.nc.L1::evict_first.b16
 
 ld.global.nc.L1::evict_first.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -4176,7 +4176,7 @@ ld.global.nc.L1::evict_first.b32
 
 ld.global.nc.L1::evict_first.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -4187,7 +4187,7 @@ ld.global.nc.L1::evict_first.b64
 
 ld.global.nc.L1::evict_first.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -4198,7 +4198,7 @@ ld.global.nc.L1::evict_first.b128
 
 ld.global.nc.L1::evict_first.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4209,7 +4209,7 @@ ld.global.nc.L1::evict_first.L2::64B.b8
 
 ld.global.nc.L1::evict_first.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4220,7 +4220,7 @@ ld.global.nc.L1::evict_first.L2::64B.b16
 
 ld.global.nc.L1::evict_first.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4231,7 +4231,7 @@ ld.global.nc.L1::evict_first.L2::64B.b32
 
 ld.global.nc.L1::evict_first.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4242,7 +4242,7 @@ ld.global.nc.L1::evict_first.L2::64B.b64
 
 ld.global.nc.L1::evict_first.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -4253,7 +4253,7 @@ ld.global.nc.L1::evict_first.L2::64B.b128
 
 ld.global.nc.L1::evict_first.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4264,7 +4264,7 @@ ld.global.nc.L1::evict_first.L2::128B.b8
 
 ld.global.nc.L1::evict_first.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4275,7 +4275,7 @@ ld.global.nc.L1::evict_first.L2::128B.b16
 
 ld.global.nc.L1::evict_first.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4286,7 +4286,7 @@ ld.global.nc.L1::evict_first.L2::128B.b32
 
 ld.global.nc.L1::evict_first.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4297,7 +4297,7 @@ ld.global.nc.L1::evict_first.L2::128B.b64
 
 ld.global.nc.L1::evict_first.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -4308,7 +4308,7 @@ ld.global.nc.L1::evict_first.L2::128B.b128
 
 ld.global.nc.L1::evict_first.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4319,7 +4319,7 @@ ld.global.nc.L1::evict_first.L2::256B.b8
 
 ld.global.nc.L1::evict_first.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4330,7 +4330,7 @@ ld.global.nc.L1::evict_first.L2::256B.b16
 
 ld.global.nc.L1::evict_first.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4341,7 +4341,7 @@ ld.global.nc.L1::evict_first.L2::256B.b32
 
 ld.global.nc.L1::evict_first.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4352,7 +4352,7 @@ ld.global.nc.L1::evict_first.L2::256B.b64
 
 ld.global.nc.L1::evict_first.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4363,7 +4363,7 @@ ld.global.nc.L1::evict_first.L2::256B.b128
 
 ld.global.nc.L1::evict_first.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4375,7 +4375,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.b8
 
 ld.global.nc.L1::evict_first.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4387,7 +4387,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.b16
 
 ld.global.nc.L1::evict_first.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4399,7 +4399,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.b32
 
 ld.global.nc.L1::evict_first.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4411,7 +4411,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.b64
 
 ld.global.nc.L1::evict_first.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4423,7 +4423,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.b128
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4435,7 +4435,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b8
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4447,7 +4447,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b16
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4459,7 +4459,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b32
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4471,7 +4471,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b64
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4483,7 +4483,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::64B.b128
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4495,7 +4495,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b8
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4507,7 +4507,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b16
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4519,7 +4519,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b32
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4531,7 +4531,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b64
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4543,7 +4543,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::128B.b128
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4555,7 +4555,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b8
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4567,7 +4567,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b16
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4579,7 +4579,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b32
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4591,7 +4591,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b64
 
 ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_first.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4603,7 +4603,7 @@ ld.global.nc.L1::evict_first.L2::cache_hint.L2::256B.b128
 
 ld.global.nc.L1::evict_last.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -4614,7 +4614,7 @@ ld.global.nc.L1::evict_last.b8
 
 ld.global.nc.L1::evict_last.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -4625,7 +4625,7 @@ ld.global.nc.L1::evict_last.b16
 
 ld.global.nc.L1::evict_last.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -4636,7 +4636,7 @@ ld.global.nc.L1::evict_last.b32
 
 ld.global.nc.L1::evict_last.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -4647,7 +4647,7 @@ ld.global.nc.L1::evict_last.b64
 
 ld.global.nc.L1::evict_last.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -4658,7 +4658,7 @@ ld.global.nc.L1::evict_last.b128
 
 ld.global.nc.L1::evict_last.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4669,7 +4669,7 @@ ld.global.nc.L1::evict_last.L2::64B.b8
 
 ld.global.nc.L1::evict_last.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4680,7 +4680,7 @@ ld.global.nc.L1::evict_last.L2::64B.b16
 
 ld.global.nc.L1::evict_last.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4691,7 +4691,7 @@ ld.global.nc.L1::evict_last.L2::64B.b32
 
 ld.global.nc.L1::evict_last.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4702,7 +4702,7 @@ ld.global.nc.L1::evict_last.L2::64B.b64
 
 ld.global.nc.L1::evict_last.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -4713,7 +4713,7 @@ ld.global.nc.L1::evict_last.L2::64B.b128
 
 ld.global.nc.L1::evict_last.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4724,7 +4724,7 @@ ld.global.nc.L1::evict_last.L2::128B.b8
 
 ld.global.nc.L1::evict_last.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4735,7 +4735,7 @@ ld.global.nc.L1::evict_last.L2::128B.b16
 
 ld.global.nc.L1::evict_last.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4746,7 +4746,7 @@ ld.global.nc.L1::evict_last.L2::128B.b32
 
 ld.global.nc.L1::evict_last.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -4757,7 +4757,7 @@ ld.global.nc.L1::evict_last.L2::128B.b64
 
 ld.global.nc.L1::evict_last.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -4768,7 +4768,7 @@ ld.global.nc.L1::evict_last.L2::128B.b128
 
 ld.global.nc.L1::evict_last.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4779,7 +4779,7 @@ ld.global.nc.L1::evict_last.L2::256B.b8
 
 ld.global.nc.L1::evict_last.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4790,7 +4790,7 @@ ld.global.nc.L1::evict_last.L2::256B.b16
 
 ld.global.nc.L1::evict_last.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4801,7 +4801,7 @@ ld.global.nc.L1::evict_last.L2::256B.b32
 
 ld.global.nc.L1::evict_last.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4812,7 +4812,7 @@ ld.global.nc.L1::evict_last.L2::256B.b64
 
 ld.global.nc.L1::evict_last.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4823,7 +4823,7 @@ ld.global.nc.L1::evict_last.L2::256B.b128
 
 ld.global.nc.L1::evict_last.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4835,7 +4835,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.b8
 
 ld.global.nc.L1::evict_last.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4847,7 +4847,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.b16
 
 ld.global.nc.L1::evict_last.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4859,7 +4859,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.b32
 
 ld.global.nc.L1::evict_last.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4871,7 +4871,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.b64
 
 ld.global.nc.L1::evict_last.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4883,7 +4883,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.b128
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4895,7 +4895,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b8
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4907,7 +4907,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b16
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4919,7 +4919,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b32
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4931,7 +4931,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b64
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -4943,7 +4943,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::64B.b128
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4955,7 +4955,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b8
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4967,7 +4967,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b16
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4979,7 +4979,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b32
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -4991,7 +4991,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b64
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -5003,7 +5003,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::128B.b128
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5015,7 +5015,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b8
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5027,7 +5027,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b16
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5039,7 +5039,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b32
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5051,7 +5051,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b64
 
 ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::evict_last.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -5063,7 +5063,7 @@ ld.global.nc.L1::evict_last.L2::cache_hint.L2::256B.b128
 
 ld.global.nc.L1::no_allocate.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.b8 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -5074,7 +5074,7 @@ ld.global.nc.L1::no_allocate.b8
 
 ld.global.nc.L1::no_allocate.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.b16 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -5085,7 +5085,7 @@ ld.global.nc.L1::no_allocate.b16
 
 ld.global.nc.L1::no_allocate.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.b32 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -5096,7 +5096,7 @@ ld.global.nc.L1::no_allocate.b32
 
 ld.global.nc.L1::no_allocate.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.b64 dest, [addr]; // PTX ISA 74, SM_70
    // .space     = { .global }
@@ -5107,7 +5107,7 @@ ld.global.nc.L1::no_allocate.b64
 
 ld.global.nc.L1::no_allocate.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.b128 dest, [addr]; // PTX ISA 83, SM_70
    // .space     = { .global }
@@ -5118,7 +5118,7 @@ ld.global.nc.L1::no_allocate.b128
 
 ld.global.nc.L1::no_allocate.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::64B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -5129,7 +5129,7 @@ ld.global.nc.L1::no_allocate.L2::64B.b8
 
 ld.global.nc.L1::no_allocate.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::64B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -5140,7 +5140,7 @@ ld.global.nc.L1::no_allocate.L2::64B.b16
 
 ld.global.nc.L1::no_allocate.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::64B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -5151,7 +5151,7 @@ ld.global.nc.L1::no_allocate.L2::64B.b32
 
 ld.global.nc.L1::no_allocate.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::64B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -5162,7 +5162,7 @@ ld.global.nc.L1::no_allocate.L2::64B.b64
 
 ld.global.nc.L1::no_allocate.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::64B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -5173,7 +5173,7 @@ ld.global.nc.L1::no_allocate.L2::64B.b128
 
 ld.global.nc.L1::no_allocate.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::128B.b8 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -5184,7 +5184,7 @@ ld.global.nc.L1::no_allocate.L2::128B.b8
 
 ld.global.nc.L1::no_allocate.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::128B.b16 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -5195,7 +5195,7 @@ ld.global.nc.L1::no_allocate.L2::128B.b16
 
 ld.global.nc.L1::no_allocate.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::128B.b32 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -5206,7 +5206,7 @@ ld.global.nc.L1::no_allocate.L2::128B.b32
 
 ld.global.nc.L1::no_allocate.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::128B.b64 dest, [addr]; // PTX ISA 74, SM_75
    // .space     = { .global }
@@ -5217,7 +5217,7 @@ ld.global.nc.L1::no_allocate.L2::128B.b64
 
 ld.global.nc.L1::no_allocate.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::128B.b128 dest, [addr]; // PTX ISA 83, SM_75
    // .space     = { .global }
@@ -5228,7 +5228,7 @@ ld.global.nc.L1::no_allocate.L2::128B.b128
 
 ld.global.nc.L1::no_allocate.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::256B.b8 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5239,7 +5239,7 @@ ld.global.nc.L1::no_allocate.L2::256B.b8
 
 ld.global.nc.L1::no_allocate.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::256B.b16 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5250,7 +5250,7 @@ ld.global.nc.L1::no_allocate.L2::256B.b16
 
 ld.global.nc.L1::no_allocate.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::256B.b32 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5261,7 +5261,7 @@ ld.global.nc.L1::no_allocate.L2::256B.b32
 
 ld.global.nc.L1::no_allocate.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::256B.b64 dest, [addr]; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5272,7 +5272,7 @@ ld.global.nc.L1::no_allocate.L2::256B.b64
 
 ld.global.nc.L1::no_allocate.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::256B.b128 dest, [addr]; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -5283,7 +5283,7 @@ ld.global.nc.L1::no_allocate.L2::256B.b128
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5295,7 +5295,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.b8
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5307,7 +5307,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.b16
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5319,7 +5319,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.b32
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5331,7 +5331,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.b64
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -5343,7 +5343,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.b128
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::64B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5355,7 +5355,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b8
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::64B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5367,7 +5367,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b16
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::64B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5379,7 +5379,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b32
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::64B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5391,7 +5391,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b64
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::64B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -5403,7 +5403,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::64B.b128
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::128B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5415,7 +5415,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b8
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::128B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5427,7 +5427,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b16
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::128B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5439,7 +5439,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b32
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::128B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5451,7 +5451,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b64
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::128B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }
@@ -5463,7 +5463,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::128B.b128
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b8
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::256B.b8 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5475,7 +5475,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b8
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b16
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::256B.b16 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5487,7 +5487,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b16
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b32
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::256B.b32 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5499,7 +5499,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b32
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b64
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::256B.b64 dest, [addr], cache_policy; // PTX ISA 74, SM_80
    // .space     = { .global }
@@ -5511,7 +5511,7 @@ ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b64
 
 ld.global.nc.L1::no_allocate.L2::cache_hint.L2::256B.b128
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code:: cuda
+.. code-block:: cuda
 
    // ld.space.nc.L1::no_allocate.L2::cache_hint.L2::256B.b128 dest, [addr], cache_policy; // PTX ISA 83, SM_80
    // .space     = { .global }

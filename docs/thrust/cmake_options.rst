@@ -19,7 +19,7 @@ CMake Options
 A Thrust build is configured using CMake options. These may be passed to
 CMake using
 
-.. code:: bash
+.. code-block:: bash
 
    cmake -D<option_name>=<value> /path/to/thrust/sources
 
