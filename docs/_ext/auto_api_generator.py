@@ -228,11 +228,31 @@ def extract_doxygen_items(xml_dir):
             items['groups'].append((name, refid))
             
             # Also extract typedefs that are members of groups
+            # We need to get the qualified name from the actual group XML file
             for member in compound.findall('member[@kind="typedef"]'):
-                typedef_name = member.find('name').text
+                name_elem = member.find('name')
+                if name_elem is None:
+                    continue
+                simple_name = name_elem.text
                 typedef_refid = member.get('refid')
-                # Group typedefs are already namespace-qualified in the XML
-                items['typedefs'].append((typedef_name, typedef_refid))
+                
+                # Try to get the qualified name from the group XML file
+                qualified_name = simple_name  # Default to simple name
+                group_xml_file = xml_path / f'{refid}.xml'
+                if group_xml_file.exists():
+                    try:
+                        group_tree = ET.parse(group_xml_file)
+                        group_root = group_tree.getroot()
+                        # Find the typedef with matching refid
+                        typedef_elem = group_root.find(f'.//memberdef[@id="{typedef_refid}"]')
+                        if typedef_elem is not None:
+                            qualifiedname_elem = typedef_elem.find('qualifiedname')
+                            if qualifiedname_elem is not None and qualifiedname_elem.text:
+                                qualified_name = qualifiedname_elem.text
+                    except:
+                        pass
+                
+                items['typedefs'].append((qualified_name, typedef_refid))
         
         # Extract functions, typedefs, enums, and variables from namespaces
         for namespace_compound in namespace_compounds:
@@ -622,12 +642,10 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                     group_name = group_refid[7:]
         
         if is_group_function and group_name:
-            # For group functions, prefer using doxygengroup for better compatibility
-            # This works better for functions with complex signatures
-            content.append(f'.. doxygengroup:: {group_name}')
+            # For group functions, use a simpler approach
+            # Just document the function directly, not through the group
+            content.append(f'.. doxygenfunction:: {qualified_name}')
             content.append(f'   :project: {project_name}')
-            content.append(f'   :content-only:')
-            content.append(f'   :members: {member_name}')
             content.append('')
         elif len(overload_refids) > 1 and xml_dir:
             # For functions with multiple overloads in namespace, extract signatures
