@@ -659,6 +659,21 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                             sig_idx = full_sig.rfind(simple_name)
                             if sig_idx != -1:
                                 params = full_sig[sig_idx + len(simple_name):].strip()
+                                # Handle trailing noexcept specifier
+                                # Look for the closing parenthesis of the parameter list
+                                paren_count = 0
+                                param_end = -1
+                                for i, char in enumerate(params):
+                                    if char == '(':
+                                        paren_count += 1
+                                    elif char == ')':
+                                        paren_count -= 1
+                                        if paren_count == 0:
+                                            param_end = i + 1
+                                            break
+                                if param_end > 0:
+                                    # Keep only the parameter list (up to and including the closing parenthesis)
+                                    params = params[:param_end]
                                 
                                 # Create a simplified signature for the section header
                                 param_summary = extract_param_summary(params)
@@ -690,6 +705,21 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                             sig_idx = full_sig.rfind(simple_name)
                             if sig_idx != -1:
                                 params = full_sig[sig_idx + len(simple_name):].strip()
+                                # Handle trailing noexcept specifier
+                                # Look for the closing parenthesis of the parameter list
+                                paren_count = 0
+                                param_end = -1
+                                for i, char in enumerate(params):
+                                    if char == '(':
+                                        paren_count += 1
+                                    elif char == ')':
+                                        paren_count -= 1
+                                        if paren_count == 0:
+                                            param_end = i + 1
+                                            break
+                                if param_end > 0:
+                                    # Keep only the parameter list (up to and including the closing parenthesis)
+                                    params = params[:param_end]
                                 content.append(f'.. doxygenfunction:: {qualified_name}{params}')
                                 content.append(f'   :project: {project_name}')
                                 content.append('')
