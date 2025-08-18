@@ -202,11 +202,11 @@ Breaking Changes
    -  In addition to the behavioral changes, the interfaces for the
       ``Dispatch`` layer have changed:
 
-      -  ``DispatchScan``\ now accepts accumulator type as a template
+      -  ``DispatchScan`` now accepts accumulator type as a template
          parameter.
-      -  ``DispatchScanByKey``\ now accepts accumulator type as a
+      -  ``DispatchScanByKey`` now accepts accumulator type as a
          template parameter.
-      -  ``DispatchReduceByKey``\ now accepts accumulator type as the
+      -  ``DispatchReduceByKey`` now accepts accumulator type as the
          last template parameter.
 
 -  NVIDIA/cub#527: Deprecate the ``debug_synchronous`` flags on device
@@ -1073,7 +1073,7 @@ Bug Fixes
    construct items in uninitialized memory. Thanks to Hugh Winkler for
    this contribution.
 -  NVIDIA/cub#38: Fix ``cub::DeviceHistogram`` for ``size_t``
-   ``OffsetT``\ s. Thanks to Leo Fang for this contribution.
+   ``OffsetT``s. Thanks to Leo Fang for this contribution.
 -  NVIDIA/cub#35: Fix GCC-5 maybe-uninitialized warning. Thanks to Rong
    Ou for this contribution.
 -  NVIDIA/cub#36: Qualify namespace for ``va_printf`` in ``_CubLog``.
@@ -1204,7 +1204,7 @@ New Features
    -  ``<cub/util_cpp_dialect.cuh>``: Detects the C++ standard dialect.
    -  ``<cub/util_compiler.cuh>``: host and device compiler detection.
    -  ``<cub/util_deprecated.cuh>``: ``CUB_DEPRECATED``.
-   -  <cub/config.cuh>\ ``: Includes``\ <cub/util_arch.cuh>\ ``,``\ <cub/util_compiler.cuh>\ ``,``\ <cub/util_cpp_dialect.cuh>\ ``,``\ <cub/util_deprecated.cuh>\ ``,``\ <cub/util_macro.cuh>\ ``,``\ <cub/util_namespace.cuh>\`
+   -  ``<cub/config.cuh>``: Includes ``<cub/util_arch.cuh>``, ``<cub/util_compiler.cuh>``, ``<cub/util_cpp_dialect.cuh>``, ``<cub/util_deprecated.cuh>``, ``<cub/util_macro.cuh>``, ``<cub/util_namespace.cuh>``
 
 -  ``cub::DeviceCount`` and ``cub::DeviceCountUncached``, caching
    abstractions for ``cudaGetDeviceCount``.
@@ -1324,7 +1324,7 @@ Breaking Changes
 Bug Fixes
 ---------
 
--  #112: Fix ``cub::WarpScan``\ ’s broadcast of warp-wide aggregate for
+-  #112: Fix ``cub::WarpScan``'s broadcast of warp-wide aggregate for
    logical warps smaller than 32 threads.
 
 CUB 1.7.5
@@ -1561,8 +1561,8 @@ Bug Fixes
 -  #71: ``cub::KeyValuePair`` won’t work if ``Key`` has non-trivial
    constructor.
 -  #69:
-   cub::BlockStore::Store\ ``doesn't compile if``\ OutputIteratorT::value_type\ ``isn't``\ T`.
--  #68: ``cub::TilePrefixCallbackOp::WarpReduce`` doesn’t permit PTX
+   ``cub::BlockStore::Store`` doesn't compile if ``OutputIteratorT::value_type`` isn't ``T``.
+-  #68: ``cub::TilePrefixCallbackOp::WarpReduce`` doesn't permit PTX
    arch specialization.
 
 CUB 1.6.2 (previously 1.5.5)
@@ -2236,7 +2236,7 @@ Other Enhancements
    ``cub::WarpScan::*Sum`` methods if they only have ``operator+``
    overloaded. Previously they also required to support assignment from
    ``int(0)``.
--  Update ``cub::BlockReduce``\ ’s ``BLOCK_REDUCE_WARP_REDUCTIONS``
+-  Update ``cub::BlockReduce``'s ``BLOCK_REDUCE_WARP_REDUCTIONS``
    algorithm to work even when block size is not an even multiple of
    warp size.
 -  Refactoring of ``cub::DeviceAllocator`` interface and
