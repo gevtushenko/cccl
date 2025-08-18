@@ -169,6 +169,9 @@ def extract_doxygen_items(xml_dir):
                 namespace_compounds.append(compound)
         
         # Extract classes and structs
+        all_classes = []
+        all_structs = []
+        
         for compound in root.findall('.//compound[@kind="class"]'):
             name = compound.find('name').text
             refid = compound.get('refid')
@@ -177,7 +180,7 @@ def extract_doxygen_items(xml_dir):
             if 'detail' in name.lower() or '__' in name:
                 continue
             
-            items['classes'].append((name, refid))
+            all_classes.append((name, refid))
         
         for compound in root.findall('.//compound[@kind="struct"]'):
             name = compound.find('name').text
@@ -187,7 +190,34 @@ def extract_doxygen_items(xml_dir):
             if 'detail' in name.lower() or '__' in name:
                 continue
             
-            items['structs'].append((name, refid))
+            all_structs.append((name, refid))
+        
+        # Filter out nested classes/structs when their parent is also documented
+        # This prevents duplicate declarations in Sphinx
+        def is_nested_and_parent_exists(name, all_classes, all_structs):
+            """Check if this is a nested class/struct and its parent is also documented."""
+            if '::' not in name:
+                return False
+            
+            # Get the parent name by removing the last component
+            parent_name = '::'.join(name.split('::')[:-1])
+            
+            # Check if parent exists in either classes or structs list
+            all_items = all_classes + all_structs
+            for item_name, _ in all_items:
+                if item_name == parent_name:
+                    return True
+            return False
+        
+        # Filter classes (check against both classes and structs for parents)
+        for name, refid in all_classes:
+            if not is_nested_and_parent_exists(name, all_classes, all_structs):
+                items['classes'].append((name, refid))
+        
+        # Filter structs (check against both classes and structs for parents)
+        for name, refid in all_structs:
+            if not is_nested_and_parent_exists(name, all_classes, all_structs):
+                items['structs'].append((name, refid))
         
         # Extract groups
         for compound in root.findall('.//compound[@kind="group"]'):
@@ -341,6 +371,40 @@ def generate_api_page(category, classes, project_name):
     return '\n'.join(content)
 
 
+def get_group_member_refids(xml_dir):
+    """Extract all class/struct refids that belong to groups with content-only documentation."""
+    group_member_refids = set()
+    xml_path = Path(xml_dir)
+    
+    if not xml_path.exists():
+        return group_member_refids
+    
+    # Only skip individual pages for groups that use content-only documentation
+    # These groups document everything inline and don't need separate pages
+    content_only_groups = ['allocators']  # Groups that use :content-only: and document everything inline
+    
+    # Find all group XML files
+    for group_xml_file in xml_path.glob('group*.xml'):
+        try:
+            tree = ET.parse(group_xml_file)
+            root = tree.getroot()
+            compounddef = root.find('.//compounddef[@kind="group"]')
+            
+            if compounddef is not None:
+                # Get the group name
+                group_name_elem = compounddef.find('compoundname')
+                if group_name_elem is not None and group_name_elem.text in content_only_groups:
+                    # Only skip members of content-only groups
+                    for innerclass in compounddef.findall('innerclass'):
+                        class_refid = innerclass.get('refid')
+                        if class_refid:
+                            group_member_refids.add(class_refid)
+        except Exception as e:
+            logger.debug(f"Failed to parse group XML {group_xml_file}: {e}")
+    
+    return group_member_refids
+
+
 def generate_group_index_page(group_name, group_refid, project_name, xml_dir):
     """Generate RST content for a Doxygen group index page."""
     content = []
@@ -389,12 +453,12 @@ def generate_group_index_page(group_name, group_refid, project_name, xml_dir):
     content.append('')
     
     # Add the doxygengroup directive to get the full documentation
-    # Groups should include their members inline rather than in separate files
+    # Don't use :content-only: for any groups to avoid duplicate declarations
+    # Groups will show their description and link to member pages instead
     content.append(f'.. doxygengroup:: {group_name}')
     content.append(f'   :project: {project_name}')
-    content.append('   :content-only:')
-    content.append('   :members:')
-    content.append('   :undoc-members:')
+    # Removed :content-only: to prevent duplicate declarations with individual pages
+    content.append('   :outline:')  # Show group outline only, not full member documentation
     content.append('')
     
     # Don't add toctree for group members - they're documented inline
@@ -429,9 +493,15 @@ def generate_individual_api_page(class_name, refid, project_name):
     # Check if this is a struct by looking at the refid
     directive = 'doxygenstruct' if refid.startswith('struct') else 'doxygenclass'
     
+    # Special handling for classes with problematic template inheritance
+    # Use the :no-inheritance: option to avoid parsing malformed base class declarations
+    problematic_templates = ['thrust::shuffle_iterator']
+    
     # Add the doxygen directive
     content.append(f'.. {directive}:: {class_name}')
     content.append(f'   :project: {project_name}')
+    if class_name in problematic_templates:
+        content.append('   :no-inheritance:')
     content.append('   :members:')
     content.append('   :undoc-members:')
     content.append('')
@@ -823,6 +893,9 @@ def generate_api_docs(app, config):
         # Also extract categorized classes for category pages
         classes = extract_doxygen_classes(xml_dir)
         
+        # Get refids of classes/structs that belong to groups to avoid duplicate documentation
+        group_member_refids = get_group_member_refids(xml_dir)
+        
         # Determine output directory based on project
         api_dir = None
         if project_name == 'cub':
@@ -897,6 +970,9 @@ def generate_api_docs(app, config):
             if any(pattern in name for pattern in internal_patterns):
                 logger.debug(f"Skipping internal implementation detail: {name}")
                 continue
+            
+            # Note: We generate individual pages for all classes/structs,
+            # even if they're in groups, so that references work correctly
                 
             # Generate individual page
             content = generate_individual_api_page(name, refid, project_name)

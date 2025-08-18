@@ -1073,7 +1073,7 @@ Bug Fixes
    construct items in uninitialized memory. Thanks to Hugh Winkler for
    this contribution.
 -  NVIDIA/cub#38: Fix ``cub::DeviceHistogram`` for ``size_t``
-   ``OffsetT``s. Thanks to Leo Fang for this contribution.
+   ``OffsetT`` s. Thanks to Leo Fang for this contribution.
 -  NVIDIA/cub#35: Fix GCC-5 maybe-uninitialized warning. Thanks to Rong
    Ou for this contribution.
 -  NVIDIA/cub#36: Qualify namespace for ``va_printf`` in ``_CubLog``.
