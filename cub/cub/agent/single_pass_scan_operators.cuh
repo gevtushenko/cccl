@@ -640,16 +640,8 @@ struct ScanTileState<T, true>
   /**
    * @brief Initializer
    *
-   * @param[in] num_tiles
-   *   Number of tiles
-   *
    * @param[in] d_temp_storage
    *   Device-accessible allocation of temporary storage.
-   *   When nullptr, the required allocation size is written to \p temp_storage_bytes and no work is
-   * done.
-   *
-   * @param[in] temp_storage_bytes
-   *   Size in bytes of \t d_temp_storage allocation
    */
   _CCCL_HOST_DEVICE _CCCL_FORCEINLINE cudaError_t
   Init(int /*num_tiles*/, void* d_temp_storage, size_t /*temp_storage_bytes*/)
@@ -665,7 +657,7 @@ struct ScanTileState<T, true>
    *   Number of tiles
    *
    * @param[out] temp_storage_bytes
-   *   Size in bytes of \t d_temp_storage allocation
+   *   Size in bytes of @p d_temp_storage allocation
    */
   _CCCL_HOST_DEVICE _CCCL_FORCEINLINE static constexpr cudaError_t
   AllocationSize(int num_tiles, size_t& temp_storage_bytes)
@@ -854,7 +846,7 @@ struct ScanTileState<T, false>
    *   done.
    *
    * @param[in] temp_storage_bytes
-   *   Size in bytes of \t d_temp_storage allocation
+   *   Size in bytes of @p d_temp_storage allocation
    */
   /// Initializer
   _CCCL_HOST_DEVICE _CCCL_FORCEINLINE cudaError_t Init(int num_tiles, void* d_temp_storage, size_t temp_storage_bytes)
@@ -885,7 +877,7 @@ struct ScanTileState<T, false>
    *   Number of tiles
    *
    * @param[out] temp_storage_bytes
-   *   Size in bytes of \t d_temp_storage allocation
+   *   Size in bytes of @p d_temp_storage allocation
    */
   _CCCL_HOST_DEVICE _CCCL_FORCEINLINE static constexpr cudaError_t
   AllocationSize(int num_tiles, size_t& temp_storage_bytes)
@@ -1065,7 +1057,7 @@ struct ReduceByKeyScanTileState<ValueT, KeyT, true>
    *   is written to \p temp_storage_bytes and no work is done.
    *
    * @param[in] temp_storage_bytes
-   *   Size in bytes of \t d_temp_storage allocation
+   *   Size in bytes of @p d_temp_storage allocation
    */
   _CCCL_HOST_DEVICE _CCCL_FORCEINLINE cudaError_t
   Init(int /*num_tiles*/, void* d_temp_storage, size_t /*temp_storage_bytes*/)
@@ -1081,7 +1073,7 @@ struct ReduceByKeyScanTileState<ValueT, KeyT, true>
    *   Number of tiles
    *
    * @param[out] temp_storage_bytes
-   *   Size in bytes of \t d_temp_storage allocation
+   *   Size in bytes of @p d_temp_storage allocation
    */
   _CCCL_HOST_DEVICE _CCCL_FORCEINLINE static cudaError_t AllocationSize(int num_tiles, size_t& temp_storage_bytes)
   {
