@@ -127,7 +127,9 @@ def extract_function_signatures(func_name, refids, xml_dir, namespace=''):
                             
                             # Build the complete signature for breathe
                             full_signature = qualified_name + argsstring_elem.text.strip()
-                            signatures.append((member_refid, full_signature))
+                            # Check if this signature is already in the list (avoid duplicates)
+                            if not any(sig[1] == full_signature for sig in signatures):
+                                signatures.append((member_refid, full_signature))
         except Exception as e:
             logger.debug(f"Failed to extract signatures from {xml_file}: {e}")
     
@@ -280,45 +282,52 @@ def extract_doxygen_items(xml_dir):
     
     return items
 
-def extract_doxygen_classes(xml_dir):
+def extract_doxygen_classes(xml_dir, project_name=None):
     """Extract classes categorized by type for category pages."""
-    classes = {
-        'device': [],
-        'block': [],
-        'warp': [],
-        'grid': [],
-        'iterator': [],
-        'thread': [],
-        'utility': []
-    }
+    # Only CUB uses these specific categories
+    if project_name == 'cub':
+        classes = {
+            'device': [],
+            'block': [],
+            'warp': [],
+            'grid': [],
+            'iterator': [],
+            'thread': [],
+            'utility': []
+        }
+    else:
+        # Other projects don't need category pages
+        classes = {}
     
-    items = extract_doxygen_items(xml_dir)
-    
-    # Filter out internal implementation details
-    internal_patterns = ['StoreInternal', 'LoadInternal', '_TempStorage', 'TileDescriptor']
-    
-    # Categorize classes and structs
-    for name, refid in items['classes'] + items['structs']:
-        # Skip internal implementation details
-        if any(pattern in name for pattern in internal_patterns):
-            continue
-            
-        # Remove namespace prefixes for categorization
-        simple_name = name.split('::')[-1] if '::' in name else name
+    # Only categorize for CUB
+    if project_name == 'cub':
+        items = extract_doxygen_items(xml_dir)
         
-        # Categorize based on name
-        if 'Device' in simple_name:
-            classes['device'].append((name, refid))
-        elif 'Block' in simple_name:
-            classes['block'].append((name, refid))
-        elif 'Warp' in simple_name:
-            classes['warp'].append((name, refid))
-        elif 'Grid' in simple_name:
-            classes['grid'].append((name, refid))
-        elif 'Iterator' in simple_name.lower() or 'iterator' in simple_name.lower():
-            classes['iterator'].append((name, refid))
-        elif any(x in simple_name for x in ['Traits', 'Type', 'Allocator', 'Debug', 'Caching']):
-            classes['utility'].append((name, refid))
+        # Filter out internal implementation details
+        internal_patterns = ['StoreInternal', 'LoadInternal', '_TempStorage', 'TileDescriptor']
+        
+        # Categorize classes and structs
+        for name, refid in items['classes'] + items['structs']:
+            # Skip internal implementation details
+            if any(pattern in name for pattern in internal_patterns):
+                continue
+                
+            # Remove namespace prefixes for categorization
+            simple_name = name.split('::')[-1] if '::' in name else name
+            
+            # Categorize based on name
+            if 'Device' in simple_name:
+                classes['device'].append((name, refid))
+            elif 'Block' in simple_name:
+                classes['block'].append((name, refid))
+            elif 'Warp' in simple_name:
+                classes['warp'].append((name, refid))
+            elif 'Grid' in simple_name:
+                classes['grid'].append((name, refid))
+            elif 'Iterator' in simple_name.lower() or 'iterator' in simple_name.lower():
+                classes['iterator'].append((name, refid))
+            elif any(x in simple_name for x in ['Traits', 'Type', 'Allocator', 'Debug', 'Caching']):
+                classes['utility'].append((name, refid))
     
     return classes
 
@@ -417,6 +426,8 @@ def generate_group_index_page(group_name, group_refid, project_name, xml_dir):
     group_xml_file = Path(xml_dir) / f'{group_refid}.xml'
     title = group_name
     members = []
+    brief_description = ''
+    detailed_description = ''
     
     if group_xml_file.exists():
         try:
@@ -429,6 +440,14 @@ def generate_group_index_page(group_name, group_refid, project_name, xml_dir):
                 title_elem = compounddef.find('title')
                 if title_elem is not None and title_elem.text:
                     title = title_elem.text
+                
+                # Get brief description if available
+                brief_elem = compounddef.find('briefdescription')
+                if brief_elem is not None:
+                    # Extract text from brief description
+                    brief_text = ''.join(brief_elem.itertext()).strip()
+                    if brief_text:
+                        brief_description = brief_text
                 
                 # Get all inner classes/structs
                 for innerclass in compounddef.findall('innerclass'):
@@ -452,24 +471,22 @@ def generate_group_index_page(group_name, group_refid, project_name, xml_dir):
     content.append('=' * len(title))
     content.append('')
     
-    # Add the doxygengroup directive to get the full documentation
-    # Don't use :content-only: for any groups to avoid duplicate declarations
-    # Groups will show their description and link to member pages instead
-    content.append(f'.. doxygengroup:: {group_name}')
-    content.append(f'   :project: {project_name}')
-    # Removed :content-only: to prevent duplicate declarations with individual pages
-    content.append('   :outline:')  # Show group outline only, not full member documentation
-    content.append('')
+    # Add brief description if available
+    if brief_description:
+        content.append(brief_description)
+        content.append('')
     
-    # Don't add toctree for group members - they're documented inline
-    # Only add toctree for inner classes/structs that have their own pages
+    # Do NOT use doxygengroup directive to avoid duplicate declarations
+    # Instead, just provide a simple page with links to members
+    
+    # Add toctree for inner classes/structs
     inner_classes = [m for m in members if m[0] == 'class']
     if inner_classes:
         content.append('.. toctree::')
         content.append('   :maxdepth: 1')
         content.append('')
         
-        # Only add inner classes to toctree (they have their own pages)
+        # Add inner classes to toctree (they have their own pages)
         for member_kind, member_name, member_refid in inner_classes:
             content.append(f'   {member_refid}')
         content.append('')
@@ -872,6 +889,47 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
             content.append(format_doc_reference(name, refid, doc_prefix))
         content.append('')
     
+    # Add hidden toctree for all generated pages to avoid orphan warnings
+    # This is only for the api/index.rst page (when doc_prefix is empty)
+    if not doc_prefix:
+        content.append('.. toctree::')
+        content.append('   :hidden:')
+        content.append('   :maxdepth: 1')
+        content.append('')
+        
+        # Add category pages only for CUB
+        if project_name == 'cub':
+            for category in ['device', 'block', 'warp', 'grid', 'iterator', 'thread', 'utility']:
+                content.append(f'   {category}')
+        
+        # Add all class/struct pages
+        for name, refid in items['classes'] + items['structs']:
+            content.append(f'   {refid}')
+        
+        # Add all function pages
+        if items.get('function_groups'):
+            for func_name in items['function_groups']:
+                first_refid = items['function_groups'][func_name][0]
+                content.append(f'   {first_refid}')
+        
+        # Add all typedef pages
+        for name, refid in items['typedefs']:
+            content.append(f'   {refid}')
+        
+        # Add all enum pages
+        for name, refid in items['enums']:
+            content.append(f'   {refid}')
+        
+        # Add all variable pages
+        for name, refid in items['variables']:
+            content.append(f'   {refid}')
+        
+        # Add all group pages
+        for name, refid in items.get('groups', []):
+            content.append(f'   {refid}')
+        
+        content.append('')
+    
     return '\n'.join(content)
 
 
@@ -891,7 +949,7 @@ def generate_api_docs(app, config):
         items = extract_doxygen_items(xml_dir)
         
         # Also extract categorized classes for category pages
-        classes = extract_doxygen_classes(xml_dir)
+        classes = extract_doxygen_classes(xml_dir, project_name)
         
         # Get refids of classes/structs that belong to groups to avoid duplicate documentation
         group_member_refids = get_group_member_refids(xml_dir)
@@ -1055,15 +1113,37 @@ def generate_api_docs(app, config):
         logger.info(f"Generated auto API reference: {auto_api_file}")
         
         # Generate category index pages (for backward compatibility)
+        # Create stub files for all categories to avoid toctree warnings
         for category, class_list in classes.items():
+            output_file = api_dir / f'{category}.rst'
+            
             if class_list:
                 content = generate_category_index(category, class_list, project_name)
-                output_file = api_dir / f'{category}.rst'
-                
-                # Write the category index
-                with open(output_file, 'w') as f:
-                    f.write(content)
-                logger.info(f"Generated category index: {output_file}")
+            else:
+                # Create a minimal stub file for empty categories
+                category_titles = {
+                    'device': 'Device-wide Primitives',
+                    'block': 'Block-wide Primitives',
+                    'warp': 'Warp-wide Primitives',
+                    'grid': 'Grid-wide Primitives',
+                    'iterator': 'Iterator Utilities',
+                    'thread': 'Thread-level Primitives',
+                    'utility': 'Utility Components'
+                }
+                title = category_titles.get(category, category.title())
+                content = f""".. AUTO-GENERATED by auto_api_generator.py - DO NOT EDIT
+
+{title}
+{'=' * len(title)}
+
+.. note::
+   No items in this category.
+"""
+            
+            # Write the category index
+            with open(output_file, 'w') as f:
+                f.write(content)
+            logger.info(f"Generated category index: {output_file}")
 
 
 def setup(app: Sphinx):
