@@ -174,10 +174,11 @@ if which ${DOXYGEN} > /dev/null 2>&1; then
     echo "Generating Doxygen XML..."
     mkdir -p ${BUILDDIR}/doxygen/cub ${BUILDDIR}/doxygen/thrust ${BUILDDIR}/doxygen/cudax ${BUILDDIR}/doxygen/libcudacxx
     
-    # Copy images to Doxygen XML output directories where they're expected
-    mkdir -p ${BUILDDIR}/doxygen/cub/xml
-    cp img/shfl_broadcast_logo.png ${BUILDDIR}/doxygen/cub/xml/ 2>/dev/null || true
-    cp img/shfl_down_logo.png ${BUILDDIR}/doxygen/cub/xml/ 2>/dev/null || true
+    # Copy all images to Doxygen XML output directories where they're expected
+    for project in cub thrust cudax libcudacxx; do
+        mkdir -p ${BUILDDIR}/doxygen/${project}/xml
+        cp img/*.png ${BUILDDIR}/doxygen/${project}/xml/ 2>/dev/null || true
+    done
     
     # Run all Doxygen builds in parallel
     (cd cub && ${DOXYGEN} Doxyfile) &
