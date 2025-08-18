@@ -1122,17 +1122,7 @@ def generate_api_docs(app, config):
                 except:
                     pass
         
-        # Clean up auto_api.rst file if it exists and is auto-generated
-        auto_api_file = Path(app.srcdir) / project_name / 'auto_api.rst'
-        if auto_api_file.exists():
-            try:
-                with open(auto_api_file, 'r') as f:
-                    first_line = f.readline()
-                    if 'AUTO-GENERATED' in first_line:
-                        auto_api_file.unlink()
-                        logger.debug(f"Removed auto-generated {auto_api_file}")
-            except:
-                pass
+        # Note: We no longer generate or clean up auto_api.rst files
         
         # Create API directory if it doesn't exist
         api_dir.mkdir(parents=True, exist_ok=True)
@@ -1213,22 +1203,7 @@ def generate_api_docs(app, config):
             f.write(namespace_content)
         logger.info(f"Generated namespace API reference: {namespace_file}")
         
-        # Generate auto_api.rst file with comprehensive API listing
-        auto_api_file = Path(app.srcdir) / project_name / 'auto_api.rst'
-        
-        # Determine the title for the auto-generated API page
-        if project_name == 'cub':
-            title = 'CUB API Reference'
-        elif project_name == 'thrust':
-            title = 'Thrust: The C++ Parallel Algorithms Library API'
-        else:
-            title = f'{project_name.upper()} API Reference'
-        
-        # Generate the auto API content with api/ prefix for links
-        auto_api_content = generate_namespace_api_page(project_name, items, title=title, doc_prefix='api/')
-        with open(auto_api_file, 'w') as f:
-            f.write(auto_api_content)
-        logger.info(f"Generated auto API reference: {auto_api_file}")
+        # Note: We no longer generate auto_api.rst as api/index.rst serves the same purpose
         
         # Generate category index pages (for backward compatibility)
         # Create stub files for all categories to avoid toctree warnings

@@ -13,7 +13,7 @@ CUB
    benchmarking
    tuning
    releases
-   auto_api
+   api/index
 
 What is CUB?
 ==================================================
