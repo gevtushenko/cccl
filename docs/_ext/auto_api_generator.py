@@ -264,8 +264,15 @@ def extract_doxygen_classes(xml_dir):
     
     items = extract_doxygen_items(xml_dir)
     
+    # Filter out internal implementation details
+    internal_patterns = ['StoreInternal', 'LoadInternal', '_TempStorage', 'TileDescriptor']
+    
     # Categorize classes and structs
     for name, refid in items['classes'] + items['structs']:
+        # Skip internal implementation details
+        if any(pattern in name for pattern in internal_patterns):
+            continue
+            
         # Remove namespace prefixes for categorization
         simple_name = name.split('::')[-1] if '::' in name else name
         
@@ -382,25 +389,24 @@ def generate_group_index_page(group_name, group_refid, project_name, xml_dir):
     content.append('')
     
     # Add the doxygengroup directive to get the full documentation
-    # If we have members that will be included in the toctree, don't include :members:
-    # to avoid duplicate declarations
+    # Groups should include their members inline rather than in separate files
     content.append(f'.. doxygengroup:: {group_name}')
     content.append(f'   :project: {project_name}')
     content.append('   :content-only:')
-    if not members:
-        # Only include members if we don't have individual member pages
-        content.append('   :members:')
-        content.append('   :undoc-members:')
+    content.append('   :members:')
+    content.append('   :undoc-members:')
     content.append('')
     
-    # Add toctree for all member files
-    if members:
+    # Don't add toctree for group members - they're documented inline
+    # Only add toctree for inner classes/structs that have their own pages
+    inner_classes = [m for m in members if m[0] == 'class']
+    if inner_classes:
         content.append('.. toctree::')
         content.append('   :maxdepth: 1')
         content.append('')
         
-        # Add all member refids to toctree
-        for member_kind, member_name, member_refid in members:
+        # Only add inner classes to toctree (they have their own pages)
+        for member_kind, member_name, member_refid in inner_classes:
             content.append(f'   {member_refid}')
         content.append('')
     
@@ -713,27 +719,34 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
     content.append('-' * (len(namespace_name) + 13))
     content.append('')
     
+    # Filter out internal implementation details
+    internal_patterns = ['StoreInternal', 'LoadInternal', '_TempStorage', 'TileDescriptor']
+    
     # Classes section
-    if items['classes']:
+    filtered_classes = [(name, refid) for name, refid in items['classes'] 
+                       if not any(pattern in name for pattern in internal_patterns)]
+    if filtered_classes:
         content.append('Classes')
         content.append('~~~~~~~')
         content.append('')
         
         # Sort classes alphabetically
-        items['classes'].sort(key=lambda x: x[0].lower())
-        for name, refid in items['classes']:
+        filtered_classes.sort(key=lambda x: x[0].lower())
+        for name, refid in filtered_classes:
             content.append(format_doc_reference(name, refid, doc_prefix))
         content.append('')
     
     # Structs section
-    if items['structs']:
+    filtered_structs = [(name, refid) for name, refid in items['structs']
+                       if not any(pattern in name for pattern in internal_patterns)]
+    if filtered_structs:
         content.append('Structs')
         content.append('~~~~~~~')
         content.append('')
         
         # Sort structs alphabetically
-        items['structs'].sort(key=lambda x: x[0].lower())
-        for name, refid in items['structs']:
+        filtered_structs.sort(key=lambda x: x[0].lower())
+        for name, refid in filtered_structs:
             content.append(format_doc_reference(name, refid, doc_prefix))
         content.append('')
     
@@ -874,7 +887,15 @@ def generate_api_docs(app, config):
         api_dir.mkdir(parents=True, exist_ok=True)
         
         # Generate individual pages for each class/struct
+        # Skip internal implementation details that cause template warnings
+        internal_patterns = ['StoreInternal', 'LoadInternal', '_TempStorage', 'TileDescriptor']
+        
         for name, refid in items['classes'] + items['structs']:
+            # Skip internal implementation details
+            if any(pattern in name for pattern in internal_patterns):
+                logger.debug(f"Skipping internal implementation detail: {name}")
+                continue
+                
             # Generate individual page
             content = generate_individual_api_page(name, refid, project_name)
             output_file = api_dir / f'{refid}.rst'
