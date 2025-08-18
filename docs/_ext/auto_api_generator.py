@@ -1010,18 +1010,6 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
     # Add hidden toctree for all generated pages to avoid orphan warnings
     # This is only for the api/index.rst page (when doc_prefix is empty)
     if not doc_prefix:
-        # Track which files are already explicitly referenced
-        explicitly_referenced = set()
-        
-        # Collect all explicitly referenced files from the content
-        import re
-        for line in content:
-            if ':doc:' in line:
-                # Extract the referenced file from :doc: links
-                match = re.search(r':doc:`[^<]+<([^>]+)>`', line)
-                if match:
-                    explicitly_referenced.add(match.group(1))
-        
         content.append('.. toctree::')
         content.append('   :hidden:')
         content.append('   :maxdepth: 1')
@@ -1032,37 +1020,31 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
             for category in ['device', 'block', 'warp', 'grid', 'iterator', 'thread', 'utility']:
                 content.append(f'   {category}')
         
-        # Add all class/struct pages (but skip those already explicitly referenced)
+        # Add all class/struct pages
         for name, refid in items['classes'] + items['structs']:
-            if refid not in explicitly_referenced:
-                content.append(f'   {refid}')
+            content.append(f'   {refid}')
         
-        # Add all function pages (but skip those already explicitly referenced)
+        # Add all function pages
         if items.get('function_groups'):
             for func_name in items['function_groups']:
                 first_refid = items['function_groups'][func_name][0]
-                if first_refid not in explicitly_referenced:
-                    content.append(f'   {first_refid}')
+                content.append(f'   {first_refid}')
         
-        # Add all typedef pages (but skip those already explicitly referenced)
+        # Add all typedef pages
         for name, refid in items['typedefs']:
-            if refid not in explicitly_referenced:
-                content.append(f'   {refid}')
+            content.append(f'   {refid}')
         
-        # Add all enum pages (but skip those already explicitly referenced)
+        # Add all enum pages
         for name, refid in items['enums']:
-            if refid not in explicitly_referenced:
-                content.append(f'   {refid}')
+            content.append(f'   {refid}')
         
-        # Add all variable pages (but skip those already explicitly referenced)
+        # Add all variable pages
         for name, refid in items['variables']:
-            if refid not in explicitly_referenced:
-                content.append(f'   {refid}')
+            content.append(f'   {refid}')
         
-        # Add all group pages (but skip those already explicitly referenced)
+        # Add all group pages
         for name, refid in items.get('groups', []):
-            if refid not in explicitly_referenced:
-                content.append(f'   {refid}')
+            content.append(f'   {refid}')
         
         content.append('')
     
