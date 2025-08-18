@@ -39,6 +39,7 @@ THRUST_NAMESPACE_BEGIN
  *  \{
  */
 
+#ifndef _CCCL_DOXYGEN_INVOKED
 /*! This version of \p device_malloc allocates sequential device storage
  *  for bytes.
  *
@@ -68,6 +69,7 @@ THRUST_NAMESPACE_BEGIN
  *  \see device_free
  */
 inline thrust::device_ptr<void> device_malloc(const std::size_t n);
+#endif // _CCCL_DOXYGEN_INVOKED
 
 /*! This version of \p device_malloc allocates sequential device storage for
  *  new objects of the given type.
