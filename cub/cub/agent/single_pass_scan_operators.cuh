@@ -599,6 +599,7 @@ struct ScanTileState;
  * that can be combined into one machine word that can be
  * read/written coherently in a single access.
  */
+#ifndef _CCCL_DOXYGEN_INVOKED // Do not document - causes Breathe/Sphinx parsing errors with nested templates
 template <typename T>
 struct ScanTileState<T, true>
 {
@@ -800,6 +801,7 @@ public:
     return tile_descriptor.value;
   }
 };
+#endif // _CCCL_DOXYGEN_INVOKED
 
 /**
  * Tile status interface specialized for scan status and value types that
@@ -992,6 +994,7 @@ struct ReduceByKeyScanTileState<ValueT, KeyT, false> : ScanTileState<KeyValuePai
  * Tile status interface for reduction by key, specialized for scan status and value types that
  * can be combined into one machine word that can be read/written coherently in a single access.
  */
+#ifndef _CCCL_DOXYGEN_INVOKED // Do not document - causes Breathe/Sphinx parsing errors with nested templates
 template <typename ValueT, typename KeyT>
 struct ReduceByKeyScanTileState<ValueT, KeyT, true>
 {
@@ -1172,6 +1175,7 @@ struct ReduceByKeyScanTileState<ValueT, KeyT, true>
     value.key   = tile_descriptor.key;
   }
 };
+#endif // _CCCL_DOXYGEN_INVOKED
 
 /******************************************************************************
  * Prefix call-back operator for coupling local block scan within a
