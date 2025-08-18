@@ -7,7 +7,7 @@ Thrust: The C++ Parallel Algorithms Library
    :hidden:
    :maxdepth: 2
 
-   :ref:`Overview <thrust-module>`
+   Overview <self>
    releases
    release_process
    developer_build

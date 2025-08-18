@@ -642,11 +642,77 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                     group_name = group_refid[7:]
         
         if is_group_function and group_name:
-            # For group functions, use a simpler approach
-            # Just document the function directly, not through the group
-            content.append(f'.. doxygenfunction:: {qualified_name}')
-            content.append(f'   :project: {project_name}')
-            content.append('')
+            # For group functions with overloads, we need to handle them specially
+            if len(overload_refids) > 1 and xml_dir:
+                # Extract signatures for all overloads
+                signatures = extract_function_signatures(member_name, overload_refids, xml_dir, namespace=project_name)
+                
+                if signatures:
+                    content.append('Overloads')
+                    content.append('---------')
+                    content.append('')
+                    
+                    for idx, (refid, full_sig) in enumerate(signatures, 1):
+                        # Extract just the parameter list from the full signature
+                        simple_name = member_name.split('::')[-1] if '::' in member_name else member_name
+                        if simple_name in full_sig:
+                            sig_idx = full_sig.rfind(simple_name)
+                            if sig_idx != -1:
+                                params = full_sig[sig_idx + len(simple_name):].strip()
+                                
+                                # Create a simplified signature for the section header
+                                param_summary = extract_param_summary(params)
+                                
+                                # Add a section header for this overload
+                                content.append(f'``{simple_name}({param_summary})``')
+                                content.append('^' * (len(simple_name) + len(param_summary) + 6))
+                                content.append('')
+                                
+                                # Use doxygenfunction with the specific parameter signature
+                                content.append(f'.. doxygenfunction:: {qualified_name}{params}')
+                                content.append(f'   :project: {project_name}')
+                                content.append('')
+                else:
+                    # Fallback to using doxygengroup if we can't extract signatures
+                    content.append(f'.. doxygengroup:: {group_name}')
+                    content.append(f'   :project: {project_name}')
+                    content.append(f'   :content-only:')
+                    content.append('')
+            else:
+                # Single overload from group - but there might be other overloads in the namespace
+                # Extract the signature to be specific
+                if xml_dir:
+                    signatures = extract_function_signatures(member_name, overload_refids, xml_dir, namespace=project_name)
+                    if signatures and len(signatures) == 1:
+                        refid, full_sig = signatures[0]
+                        simple_name = member_name.split('::')[-1] if '::' in member_name else member_name
+                        if simple_name in full_sig:
+                            sig_idx = full_sig.rfind(simple_name)
+                            if sig_idx != -1:
+                                params = full_sig[sig_idx + len(simple_name):].strip()
+                                content.append(f'.. doxygenfunction:: {qualified_name}{params}')
+                                content.append(f'   :project: {project_name}')
+                                content.append('')
+                            else:
+                                # Fallback to simple
+                                content.append(f'.. doxygenfunction:: {qualified_name}')
+                                content.append(f'   :project: {project_name}')
+                                content.append('')
+                        else:
+                            # Fallback to simple
+                            content.append(f'.. doxygenfunction:: {qualified_name}')
+                            content.append(f'   :project: {project_name}')
+                            content.append('')
+                    else:
+                        # Fallback to simple
+                        content.append(f'.. doxygenfunction:: {qualified_name}')
+                        content.append(f'   :project: {project_name}')
+                        content.append('')
+                else:
+                    # No xml_dir, use simple
+                    content.append(f'.. doxygenfunction:: {qualified_name}')
+                    content.append(f'   :project: {project_name}')
+                    content.append('')
         elif len(overload_refids) > 1 and xml_dir:
             # For functions with multiple overloads in namespace, extract signatures
             # For cudax, member_name already includes namespace, for others use project_name
@@ -912,6 +978,18 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
     # Add hidden toctree for all generated pages to avoid orphan warnings
     # This is only for the api/index.rst page (when doc_prefix is empty)
     if not doc_prefix:
+        # Track which files are already explicitly referenced
+        explicitly_referenced = set()
+        
+        # Collect all explicitly referenced files from the content
+        import re
+        for line in content:
+            if ':doc:' in line:
+                # Extract the referenced file from :doc: links
+                match = re.search(r':doc:`[^<]+<([^>]+)>`', line)
+                if match:
+                    explicitly_referenced.add(match.group(1))
+        
         content.append('.. toctree::')
         content.append('   :hidden:')
         content.append('   :maxdepth: 1')
@@ -922,31 +1000,37 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
             for category in ['device', 'block', 'warp', 'grid', 'iterator', 'thread', 'utility']:
                 content.append(f'   {category}')
         
-        # Add all class/struct pages
+        # Add all class/struct pages (but skip those already explicitly referenced)
         for name, refid in items['classes'] + items['structs']:
-            content.append(f'   {refid}')
+            if refid not in explicitly_referenced:
+                content.append(f'   {refid}')
         
-        # Add all function pages
+        # Add all function pages (but skip those already explicitly referenced)
         if items.get('function_groups'):
             for func_name in items['function_groups']:
                 first_refid = items['function_groups'][func_name][0]
-                content.append(f'   {first_refid}')
+                if first_refid not in explicitly_referenced:
+                    content.append(f'   {first_refid}')
         
-        # Add all typedef pages
+        # Add all typedef pages (but skip those already explicitly referenced)
         for name, refid in items['typedefs']:
-            content.append(f'   {refid}')
+            if refid not in explicitly_referenced:
+                content.append(f'   {refid}')
         
-        # Add all enum pages
+        # Add all enum pages (but skip those already explicitly referenced)
         for name, refid in items['enums']:
-            content.append(f'   {refid}')
+            if refid not in explicitly_referenced:
+                content.append(f'   {refid}')
         
-        # Add all variable pages
+        # Add all variable pages (but skip those already explicitly referenced)
         for name, refid in items['variables']:
-            content.append(f'   {refid}')
+            if refid not in explicitly_referenced:
+                content.append(f'   {refid}')
         
-        # Add all group pages
+        # Add all group pages (but skip those already explicitly referenced)
         for name, refid in items.get('groups', []):
-            content.append(f'   {refid}')
+            if refid not in explicitly_referenced:
+                content.append(f'   {refid}')
         
         content.append('')
     
