@@ -267,10 +267,20 @@ def extract_doxygen_classes(xml_dir):
     # Filter out internal implementation details
     internal_patterns = ['StoreInternal', 'LoadInternal', '_TempStorage', 'TileDescriptor']
     
+    # Also skip problematic template specializations that cause Breathe/Sphinx warnings
+    problematic_specializations = [
+        'ReduceByKeyScanTileState<ValueT, KeyT, true>',
+        'ScanTileState<T, true>'
+    ]
+    
     # Categorize classes and structs
     for name, refid in items['classes'] + items['structs']:
         # Skip internal implementation details
         if any(pattern in name for pattern in internal_patterns):
+            continue
+            
+        # Skip problematic template specializations
+        if any(spec in name for spec in problematic_specializations):
             continue
             
         # Remove namespace prefixes for categorization
@@ -715,16 +725,25 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
     content.append('')
     
     # Add namespace description
-    content.append(f'Namespace ``{namespace_name}``')
-    content.append('-' * (len(namespace_name) + 13))
+    namespace_title = f'Namespace ``{namespace_name}``'
+    content.append(namespace_title)
+    # Make underline slightly longer to avoid "too short" warnings
+    content.append('-' * (len(namespace_title) + 2))
     content.append('')
     
     # Filter out internal implementation details
     internal_patterns = ['StoreInternal', 'LoadInternal', '_TempStorage', 'TileDescriptor']
     
+    # Also skip problematic template specializations that cause Breathe/Sphinx warnings
+    problematic_specializations = [
+        'ReduceByKeyScanTileState<ValueT, KeyT, true>',
+        'ScanTileState<T, true>'
+    ]
+    
     # Classes section
     filtered_classes = [(name, refid) for name, refid in items['classes'] 
-                       if not any(pattern in name for pattern in internal_patterns)]
+                       if not any(pattern in name for pattern in internal_patterns)
+                       and not any(spec in name for spec in problematic_specializations)]
     if filtered_classes:
         content.append('Classes')
         content.append('~~~~~~~')
@@ -738,7 +757,8 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
     
     # Structs section
     filtered_structs = [(name, refid) for name, refid in items['structs']
-                       if not any(pattern in name for pattern in internal_patterns)]
+                       if not any(pattern in name for pattern in internal_patterns)
+                       and not any(spec in name for spec in problematic_specializations)]
     if filtered_structs:
         content.append('Structs')
         content.append('~~~~~~~')
@@ -890,10 +910,21 @@ def generate_api_docs(app, config):
         # Skip internal implementation details that cause template warnings
         internal_patterns = ['StoreInternal', 'LoadInternal', '_TempStorage', 'TileDescriptor']
         
+        # Also skip problematic template specializations that cause Breathe/Sphinx warnings
+        problematic_specializations = [
+            'ReduceByKeyScanTileState<ValueT, KeyT, true>',
+            'ScanTileState<T, true>'
+        ]
+        
         for name, refid in items['classes'] + items['structs']:
             # Skip internal implementation details
             if any(pattern in name for pattern in internal_patterns):
                 logger.debug(f"Skipping internal implementation detail: {name}")
+                continue
+                
+            # Skip problematic template specializations
+            if any(spec in name for spec in problematic_specializations):
+                logger.debug(f"Skipping problematic template specialization: {name}")
                 continue
                 
             # Generate individual page
