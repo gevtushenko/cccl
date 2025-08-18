@@ -656,7 +656,8 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                         # Extract just the parameter list from the full signature
                         simple_name = member_name.split('::')[-1] if '::' in member_name else member_name
                         if simple_name in full_sig:
-                            sig_idx = full_sig.rfind(simple_name)
+                            # Use find instead of rfind to get the first occurrence
+                            sig_idx = full_sig.find(simple_name)
                             if sig_idx != -1:
                                 params = full_sig[sig_idx + len(simple_name):].strip()
                                 # Handle trailing noexcept specifier
@@ -702,7 +703,8 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                         refid, full_sig = signatures[0]
                         simple_name = member_name.split('::')[-1] if '::' in member_name else member_name
                         if simple_name in full_sig:
-                            sig_idx = full_sig.rfind(simple_name)
+                            # Use find instead of rfind to get the first occurrence
+                            sig_idx = full_sig.find(simple_name)
                             if sig_idx != -1:
                                 params = full_sig[sig_idx + len(simple_name):].strip()
                                 # Handle trailing noexcept specifier
