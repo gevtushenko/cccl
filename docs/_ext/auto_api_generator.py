@@ -1030,17 +1030,26 @@ def generate_namespace_api_page(project_name, items, title=None, doc_prefix=''):
                 first_refid = items['function_groups'][func_name][0]
                 content.append(f'   {first_refid}')
         
-        # Add all typedef pages
+        # Add all typedef pages (deduplicate by refid)
+        typedef_refids_seen = set()
         for name, refid in items['typedefs']:
-            content.append(f'   {refid}')
+            if refid not in typedef_refids_seen:
+                content.append(f'   {refid}')
+                typedef_refids_seen.add(refid)
         
-        # Add all enum pages
+        # Add all enum pages (deduplicate by refid)
+        enum_refids_seen = set()
         for name, refid in items['enums']:
-            content.append(f'   {refid}')
+            if refid not in enum_refids_seen:
+                content.append(f'   {refid}')
+                enum_refids_seen.add(refid)
         
-        # Add all variable pages
+        # Add all variable pages (deduplicate by refid)
+        variable_refids_seen = set()
         for name, refid in items['variables']:
-            content.append(f'   {refid}')
+            if refid not in variable_refids_seen:
+                content.append(f'   {refid}')
+                variable_refids_seen.add(refid)
         
         # Add all group pages
         for name, refid in items.get('groups', []):
