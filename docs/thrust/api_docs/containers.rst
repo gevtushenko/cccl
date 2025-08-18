@@ -9,4 +9,4 @@ Containers
 
    ../api/*host__vector*
    ../api/*device__vector*
-   ../api/typedef_group__containers*
+   ../api/group__containers_*

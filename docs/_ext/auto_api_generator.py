@@ -221,11 +221,18 @@ def extract_doxygen_items(xml_dir):
             if not is_nested_and_parent_exists(name, all_classes, all_structs):
                 items['structs'].append((name, refid))
         
-        # Extract groups
+        # Extract groups and their members
         for compound in root.findall('.//compound[@kind="group"]'):
             name = compound.find('name').text
             refid = compound.get('refid')
             items['groups'].append((name, refid))
+            
+            # Also extract typedefs that are members of groups
+            for member in compound.findall('member[@kind="typedef"]'):
+                typedef_name = member.find('name').text
+                typedef_refid = member.get('refid')
+                # Group typedefs are already namespace-qualified in the XML
+                items['typedefs'].append((typedef_name, typedef_refid))
         
         # Extract functions, typedefs, enums, and variables from namespaces
         for namespace_compound in namespace_compounds:
@@ -510,15 +517,9 @@ def generate_individual_api_page(class_name, refid, project_name):
     # Check if this is a struct by looking at the refid
     directive = 'doxygenstruct' if refid.startswith('struct') else 'doxygenclass'
     
-    # Special handling for classes with problematic template inheritance
-    # Use the :no-inheritance: option to avoid parsing malformed base class declarations
-    problematic_templates = ['thrust::shuffle_iterator']
-    
     # Add the doxygen directive
     content.append(f'.. {directive}:: {class_name}')
     content.append(f'   :project: {project_name}')
-    if class_name in problematic_templates:
-        content.append('   :no-inheritance:')
     content.append('   :members:')
     content.append('   :undoc-members:')
     content.append('')
@@ -620,12 +621,13 @@ def generate_member_api_page(member_name, member_type, project_name, refid=None,
                 if not group_name:
                     group_name = group_refid[7:]
         
-        if not is_in_namespace and is_group_function and group_name:
-            # For group functions, just use doxygengroup
-            # The TOC will be generated from the actual function signatures
+        if is_group_function and group_name:
+            # For group functions, prefer using doxygengroup for better compatibility
+            # This works better for functions with complex signatures
             content.append(f'.. doxygengroup:: {group_name}')
             content.append(f'   :project: {project_name}')
-            content.append(f'   :members:')
+            content.append(f'   :content-only:')
+            content.append(f'   :members: {member_name}')
             content.append('')
         elif len(overload_refids) > 1 and xml_dir:
             # For functions with multiple overloads in namespace, extract signatures
