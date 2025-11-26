@@ -19,6 +19,7 @@
 #include <cub/device/dispatch/dispatch_common.cuh>
 #include <cub/util_device.cuh>
 #include <cub/warp/warp_reduce.cuh>
+#include <cuda/std/__cccl/cuda_capabilities.h>
 
 CUB_NAMESPACE_BEGIN
 namespace detail::segmented_sort
@@ -435,6 +436,8 @@ __launch_bounds__(ChainedPolicyT::ActivePolicy::LargeSegmentPolicy::BLOCK_THREAD
     BeginOffsetIteratorT d_begin_offsets,
     EndOffsetIteratorT d_end_offsets)
 {
+  _CCCL_PDL_TRIGGER_NEXT_LAUNCH(); 
+
   using ActivePolicyT         = typename ChainedPolicyT::ActivePolicy;
   using LargeSegmentPolicyT   = typename ActivePolicyT::LargeSegmentPolicy;
   using local_segment_index_t = local_segment_index_t;
