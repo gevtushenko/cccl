@@ -134,7 +134,12 @@ CUB_RUNTIME_FUNCTION _CCCL_VISIBILITY_HIDDEN cudaError_t DeviceSegmentedSortCont
             (long long) stream);
 #endif // CUB_DEBUG_LOG
 
-    launcher_factory(small_and_medium_blocks_in_grid, wrapped_policy.SmallSegment().BlockThreads(), 0, stream)
+    launcher_factory(
+      small_and_medium_blocks_in_grid,
+      wrapped_policy.SmallSegment().BlockThreads(),
+      0,
+      stream,
+      true /* dependent launch */)
       .doit(small_kernel,
             small_segments,
             medium_segments,
