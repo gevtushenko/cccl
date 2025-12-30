@@ -8,7 +8,7 @@ CUDA Core Compute Libraries
    cpp
    python/index
 
-Welcome to the CUDA Core Compute Libraries (CCCL) where our mission is to
+Welcome to the CUDA Core Compute Library (CCCL) where our mission is to
 make CUDA C++ and Python more delightful.
 
 - :ref:`cccl-cpp-libraries`
