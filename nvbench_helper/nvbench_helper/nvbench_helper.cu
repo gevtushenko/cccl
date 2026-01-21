@@ -326,62 +326,14 @@ private:
 
 template <typename ExecT, typename DistT, typename T>
 void generator_t::generate(
-  const ExecT& exec, DistT& dist, seed_t seed, cuda::std::span<T> span, bit_entropy entropy, T min, T max)
+  const ExecT& exec, DistT& , seed_t seed, cuda::std::span<T> span, bit_entropy , T min, T max)
 {
-  switch (entropy)
-  {
-    case bit_entropy::_1_000: {
-      const double* uniform_distribution = dist.new_uniform_distribution(seed, span.size());
-
-      thrust::transform(
-        exec,
-        uniform_distribution,
-        uniform_distribution + span.size(),
-        span.data(),
-        ::cuda::proclaim_copyable_arguments(random_to_item_t<T>(min, max)));
-      return;
-    }
-    case bit_entropy::_0_000: {
-      std::mt19937 rng;
-      rng.seed(static_cast<std::mt19937::result_type>(seed.get()));
-      std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-      T random_value = random_to_item_t<T>(min, max)(dist(rng));
-      thrust::fill(exec, span.data(), span.data() + span.size(), random_value);
-      return;
-    }
-    default: {
-      const double* uniform_distribution = dist.new_uniform_distribution(seed, span.size());
-      ++seed;
-
-      thrust::transform(
-        exec,
-        uniform_distribution,
-        uniform_distribution + span.size(),
-        span.data(),
-        ::cuda::proclaim_copyable_arguments(random_to_item_t<T>(min, max)));
-
-      const int number_of_steps = static_cast<int>(entropy);
-
-      constexpr bool is_device = std::is_same_v<DistT, device_generator_t>;
-      using vec_t              = std::conditional_t<is_device, thrust::device_vector<T>, thrust::host_vector<T>>;
-      vec_t tmp_vec(span.size());
-      cuda::std::span<T> tmp(thrust::raw_pointer_cast(tmp_vec.data()), tmp_vec.size());
-
-      for (int i = 0; i < number_of_steps; i++, ++seed)
-      {
-        this->generate(is_device ? executor::device : executor::host, seed, tmp, bit_entropy::_1_000, min, max);
-
-        thrust::transform(
-          exec,
-          span.data(),
-          span.data() + span.size(),
-          tmp.data(),
-          span.data(),
-          ::cuda::proclaim_copyable_arguments(and_t{}));
-      }
-      return;
-    }
-  };
+  // sacrificy entropy for now to make clangcuda
+  std::mt19937 rng;
+  rng.seed(static_cast<std::mt19937::result_type>(seed.get()));
+  std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+  T random_value = random_to_item_t<T>(min, max)(dist(rng));
+  thrust::fill(exec, span.data(), span.data() + span.size(), random_value);
 }
 
 template <typename ExecT, typename DistT>
