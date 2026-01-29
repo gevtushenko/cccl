@@ -51,6 +51,15 @@ set(
   "-DCCCL_TAG=${CCCL_EXAMPLE_CPM_TAG}"
 )
 
+# everything-bagel is built directly as part of CCCL, not as a standalone CPM project
+add_subdirectory(everything-bagel)
+
+# The remaining examples are CPM-based compile tests that build standalone projects.
+# They require CCCL_ENABLE_TESTING to be enabled.
+if (NOT CCCL_ENABLE_TESTING)
+  return()
+endif()
+
 if (MSVC)
   message(STATUS "Skipping example build-and-test CTests on MSVC")
   return()
