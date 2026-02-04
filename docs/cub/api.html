@@ -46,8 +46,8 @@
 
 
     <script src="../_static/documentation_options.js?v=26f62d79"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=5ceeb459"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -326,7 +326,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/functional.html">Functional</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/iterators.html">Fancy Iterators</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/type_traits.html">Type traits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/vector_tuple_protocol.html">Vector Tuple Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/numeric.html">Numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/random.html">Random</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/memory.html">Memory</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/memory_resource.html">Memory Resources</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/extended_api/math.html">Math</a></li>
@@ -353,6 +355,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../libcudacxx/api/index.html">API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classbasic__any__resource.html">basic_any_resource</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classbasic__resource__ref.html">basic_resource_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classbuffer.html">buffer</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classcompute__capability.html">compute_capability</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classconstant__iterator.html">constant_iterator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classcounting__iterator.html">counting_iterator</a></li>
@@ -361,6 +364,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classdiscard__iterator.html">discard_iterator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classevent.html">event</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classevent__ref.html">event_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classheterogeneous__iterator.html">heterogeneous_iterator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classlegacy__managed__memory__resource.html">legacy_managed_memory_resource</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classlegacy__pinned__memory__resource.html">legacy_pinned_memory_resource</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/classmanaged__memory__pool__ref.html">managed_memory_pool_ref</a></li>
@@ -387,6 +391,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/structmanaged__memory__pool.html">managed_memory_pool</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/structmemory__pool__properties.html">memory_pool_properties</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/structpinned__memory__pool.html">pinned_memory_pool</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/structcuda_1_1std_1_1pointer__traits_3_1_1cuda_1_1heterogeneous__iterator_3_01__Tp_00_01__Properties_8_8_8_01_4_01_4.html">cuda::std::pointer_traits&lt;::cuda::heterogeneous_iterator&lt; _Tp, _Properties… &gt; &gt;</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/structproperties__list.html">properties_list</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/structshared__resource.html">shared_resource</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/structstream.html">stream</a></li>
@@ -396,7 +401,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/group__iterators_1ga3a57fccd85438fe6ac517f59802807b5.html">zip_iterator::pointer</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/group__iterators_1ga3d65c0bac93cd905b59b6b7cb0c04f08.html">zip_iterator::reference</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/group__iterators_1gaebe2d9c8478b11e187372e211ab26711.html">zip_iterator::value_type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/group__construction.html">Construction</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/group__iterators.html">Iterators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/group__access.html">Access</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../libcudacxx/api/group__size.html">Size</a></li>
 </ul>
 </details></li>
 </ul>
@@ -411,7 +419,6 @@
 <li class="toctree-l4"><a class="reference internal" href="developer/warp_level.html">Warp-level</a></li>
 <li class="toctree-l4"><a class="reference internal" href="developer/block_scope.html">Block-scope</a></li>
 <li class="toctree-l4"><a class="reference internal" href="developer/device_scope.html">Device-scope</a></li>
-<li class="toctree-l4"><a class="reference internal" href="developer/visibility.html">Symbol Visibility</a></li>
 <li class="toctree-l4"><a class="reference internal" href="developer/nvtx.html">NVTX</a></li>
 </ul>
 </details></li>
@@ -544,6 +551,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/structcub_1_1ChainedPolicy.html">cub::ChainedPolicy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/structcub_1_1DeviceAdjacentDifference.html">cub::DeviceAdjacentDifference</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/structcub_1_1DeviceCopy.html">cub::DeviceCopy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/structcub_1_1DeviceFind.html">cub::DeviceFind</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/structcub_1_1DeviceFor.html">cub::DeviceFor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/structcub_1_1DeviceHistogram.html">cub::DeviceHistogram</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/structcub_1_1DeviceMemcpy.html">cub::DeviceMemcpy</a></li>
@@ -599,7 +607,6 @@
 <li class="toctree-l4"><a class="reference internal" href="api/namespacecub_1a03d07a1e0e455128713337bc38992ec6.html">cub::StoreDirectWarpStriped</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/namespacecub_1af987f4650f9ab899588513632a7a335c.html">cub::ThreadLoad</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/namespacecub_1a553633b74da5b2b77992aa60c1f278f3.html">cub::ThreadStore</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/namespacecub_1a2ed79a837d7d04fc62062a113f41819f.html">cub::operator&lt;&lt;</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/namespacecub_1a1b6e2aaf857cfd72861cf2499bf9acb3.html">cub::MergePath</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/namespacecub_1aed5ce3db2c0ebfafd33d5ef6a1eb71a8.html">cub::SerialMerge</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/namespacecub_1a5bc54df3b7da4260d8c1d8579f63f0c0.html">cub::ThreadReduce</a></li>
@@ -820,10 +827,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1ae268bfffafaa04f5a8a4cf902861367c.html">thrust::next</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1a253ceec56c467b5ce73b1593ff8b1375.html">thrust::prev</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1aadb50b0c546159c3f06ecdf8349fb901.html">thrust::make_tagged_deleter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1a2ac27e75b5e3ff9162038c65f9a962e6.html">thrust::allocate_unique</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1a422a511a42fdee806b0c6fd3b2c1a297.html">thrust::uninitialized_allocate_unique</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1ac43d207f42ebc9d5ecf79d7708119ec1.html">thrust::allocate_unique_n</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1a107423505ed1d5bd9e05dda2e3c2a4ad.html">thrust::uninitialized_allocate_unique_n</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1a82dc371eac6d1499d28f153e3f921926.html">thrust::allocate_unique</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1ae7fd98cda27174a35283582ebdd724c1.html">thrust::uninitialized_allocate_unique</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1a66c4817439220a11edc1c810c9f2c4e4.html">thrust::allocate_unique_n</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../thrust/api/namespacethrust_1a3a4c778f56a57b41e72b4a6037ed08da.html">thrust::uninitialized_allocate_unique_n</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__binary__search_1gad2ac5a1c5091366144d6fdbf2ff5551e.html">thrust::lower_bound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__binary__search_1gac85cc9ea00f4bdd8f80ad25fff16741d.html">thrust::upper_bound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__binary__search_1gaa855fdcf3942f95919bb712e26c7bfc6.html">thrust::binary_search</a></li>
@@ -995,10 +1002,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga30dd0858022330597b14a4c034e1936d.html">thrust::integer_sequence_push_front</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1gafcd0e9ee2ab2f7123caf84f6c85a691b.html">thrust::is_contiguous_iterator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga8cff578125e8f610db7f03cdba1e271d.html">thrust::is_execution_policy</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga80899866447b02e95640aa86cb3b9d5b.html">thrust::is_operator_greater_function_object</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga89fa2cd21cf618ac3f6742e015347bd4.html">thrust::is_operator_less_function_object</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga9e81f0f06e410e65fd4ae0ff3649aa8d.html">thrust::is_operator_less_or_greater_function_object</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga4951501a3c7337be79222a966d1f9d73.html">thrust::is_operator_plus_function_object</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__iterator__traits_1gadffd965cb3b426d99eab1f6506c30ed6.html">thrust::iterator_difference_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__iterator__traits_1ga9410f26f50e2038f458b0274dd0a39cf.html">thrust::iterator_pointer_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__iterator__traits_1ga6bbc4f5672e0638f4fb040db3a3ea90b.html">thrust::iterator_reference_t</a></li>
@@ -1073,10 +1076,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__execution__policies_1gaebabcc1c0958344babfccdcf379915e5.html">thrust::host</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga1da323e7acfe527a28ea6bd940488584.html">thrust::is_contiguous_iterator_v</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga2bdbeb4d76c1629f2b2e2323ce10a556.html">thrust::is_execution_policy_v</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga42415f71c7b50c51763edc7a3591a400.html">thrust::is_operator_greater_function_object_v</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1ga38d413b5daee16a97fa7d9da9f3c4b29.html">thrust::is_operator_less_function_object_v</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1gac4884b2dd3b4d114ebc739d254c9d505.html">thrust::is_operator_less_or_greater_function_object_v</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__type__traits_1gad5d7207e2d28604f48cef2daccf1ed22.html">thrust::is_operator_plus_function_object_v</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__transformations.html">Transformations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__algorithms.html">Algorithms</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../thrust/api/group__searching.html">Searching</a></li>
@@ -1209,6 +1208,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1data__instance.html">cuda::experimental::stf::data_instance</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1data__interface.html">cuda::experimental::stf::data_interface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1data__place.html">cuda::experimental::stf::data_place</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1data__place__extension.html">cuda::experimental::stf::data_place_extension</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1deferred__stream__task.html">cuda::experimental::stf::deferred_stream_task</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1dim4.html">cuda::experimental::stf::dim4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1event__impl.html">cuda::experimental::stf::event_impl</a></li>
@@ -1229,6 +1229,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1graph__task.html">cuda::experimental::stf::graph_task</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1graph__task_3_4.html">cuda::experimental::stf::graph_task&lt;&gt;</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1green__context__helper.html">cuda::experimental::stf::green_context_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1green__ctx__data__place.html">cuda::experimental::stf::green_ctx_data_place</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1green__ctx__view.html">cuda::experimental::stf::green_ctx_view</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1hashtable.html">cuda::experimental::stf::hashtable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/classcuda_1_1experimental_1_1stf_1_1hashtable__stream__interface.html">cuda::experimental::stf::hashtable_stream_interface</a></li>
@@ -1350,6 +1351,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/namespacecuda_1_1experimental_1_1stf_1a1a3f54ba8407a462e7410a45af0f75a3.html">cuda::experimental::stf::data_hash</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/namespacecuda_1_1experimental_1_1stf_1abe262e91fef7dd1a874d0c45463f4529.html">cuda::experimental::stf::data_dump</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/namespacecuda_1_1experimental_1_1stf_1acddbda1fa79384aa723f05740d12001c.html">cuda::experimental::stf::pack_state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cudax/api/namespacecuda_1_1experimental_1_1stf_1a20c223a02a2cfb089fe1d91f932912f2.html">cuda::experimental::stf::make_green_ctx_data_place</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/namespacecuda_1_1experimental_1_1stf_1a5b257d4c2331422fd492439852cb9005.html">cuda::experimental::stf::get_cuda_context_id</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/namespacecuda_1_1experimental_1_1stf_1a58cda9cdc2010f7451a34efc10f8f3f2.html">cuda::experimental::stf::place_partition_scope_to_string</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cudax/api/namespacecuda_1_1experimental_1_1stf_1a742f1c47d0b76725772e86a449d8d604.html">cuda::experimental::stf::make_grid</a></li>
@@ -1421,6 +1423,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../cccl/development/macro.html">CCCL Internal Macros</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../cccl/development/testing.html">CCCL Testing Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../cccl/development/build_and_bisect_tools.html">Build and Bisect Utilities</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../cccl/development/visibility.html">Symbol Visibility</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../cccl/development/visibility/host_stub_visibility.html">Host Stub Visibility Issue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cccl/development/visibility/device_kernel_visibility.html">Device Kernel Visibility Issue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cccl/development/visibility/different_architectures.html">Linking TUs compiled with different architectures</a></li>
+</ul>
+</details></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../cccl/contributing.html">Contributing to the CUDA Core Compute Libraries</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -1573,7 +1581,7 @@
 
   <p class="copyright">
     
-      Copyright © 2025, NVIDIA Corporation.
+      Copyright © 2026, NVIDIA Corporation.
       <br/>
     
   </p>
@@ -1588,7 +1596,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
