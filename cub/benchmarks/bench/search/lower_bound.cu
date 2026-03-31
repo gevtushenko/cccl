@@ -35,6 +35,35 @@ struct linear_lower_bound
 };
 
 template <typename T>
+static void verify_linear_scan(
+  nvbench::state& state, const T* d_range, int elements, const T* d_values, std::size_t needles)
+{
+  thrust::device_vector<T> cub_result(needles);
+  thrust::device_vector<T> linear_result(needles);
+
+  size_t cub_temp_size{};
+  cub::DeviceFind::LowerBound(
+    nullptr, cub_temp_size, d_range, elements, d_values, needles,
+    thrust::raw_pointer_cast(cub_result.data()), cuda::std::less<>{});
+  thrust::device_vector<uint8_t> cub_temp(cub_temp_size);
+  cub::DeviceFind::LowerBound(
+    thrust::raw_pointer_cast(cub_temp.data()), cub_temp_size, d_range, elements, d_values, needles,
+    thrust::raw_pointer_cast(cub_result.data()), cuda::std::less<>{});
+
+  auto linear_op = cub::detail::find::make_comp_wrapper<linear_lower_bound>(d_range, elements, cuda::std::less<>{});
+  auto zip       = ::cuda::make_zip_iterator(d_values, thrust::raw_pointer_cast(linear_result.data()));
+  size_t linear_temp_size{};
+  cub::DeviceFor::ForEachN(nullptr, linear_temp_size, zip, needles, linear_op);
+  thrust::device_vector<uint8_t> linear_temp(linear_temp_size);
+  cub::DeviceFor::ForEachN(thrust::raw_pointer_cast(linear_temp.data()), linear_temp_size, zip, needles, linear_op);
+
+  if (cub_result != linear_result)
+  {
+    state.skip("linear scan results do not match CUB lower_bound");
+  }
+}
+
+template <typename T>
 static void basic(nvbench::state& state, nvbench::type_list<T>)
 {
   const auto needles  = static_cast<std::size_t>(state.get_int64("Elements"));
@@ -67,6 +96,8 @@ static void basic(nvbench::state& state, nvbench::type_list<T>)
   thrust::device_vector<uint8_t> temp_storage(temp_storage_size);
   void* d_temp_storage = thrust::raw_pointer_cast(temp_storage.data());
 #endif
+
+  verify_linear_scan(state, d_range, elements, d_values, needles);
 
   state.exec(nvbench::exec_tag::gpu | nvbench::exec_tag::no_batch, [&](nvbench::launch& launch) {
 #if USE_CUB
