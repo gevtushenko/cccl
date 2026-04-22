@@ -28,7 +28,7 @@
 #else // ^^^ _CCCL_HOSTED() ^^^ / vvv _CCCL_FREESTANDING() vvv
 #  include <cuda/std/climits>
 
-#  if defined(__clang__) && defined(__CUDA__)
+#  if defined(__INT64_TYPE__)
 using int8_t   = __INT8_TYPE__;
 using int16_t  = __INT16_TYPE__;
 using int32_t  = __INT32_TYPE__;
@@ -37,7 +37,7 @@ using uint8_t  = __UINT8_TYPE__;
 using uint16_t = __UINT16_TYPE__;
 using uint32_t = __UINT32_TYPE__;
 using uint64_t = __UINT64_TYPE__;
-#  else
+#  else // ^^^ GCC/Clang/NVCC ^^^ / vvv MSVC vvv
 using int8_t   = signed char;
 using int16_t  = signed short;
 using int32_t  = signed int;
@@ -48,34 +48,67 @@ using uint32_t = unsigned int;
 using uint64_t = unsigned long long;
 #  endif
 
-using int_fast8_t   = int8_t;
-using int_fast16_t  = int16_t;
-using int_fast32_t  = int32_t;
-using int_fast64_t  = int64_t;
-using uint_fast8_t  = uint8_t;
-using uint_fast16_t = uint16_t;
-using uint_fast32_t = uint32_t;
-using uint_fast64_t = uint64_t;
+// fast/least/ptr/max types must match the platform's stdint.h exactly.
+// Compiler intrinsics (__INT_FAST16_TYPE__ etc.) are unreliable — NVCC's EDG
+// frontend resolves them inconsistently with glibc on LP64.
 
-using int_least8_t   = int8_t;
-using int_least16_t  = int16_t;
-using int_least32_t  = int32_t;
-using int_least64_t  = int64_t;
-using uint_least8_t  = uint8_t;
-using uint_least16_t = uint16_t;
-using uint_least32_t = uint32_t;
-using uint_least64_t = uint64_t;
+using int_least8_t   = signed char;
+using int_least16_t  = signed short;
+using int_least32_t  = signed int;
+using uint_least8_t  = unsigned char;
+using uint_least16_t = unsigned short;
+using uint_least32_t = unsigned int;
 
-#  if defined(__clang__) && defined(__CUDA__)
-using intptr_t  = __INTPTR_TYPE__;
-using uintptr_t = __UINTPTR_TYPE__;
-using intmax_t  = __INTMAX_TYPE__;
-using uintmax_t = __UINTMAX_TYPE__;
+using int_fast8_t  = signed char;
+using uint_fast8_t = unsigned char;
+
+#  if defined(_WIN32)
+// MSVC / Windows (LLP64): long long is 64-bit, long is 32-bit
+using int_least64_t  = signed long long;
+using uint_least64_t = unsigned long long;
+using int_fast16_t   = signed int;
+using int_fast32_t   = signed int;
+using int_fast64_t   = signed long long;
+using uint_fast16_t  = unsigned int;
+using uint_fast32_t  = unsigned int;
+using uint_fast64_t  = unsigned long long;
+using intmax_t       = signed long long;
+using uintmax_t      = unsigned long long;
+#    if defined(_WIN64)
+using intptr_t  = signed long long;
+using uintptr_t = unsigned long long;
+#    else
+using intptr_t  = signed int;
+using uintptr_t = unsigned int;
+#    endif
+#  elif defined(__LP64__) || defined(_LP64)
+// LP64 (Linux/glibc, macOS): long is 64-bit
+using int_least64_t  = signed long;
+using uint_least64_t = unsigned long;
+using int_fast16_t   = signed long;
+using int_fast32_t   = signed long;
+using int_fast64_t   = signed long;
+using uint_fast16_t  = unsigned long;
+using uint_fast32_t  = unsigned long;
+using uint_fast64_t  = unsigned long;
+using intptr_t       = signed long;
+using uintptr_t      = unsigned long;
+using intmax_t       = signed long;
+using uintmax_t      = unsigned long;
 #  else
-using intptr_t  = int64_t;
-using uintptr_t = uint64_t;
-using intmax_t  = int64_t;
-using uintmax_t = uint64_t;
+// ILP32 POSIX: long is 32-bit, long long is 64-bit
+using int_least64_t  = signed long long;
+using uint_least64_t = unsigned long long;
+using int_fast16_t   = signed int;
+using int_fast32_t   = signed int;
+using int_fast64_t   = signed long long;
+using uint_fast16_t  = unsigned int;
+using uint_fast32_t  = unsigned int;
+using uint_fast64_t  = unsigned long long;
+using intptr_t       = signed int;
+using uintptr_t      = unsigned int;
+using intmax_t       = signed long long;
+using uintmax_t      = unsigned long long;
 #  endif
 
 #  define INT8_MIN   SCHAR_MIN

@@ -33,11 +33,12 @@
 #  define _CCCL_HAS_BUILTIN_STD_MOVE() 0
 #endif // ^^^ no builtin std::move ^^^
 
-// nvcc always supports std::move in device code.
-#if _CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION()
+// nvcc always supports std::move in device code, but only when the host
+// standard library is available to provide the std::move declaration.
+#if _CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION() && _CCCL_HOSTED()
 #  undef _CCCL_HAS_BUILTIN_STD_MOVE
 #  define _CCCL_HAS_BUILTIN_STD_MOVE() 1
-#endif // _CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION()
+#endif // _CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION() && _CCCL_HOSTED()
 
 #if _CCCL_COMPILER(CLANG, >=, 15) && _CCCL_HOSTED()
 #  define _CCCL_HAS_BUILTIN_STD_MOVE_IF_NOEXCEPT() 1

@@ -30,9 +30,17 @@
 #else // ^^^ _CCCL_HOSTED() ^^^ / vvv _CCCL_FREESTANDING() vvv
 #  define TIME_UTC 1
 
-using clock_t = long long int;
-using time_t  = long long int;
-using size_t  = decltype(sizeof(0));
+using clock_t = long;
+#  if defined(_WIN32)
+using time_t = long long;
+#  else // ^^^ Windows ^^^ / vvv POSIX vvv
+using time_t = long;
+#  endif
+#  if defined(__SIZE_TYPE__)
+using size_t = __SIZE_TYPE__;
+#  else
+using size_t = decltype(sizeof(0));
+#  endif
 
 struct timespec
 {

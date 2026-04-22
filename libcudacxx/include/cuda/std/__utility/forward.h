@@ -32,11 +32,12 @@
 #  define _CCCL_HAS_BUILTIN_STD_FORWARD() 0
 #endif // ^^^ no builtin std::forward ^^^
 
-// nvcc always supports std::forward in device code.
-#if _CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION()
+// nvcc always supports std::forward in device code, but only when the host
+// standard library is available to provide the std::forward declaration.
+#if _CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION() && _CCCL_HOSTED()
 #  undef _CCCL_HAS_BUILTIN_STD_FORWARD
 #  define _CCCL_HAS_BUILTIN_STD_FORWARD() 1
-#endif // _CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION()
+#endif // _CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION() && _CCCL_HOSTED()
 
 // include minimal std:: headers, nvcc in device mode doesn't need the std:: header
 #if _CCCL_HAS_BUILTIN_STD_FORWARD() && !(_CCCL_CUDA_COMPILER(NVCC) && _CCCL_DEVICE_COMPILATION())
