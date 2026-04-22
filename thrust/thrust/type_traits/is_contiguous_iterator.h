@@ -69,7 +69,7 @@ namespace detail
 template <typename Iterator>
 inline constexpr bool is_libcxx_wrap_iter_v = false;
 
-#if _CCCL_HOST_STD_LIB(LIBCXX)
+#if _CCCL_HOSTED() && _CCCL_HOST_STD_LIB(LIBCXX)
 template <typename Iterator>
 inline constexpr bool is_libcxx_wrap_iter_v<
 #  if _LIBCPP_VERSION < 14000
@@ -78,23 +78,23 @@ inline constexpr bool is_libcxx_wrap_iter_v<
   std::__wrap_iter<Iterator>
 #  endif
   > = true;
-#endif // _CCCL_HOST_STD_LIB(LIBCXX)
+#endif // _CCCL_HOSTED() && _CCCL_HOST_STD_LIB(LIBCXX)
 
 template <typename Iterator>
 inline constexpr bool is_libstdcxx_normal_iterator_v = false;
 
-#if _CCCL_HOST_STD_LIB(LIBSTDCXX)
+#if _CCCL_HOSTED() && _CCCL_HOST_STD_LIB(LIBSTDCXX)
 template <typename Iterator, typename Container>
 inline constexpr bool is_libstdcxx_normal_iterator_v<::__gnu_cxx::__normal_iterator<Iterator, Container>> = true;
-#endif // _CCCL_HOST_STD_LIB(LIBSTDCXX)
+#endif // _CCCL_HOSTED() && _CCCL_HOST_STD_LIB(LIBSTDCXX)
 
-#if _CCCL_HOST_STD_LIB(STL)
+#if _CCCL_HOSTED() && _CCCL_HOST_STD_LIB(STL)
 template <typename Iterator>
 inline constexpr bool is_msvc_contiguous_iterator_v = ::cuda::std::is_pointer_v<::std::_Unwrapped_t<Iterator>>;
-#else // ^^^ _CCCL_HOST_STD_LIB(STL) ^^^ / vvv !_CCCL_HOST_STD_LIB(STL) vvv
+#else // ^^^ _CCCL_HOSTED() && _CCCL_HOST_STD_LIB(STL) ^^^ / vvv !(_CCCL_HOSTED() && _CCCL_HOST_STD_LIB(STL)) vvv
 template <typename Iterator>
 inline constexpr bool is_msvc_contiguous_iterator_v = false;
-#endif // ^^^ !_CCCL_HOST_STD_LIB(STL) ^^^
+#endif // ^^^ !(_CCCL_HOSTED() && _CCCL_HOST_STD_LIB(STL)) ^^^
 
 template <typename Iterator>
 inline constexpr bool is_contiguous_iterator_impl_v =
