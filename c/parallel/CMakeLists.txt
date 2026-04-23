@@ -8,6 +8,7 @@ option(
   "Build cccl.c.parallel standalone headers."
   OFF
 )
+option(CCCL_C_Parallel_ENABLE_EXAMPLES "Build cccl.c.parallel examples." OFF)
 
 # FIXME Ideally this would be handled by presets and install rules, but for now
 # consumers may override this to control the target location of cccl.c.parallel.
@@ -90,6 +91,10 @@ target_include_directories(
 
 if (CCCL_C_Parallel_ENABLE_TESTING)
   add_subdirectory(test)
+endif()
+
+if (CCCL_C_Parallel_ENABLE_EXAMPLES)
+  add_subdirectory(examples)
 endif()
 
 if (CCCL_C_Parallel_ENABLE_HEADER_TESTING)
