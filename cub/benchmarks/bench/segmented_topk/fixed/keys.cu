@@ -7,7 +7,11 @@
 #include <cuda/argument>
 #include <cuda/iterator>
 
+#include <stdexcept>
+
 #include <nvbench_helper.cuh>
+
+#include "../verify.cuh"
 
 // %RANGE% TUNE_ITEMS_PER_THREAD ipt 1:24:1
 // %RANGE% TUNE_THREADS_PER_BLOCK tpb 128:1024:32
@@ -62,6 +66,7 @@ void fixed_seg_size_topk_keys(
   }
 
   thrust::device_vector<KeyT> in_keys_buffer = generate(elements, entropy);
+  workaround_replace_zeros(in_keys_buffer); // TODO(topk): remove once the block_topk_air signed-zero bug is fixed
   thrust::device_vector<KeyT> out_keys_buffer(selected_elements * num_segments, thrust::no_init);
   auto d_keys_in_ptr  = thrust::raw_pointer_cast(in_keys_buffer.data());
   auto d_keys_out_ptr = thrust::raw_pointer_cast(out_keys_buffer.data());
@@ -103,6 +108,20 @@ void fixed_seg_size_topk_keys(
       total_num_items,
       env);
   });
+
+#if !TUNE_BASE
+  if (!verify_segmented_topk_keys(
+        in_keys_buffer,
+        static_cast<::cuda::std::int64_t>(segment_size),
+        out_keys_buffer,
+        static_cast<::cuda::std::int64_t>(num_segments),
+        static_cast<::cuda::std::int64_t>(selected_elements),
+        cuda::make_constant_iterator(static_cast<::cuda::std::int64_t>(segment_size)),
+        cub::detail::topk::select::max))
+  {
+    throw std::runtime_error("fixed_seg_size_topk_keys: output verification failed");
+  }
+#endif // !TUNE_BASE
 }
 
 using key_type_list          = nvbench::type_list<float>;

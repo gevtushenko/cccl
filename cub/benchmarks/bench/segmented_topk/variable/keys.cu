@@ -10,8 +10,11 @@
 #include <cuda/argument>
 #include <cuda/iterator>
 
+#include <stdexcept>
+
 #include <nvbench_helper.cuh>
 
+#include "../verify.cuh"
 #include "common.cuh"
 
 template <typename KeyT, int MaxSegmentSize, int K>
@@ -36,6 +39,7 @@ void decode_style_variable_topk_keys(
 
   auto in_keys_buffer = gen_data<MaxSegmentSize, K>(
     num_segments, string_to_pattern(state.get_string("Pattern")), thrust::raw_pointer_cast(d_segment_sizes.data()));
+  workaround_replace_zeros(in_keys_buffer); // TODO(topk): remove once the block_topk_air signed-zero bug is fixed
   auto out_keys_buffer = thrust::device_vector<KeyT>(output_elements, thrust::no_init);
 
   auto segment_sizes_param = cuda::args::deferred_sequence{
@@ -74,6 +78,21 @@ void decode_style_variable_topk_keys(
       total_num_items,
       env);
   });
+
+#if !TUNE_BASE
+  if (!verify_segmented_topk_keys(
+        in_keys_buffer,
+        static_cast<cuda::std::int64_t>(MaxSegmentSize),
+        out_keys_buffer,
+        static_cast<cuda::std::int64_t>(num_segments),
+        static_cast<cuda::std::int64_t>(K),
+        thrust::raw_pointer_cast(d_segment_sizes.data()),
+        cub::detail::topk::select::max))
+  {
+    throw std::runtime_error(
+      "decode_style_variable_topk_keys: output verification failed (pattern=" + state.get_string("Pattern") + ")");
+  }
+#endif // !TUNE_BASE
 }
 
 NVBENCH_BENCH_TYPES(decode_style_variable_topk_keys, NVBENCH_TYPE_AXES(key_type_list, max_segment_size_list, k_list))

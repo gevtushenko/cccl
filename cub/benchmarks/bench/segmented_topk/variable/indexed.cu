@@ -11,8 +11,12 @@
 #include <cuda/iterator>
 #include <cuda/std/cstdint>
 
+#include <stdexcept>
+#include <string>
+
 #include <nvbench_helper.cuh>
 
+#include "../verify.cuh"
 #include "common.cuh"
 
 // Indexed (arg-top-k) variant: each key carries a segment-local index as its value payload. The input values are
@@ -40,6 +44,7 @@ void decode_style_variable_topk_indexed(
 
   auto in_keys_buffer = gen_data<MaxSegmentSize, K>(
     num_segments, string_to_pattern(state.get_string("Pattern")), thrust::raw_pointer_cast(d_segment_sizes.data()));
+  workaround_replace_zeros(in_keys_buffer); // TODO(topk): remove once the block_topk_air signed-zero bug is fixed
   auto out_keys_buffer    = thrust::device_vector<KeyT>(output_elements, thrust::no_init);
   auto out_indices_buffer = thrust::device_vector<IndexT>(output_elements, thrust::no_init);
 
@@ -86,6 +91,24 @@ void decode_style_variable_topk_indexed(
       total_num_items,
       env);
   });
+
+#if !TUNE_BASE
+  const auto in_stride        = static_cast<cuda::std::int64_t>(MaxSegmentSize);
+  const auto num_segments_i64 = static_cast<cuda::std::int64_t>(num_segments);
+  const auto k_i64            = static_cast<cuda::std::int64_t>(K);
+  const auto* seg_sizes       = thrust::raw_pointer_cast(d_segment_sizes.data());
+
+  const bool keys_ok = verify_segmented_topk_keys(
+    in_keys_buffer, in_stride, out_keys_buffer, num_segments_i64, k_i64, seg_sizes, cub::detail::topk::select::max);
+  const bool indices_ok = verify_segmented_topk_indices(
+    in_keys_buffer, in_stride, out_keys_buffer, out_indices_buffer, num_segments_i64, k_i64, seg_sizes);
+  if (!keys_ok || !indices_ok)
+  {
+    throw std::runtime_error(
+      "decode_style_variable_topk_indexed: output verification failed (pattern=" + state.get_string("Pattern")
+      + ", keys_ok=" + std::to_string(keys_ok) + ", indices_ok=" + std::to_string(indices_ok) + ")");
+  }
+#endif // !TUNE_BASE
 }
 
 // Index type is a compile-time axis: i32 for now, extensible to i64.
