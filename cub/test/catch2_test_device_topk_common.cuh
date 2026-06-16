@@ -4,7 +4,6 @@
 #pragma once
 
 #include <cub/device/device_copy.cuh>
-#include <cub/device/device_segmented_radix_sort.cuh>
 #include <cub/device/dispatch/dispatch_common.cuh> // topk::select::{min, max}
 
 #include <thrust/remove.h>
@@ -14,6 +13,7 @@
 #include <cuda/std/type_traits>
 
 #include <c2h/catch2_test_helper.h>
+#include <c2h/device_topk_reference.cuh>
 
 // Function object to generate monotonically non-decreasing values for small key types
 template <typename T>
@@ -354,71 +354,22 @@ void segmented_sort_keys(
   OffsetItT d_segment_offsets_end_it,
   cub::detail::topk::select direction)
 {
-  // Use cub::DeviceSegmentedRadixSort rather than cub::DeviceSegmentedSort for this reference sort: it compiles
-  // ~30% faster at negligible runtime cost (the reference only needs per-segment ordering of arithmetic keys).
-  cuda::std::int64_t num_items = d_keys_in.size();
+  // Delegate to the shared, precompiled sort-based reference (c2h/device_topk_reference.cuh). Its boundary takes a
+  // single concrete `const int64_t*` offset type, so materialize the (possibly fancy / non-int64) offset iterators
+  // here -- this keeps the heavy cub::DeviceSegmentedRadixSort instantiation in cccl.c2h.core for the native key types
+  // rather than recompiling it in every test translation unit.
+  c2h::device_vector<cuda::std::int64_t> d_begin_offsets(num_segments, thrust::no_init);
+  c2h::device_vector<cuda::std::int64_t> d_end_offsets(num_segments, thrust::no_init);
+  thrust::copy(d_segment_offsets_begin_it, d_segment_offsets_begin_it + num_segments, d_begin_offsets.begin());
+  thrust::copy(d_segment_offsets_end_it, d_segment_offsets_end_it + num_segments, d_end_offsets.begin());
 
-  // Prepare alternate buffer for double buffering
-  c2h::device_vector<KeyT> d_keys_alt(num_items, thrust::no_init);
-  cub::DoubleBuffer<KeyT> d_keys(
-    thrust::raw_pointer_cast(d_keys_in.data()), thrust::raw_pointer_cast(d_keys_alt.data()));
-
-  // Query temporary storage size
-  size_t temp_storage_bytes = 0;
-  if (direction == cub::detail::topk::select::min)
-  {
-    cub::DeviceSegmentedRadixSort::SortKeys(
-      nullptr,
-      temp_storage_bytes,
-      d_keys,
-      num_items,
-      num_segments,
-      d_segment_offsets_begin_it,
-      d_segment_offsets_end_it);
-
-    // Allocate temporary storage
-    c2h::device_vector<cuda::std::uint8_t> d_temp_storage(temp_storage_bytes, thrust::no_init);
-
-    // Run segmented sort
-    cub::DeviceSegmentedRadixSort::SortKeys(
-      thrust::raw_pointer_cast(d_temp_storage.data()),
-      temp_storage_bytes,
-      d_keys,
-      num_items,
-      num_segments,
-      d_segment_offsets_begin_it,
-      d_segment_offsets_end_it);
-  }
-  else
-  {
-    cub::DeviceSegmentedRadixSort::SortKeysDescending(
-      nullptr,
-      temp_storage_bytes,
-      d_keys,
-      num_items,
-      num_segments,
-      d_segment_offsets_begin_it,
-      d_segment_offsets_end_it);
-
-    // Allocate temporary storage
-    c2h::device_vector<cuda::std::uint8_t> d_temp_storage(temp_storage_bytes, thrust::no_init);
-
-    // Run segmented sort
-    cub::DeviceSegmentedRadixSort::SortKeysDescending(
-      thrust::raw_pointer_cast(d_temp_storage.data()),
-      temp_storage_bytes,
-      d_keys,
-      num_items,
-      num_segments,
-      d_segment_offsets_begin_it,
-      d_segment_offsets_end_it);
-  }
-
-  // Make sure the result is returned in the original buffer
-  if (d_keys.Current() != thrust::raw_pointer_cast(d_keys_in.data()))
-  {
-    thrust::copy(d_keys.Current(), d_keys.Current() + num_items, d_keys_in.begin());
-  }
+  c2h::segmented_sort_keys<KeyT>(
+    thrust::raw_pointer_cast(d_keys_in.data()),
+    static_cast<cuda::std::int64_t>(d_keys_in.size()),
+    num_segments,
+    thrust::raw_pointer_cast(d_begin_offsets.data()),
+    thrust::raw_pointer_cast(d_end_offsets.data()),
+    direction);
 }
 
 template <typename KeyT>

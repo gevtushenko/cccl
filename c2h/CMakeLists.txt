@@ -28,6 +28,25 @@ if (C2H_ENABLE_CURAND AND NOT has_curand)
   set(C2H_ENABLE_CURAND OFF)
 endif()
 
+# Catch2-free core of c2h: shared helpers that must be linkable from targets which do not (and should not) depend on
+# Catch2 -- notably the CUB benchmarks. Heavy, reusable instantiations (e.g. the device top-k sort-based reference) live
+# here so they are compiled once rather than in every consuming translation unit.
+add_library(
+  cccl.c2h.core
+  STATIC
+  device_topk_reference.cu
+)
+target_include_directories(cccl.c2h.core PUBLIC "${C2H_SOURCE_DIR}/include")
+target_link_libraries(cccl.c2h.core PUBLIC cccl.compiler_interface)
+if (NOT C2H_USE_CCCL_FROM_CTK)
+  target_link_libraries(cccl.c2h.core PUBLIC CCCL::CCCL)
+endif()
+cccl_configure_target(cccl.c2h.core DIALECT 17)
+set_target_properties(
+  cccl.c2h.core
+  PROPERTIES CXX_VISIBILITY_PRESET "default" CUDA_VISIBILITY_PRESET "default"
+)
+
 add_library(
   cccl.c2h
   STATIC
@@ -37,16 +56,13 @@ add_library(
   generators_vector.cu
 )
 target_compile_definitions(cccl.c2h PUBLIC CATCH_CONFIG_PREFIX_ALL)
-target_include_directories(cccl.c2h PUBLIC "${C2H_SOURCE_DIR}/include")
 target_link_libraries(
   cccl.c2h
   PUBLIC #
+    cccl.c2h.core
     cccl.compiler_interface
     Catch2::Catch2
 )
-if (NOT C2H_USE_CCCL_FROM_CTK)
-  target_link_libraries(cccl.c2h PUBLIC CCCL::CCCL)
-endif()
 cccl_configure_target(cccl.c2h DIALECT 17)
 
 if (C2H_ENABLE_CURAND)

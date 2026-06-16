@@ -2,6 +2,9 @@ include(${CMAKE_SOURCE_DIR}/benchmarks/cmake/CCCLBenchmarkRegistry.cmake)
 
 cccl_get_nvbench_helper()
 
+# Catch2-free shared helpers (e.g. the device top-k sort-based reference) used by benchmark verification.
+cccl_get_c2h()
+
 set(benches_root "${CMAKE_CURRENT_LIST_DIR}")
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -89,6 +92,7 @@ function(add_bench target_name bench_name bench_src)
     ${bench_target}
     PRIVATE #
       cccl.nvbench_helper
+      cccl.c2h.core
       nvbench::main
   )
 endfunction()

@@ -16,6 +16,8 @@
 
 #include <nvbench_helper.cuh>
 
+#include <c2h/device_topk_reference.cuh>
+
 #include "../verify.cuh"
 #include "common.cuh"
 
@@ -92,23 +94,33 @@ void decode_style_variable_topk_indexed(
       env);
   });
 
-#if !TUNE_BASE
   const auto in_stride        = static_cast<cuda::std::int64_t>(MaxSegmentSize);
   const auto num_segments_i64 = static_cast<cuda::std::int64_t>(num_segments);
   const auto k_i64            = static_cast<cuda::std::int64_t>(K);
   const auto* seg_sizes       = thrust::raw_pointer_cast(d_segment_sizes.data());
 
-  const bool keys_ok = verify_segmented_topk_keys(
-    in_keys_buffer, in_stride, out_keys_buffer, num_segments_i64, k_i64, seg_sizes, cub::detail::topk::select::max);
-  const bool indices_ok = verify_segmented_topk_indices(
-    in_keys_buffer, in_stride, out_keys_buffer, out_indices_buffer, num_segments_i64, k_i64, seg_sizes);
+  const bool keys_ok = c2h::verify_segmented_topk_keys(
+    thrust::raw_pointer_cast(in_keys_buffer.data()),
+    in_stride,
+    thrust::raw_pointer_cast(out_keys_buffer.data()),
+    num_segments_i64,
+    k_i64,
+    seg_sizes,
+    cub::detail::topk::select::max);
+  const bool indices_ok = c2h::verify_segmented_topk_indices(
+    thrust::raw_pointer_cast(in_keys_buffer.data()),
+    in_stride,
+    thrust::raw_pointer_cast(out_keys_buffer.data()),
+    thrust::raw_pointer_cast(out_indices_buffer.data()),
+    num_segments_i64,
+    k_i64,
+    seg_sizes);
   if (!keys_ok || !indices_ok)
   {
     throw std::runtime_error(
       "decode_style_variable_topk_indexed: output verification failed (pattern=" + state.get_string("Pattern")
       + ", keys_ok=" + std::to_string(keys_ok) + ", indices_ok=" + std::to_string(indices_ok) + ")");
   }
-#endif // !TUNE_BASE
 }
 
 // Index type is a compile-time axis: i32 for now, extensible to i64.

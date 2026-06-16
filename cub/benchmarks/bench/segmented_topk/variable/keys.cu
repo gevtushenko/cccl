@@ -14,6 +14,8 @@
 
 #include <nvbench_helper.cuh>
 
+#include <c2h/device_topk_reference.cuh>
+
 #include "../verify.cuh"
 #include "common.cuh"
 
@@ -79,11 +81,10 @@ void decode_style_variable_topk_keys(
       env);
   });
 
-#if !TUNE_BASE
-  if (!verify_segmented_topk_keys(
-        in_keys_buffer,
+  if (!c2h::verify_segmented_topk_keys(
+        thrust::raw_pointer_cast(in_keys_buffer.data()),
         static_cast<cuda::std::int64_t>(MaxSegmentSize),
-        out_keys_buffer,
+        thrust::raw_pointer_cast(out_keys_buffer.data()),
         static_cast<cuda::std::int64_t>(num_segments),
         static_cast<cuda::std::int64_t>(K),
         thrust::raw_pointer_cast(d_segment_sizes.data()),
@@ -92,7 +93,6 @@ void decode_style_variable_topk_keys(
     throw std::runtime_error(
       "decode_style_variable_topk_keys: output verification failed (pattern=" + state.get_string("Pattern") + ")");
   }
-#endif // !TUNE_BASE
 }
 
 NVBENCH_BENCH_TYPES(decode_style_variable_topk_keys, NVBENCH_TYPE_AXES(key_type_list, max_segment_size_list, k_list))

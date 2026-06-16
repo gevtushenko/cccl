@@ -11,6 +11,8 @@
 
 #include <nvbench_helper.cuh>
 
+#include <c2h/device_topk_reference.cuh>
+
 #include "../verify.cuh"
 
 // %RANGE% TUNE_ITEMS_PER_THREAD ipt 1:24:1
@@ -109,19 +111,21 @@ void fixed_seg_size_topk_keys(
       env);
   });
 
-#if !TUNE_BASE
-  if (!verify_segmented_topk_keys(
-        in_keys_buffer,
-        static_cast<::cuda::std::int64_t>(segment_size),
-        out_keys_buffer,
+  // Uniform segment size: materialize the per-segment sizes the reference expects as a raw int64 array.
+  const auto segment_size_i64 = static_cast<::cuda::std::int64_t>(segment_size);
+  const thrust::device_vector<::cuda::std::int64_t> d_segment_sizes(
+    static_cast<std::size_t>(num_segments), segment_size_i64);
+  if (!c2h::verify_segmented_topk_keys(
+        thrust::raw_pointer_cast(in_keys_buffer.data()),
+        segment_size_i64,
+        thrust::raw_pointer_cast(out_keys_buffer.data()),
         static_cast<::cuda::std::int64_t>(num_segments),
         static_cast<::cuda::std::int64_t>(selected_elements),
-        cuda::make_constant_iterator(static_cast<::cuda::std::int64_t>(segment_size)),
+        thrust::raw_pointer_cast(d_segment_sizes.data()),
         cub::detail::topk::select::max))
   {
     throw std::runtime_error("fixed_seg_size_topk_keys: output verification failed");
   }
-#endif // !TUNE_BASE
 }
 
 using key_type_list          = nvbench::type_list<float>;
