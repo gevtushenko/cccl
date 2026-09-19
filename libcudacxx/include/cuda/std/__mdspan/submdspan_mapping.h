@@ -237,21 +237,25 @@ _CCCL_API constexpr bool __can_layout_right()
   {
     return true;
   }
-  // [mdspan.sub.map.right-1.3.2]
-  else if constexpr (sizeof...(_OtherSlices) == 0)
+  // A leading slice that contributes no extent only offsets the mapping, so keep
+  // walking until the first slice that does contribute one.
+  else if constexpr (sizeof...(_OtherSlices) + 1 > _SubExtents::rank())
   {
-    return ::cuda::std::__is_unit_stride_slice<_LayoutMapping, _Slice>();
+    return ::cuda::std::__can_layout_right<_LayoutMapping, _SubExtents, _OtherSlices...>();
   }
   // [mdspan.sub.map.right-1.3.1]
-  else if constexpr (is_convertible_v<_Slice, full_extent_t>)
-  {
-    return ::cuda::std::__can_layout_left<_LayoutMapping, _SubExtents, _OtherSlices...>();
-  }
+  // [mdspan.sub.map.right-1.3.2]
+  // layout_right's stride-1 extent is the last one, so only the first extent it
+  // keeps may be narrowed: this slice has to be a unit-stride slice and every
+  // slice after it has to be full_extent. This is the mirror image of
+  // __can_layout_left, which narrows the last extent it keeps.
   else
   {
-    return false;
+    return ::cuda::std::__is_unit_stride_slice<_LayoutMapping, _Slice>()
+        && (is_convertible_v<_OtherSlices, full_extent_t> && ...);
   }
 }
+
 
 _CCCL_TEMPLATE(class _Extents, class... _Slices)
 _CCCL_REQUIRES(__matching_number_of_slices<_Extents, _Slices...>)
@@ -270,7 +274,7 @@ __submdspan_mapping_impl(const typename layout_right::mapping<_Extents>& __mappi
     using _SubExtents    = __get_subextents_t<_Extents, _Slices...>;
     const auto __sub_ext = ::cuda::std::submdspan_extents(__mapping.extents(), __slices...);
     const auto __offset  = ::cuda::std::__submdspan_offset(__mapping, __slices...);
-    if constexpr (::cuda::std::__can_layout_right<typename layout_left::mapping<_Extents>, _SubExtents, _Slices...>())
+    if constexpr (::cuda::std::__can_layout_right<typename layout_right::mapping<_Extents>, _SubExtents, _Slices...>())
     {
       using __sub_mapping_t = layout_right::template mapping<_SubExtents>;
       return submdspan_mapping_result<__sub_mapping_t>{__sub_mapping_t{__sub_ext}, __offset};
